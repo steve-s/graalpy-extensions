@@ -1,0 +1,11 @@
+pluginManagement {
+    repositories {
+        maven {
+            // url = uri("alternative-maven-central-url")
+        }
+    }
+}
+
+
+rootProject.name = "graalpy-gradle-plugin"
+
