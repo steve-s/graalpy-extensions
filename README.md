@@ -41,6 +41,10 @@ to how Maven dependencies are added:
 
 For an example, see [GraalPy JBang QR Code demo](https://github.com/graalvm/graal-languages-demos/tree/main/graalpy/graalpy-jbang-qrcode)
 
+## Contributing
+
+This project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md)
+
 ## Security
 
 Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process
