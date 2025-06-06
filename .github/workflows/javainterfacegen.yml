@@ -1,0 +1,41 @@
+name: Java Interface Generator
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            os_name: linux
+          - os: macos-latest
+            os_name: macos
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: '25-ea'
+
+      - name: Setup Polyglot Maven bundle
+        uses: ./.github/actions/setup-polyglot-mvn-repo
+
+      - name: Build javainterfacegen tool
+        run: mvn --batch-mode -s settings.xml -DskipTests -pl javainterfacegen -am -Pnative package
+
+      - name: Detect architecture
+        run: echo "ARCH=$(uname -m)" >> $GITHUB_ENV
+
+      - name: Publish javainterfacegen tool
+        uses: actions/upload-artifact@v4
+        with:
+          name: javainterfacegen-${{ matrix.os_name }}-${{ env.ARCH }}
+          path: |
+            javainterfacegen/target/javainterfacegen

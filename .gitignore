@@ -1,4 +1,5 @@
 target
+bin
 build
 .settings
 .gradle
@@ -7,3 +8,7 @@ build
 .project
 .idea
 *.iml
+.vscode
+TODO
+__pycache__
+*.swp
