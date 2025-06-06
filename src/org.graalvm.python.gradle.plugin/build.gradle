@@ -1,13 +1,16 @@
 plugins {
     id 'java'
     id 'java-gradle-plugin'
+    id 'maven-publish'
 }
+
+version = '25.0.0-SNAPSHOT'
+group = 'org.graalvm.python'
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
-
-version = '24.2.0'
 
 gradlePlugin {
     plugins {
@@ -18,12 +21,6 @@ gradlePlugin {
     }
 }
 
-// Disable to automatic generation of org.graalvm.python.properties, we
-// use manually created properties file
-// tasks.withType(GeneratePluginDescriptors).configureEach {
-//    enabled = false
-// }
-
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -33,5 +30,14 @@ java {
 sourceSets.main.java.srcDirs += ['../org.graalvm.python.embedding.tools/src/main/java']
 
 dependencies {
-    implementation 'org.graalvm.python:python-launcher:24.2.0'
+    implementation "org.graalvm.python:python-launcher:${project.version}"
+}
+
+// generate a properties file in resources that will capture the desired GraalPy version
+tasks.named("processResources") {
+    def version = "${project.version}"
+    doLast {
+        def f = layout.buildDirectory.file("resources/main/META-INF/gradle-plugins/org.graalvm.python-extra.properties").get().asFile
+        f.text = "version=${version}"
+    }
 }

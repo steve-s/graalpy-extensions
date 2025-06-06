@@ -60,7 +60,6 @@ import org.gradle.api.file.RegularFile;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Provider;
-import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.jvm.tasks.Jar;
@@ -81,7 +80,7 @@ import static org.graalvm.python.embedding.tools.vfs.VFSUtils.VFS_VENV;
 public abstract class GraalPyGradlePlugin implements Plugin<Project> {
     private static final String LAUNCHER_CONFIGURATION_NAME = "pythonLauncherClasspath";
 
-    private static final String GRADLE_PLUGIN_PROPERTIES = "META-INF/gradle-plugins/org.graalvm.python.properties";
+    private static final String GRADLE_PLUGIN_EXTRA_PROPERTIES = "META-INF/gradle-plugins/org.graalvm.python-extra.properties";
     private static final String PYTHON_LAUNCHER_ARTIFACT_ID = "python-launcher";
     private static final String PYTHON_EMBEDDING_ARTIFACT_ID = "python-embedding";
     private static final String POLYGLOT_GROUP_ID = "org.graalvm.polyglot";
@@ -335,7 +334,7 @@ public abstract class GraalPyGradlePlugin implements Plugin<Project> {
         String version = graalPyVersion;
         if (version == null) {
             try {
-                InputStream propertiesStream = GraalPyGradlePlugin.class.getClassLoader().getResourceAsStream(GRADLE_PLUGIN_PROPERTIES);
+                InputStream propertiesStream = GraalPyGradlePlugin.class.getClassLoader().getResourceAsStream(GRADLE_PLUGIN_EXTRA_PROPERTIES);
                 Properties properties = new Properties();
                 properties.load(propertiesStream);
                 graalPyVersion = version = properties.getProperty("version");
@@ -343,7 +342,7 @@ public abstract class GraalPyGradlePlugin implements Plugin<Project> {
                     throw new NullPointerException();
                 }
             } catch (IOException | NullPointerException e) {
-                throw new IllegalStateException("Failed to read the GraalPy version from the gradle-plugins/org.graalvm.python.properties file in resources", e);
+                throw new IllegalStateException(String.format("Failed to read the GraalPy version from '%s'.", GRADLE_PLUGIN_EXTRA_PROPERTIES), e);
             }
         }
         return version;
