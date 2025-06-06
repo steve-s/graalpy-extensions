@@ -29,5 +29,11 @@
         <version>${project.polyglot.version}</version>
         <type>pom</type>
     </dependency>
+    <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>${project.junit.version}</version>
+        <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

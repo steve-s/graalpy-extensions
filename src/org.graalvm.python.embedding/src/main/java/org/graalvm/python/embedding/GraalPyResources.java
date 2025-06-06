@@ -191,8 +191,9 @@ public final class GraalPyResources {
 
     /**
      * Creates a GraalPy context preconfigured with a {@link VirtualFileSystem} and other GraalPy
-     * and polyglot Context configuration options optimized for the usage of the Python virtual
-     * environment contained in the virtual filesystem.
+     * and polyglot Context configuration options optimized for the usage of the
+     * <a href="https://docs.python.org/3/library/venv.html">Python virtual environment</a>
+     * contained in the virtual filesystem.
      * <p>
      * Following resource paths are preconfigured:
      * <ul>
@@ -216,8 +217,9 @@ public final class GraalPyResources {
 
     /**
      * Creates a GraalPy context builder preconfigured with a {@link VirtualFileSystem} and other
-     * GraalPy and polyglot Context configuration options optimized for the usage of the Python
-     * virtual environment contained in the virtual filesystem.
+     * GraalPy and polyglot Context configuration options optimized for the usage of the
+     * <a href="https://docs.python.org/3/library/venv.html">Python virtual environment</a>
+     * contained in the virtual filesystem.
      * <p>
      * Following resource paths are preconfigured:
      * <ul>
@@ -259,8 +261,9 @@ public final class GraalPyResources {
 
     /**
      * Creates a GraalPy context builder preconfigured with the given {@link VirtualFileSystem} and
-     * other GraalPy and polygot Context configuration options optimized for the usage of the Python
-     * virtual environment contained in the virtual filesystem.
+     * other GraalPy and polygot Context configuration options optimized for the usage of the
+     * <a href="https://docs.python.org/3/library/venv.html">Python virtual environment</a>
+     * contained in the virtual filesystem.
      * <p>
      * Following resource paths are preconfigured:
      * <ul>
@@ -354,7 +357,21 @@ public final class GraalPyResources {
      * <li>use the context to import the python module <code>mymodule</code>, which should be either
      * located in <code>python-resources/src</code> or in a python package installed in
      * <code>/python/venv</code> (python virtual environment)</li>
+     * <li>note that in this scenario, the Python context has access to the extracted resources as
+     * well as the rest of the real filesystem</li>
      * </ul>
+     * </p>
+     *
+     * <p>
+     * External resources directory is often used for better compatibility with Python native
+     * extensions that may bypass the Python abstractions and access the filesystem directly from
+     * native code. Setting the {@code PosixModuleBackend} option to "native" increases the
+     * compatibility further, but in such case even Python code bypasses the Truffle abstractions
+     * and accesses native POSIX APIs directly. Usage:
+     *
+     * <pre>
+     * GraalPyResources.contextBuilder(Path.of("python-resources")).option("python.PosixModuleBackend", "native")
+     * </pre>
      * </p>
      *
      * <p/>
