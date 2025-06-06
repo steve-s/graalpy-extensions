@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Copyright (c) 2023, 2025, Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 2023, 2023, Oracle and/or its affiliates. All rights reserved.
 DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 
 The Universal Permissive License (UPL), Version 1.0
@@ -39,78 +39,88 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.graalvm.python</groupId>
-    <artifactId>graalpy-extensions</artifactId>
-    <version>25.0.0-SNAPSHOT</version>
-  </parent>
 
-  <name>graalpy-maven-plugin</name>
-  <artifactId>graalpy-maven-plugin</artifactId>
-  <description>Handles python related resources in a maven GraalPy - Java polyglot application.</description>
-  <packaging>maven-plugin</packaging>
+  <groupId>org.graalvm.python.tests</groupId>
+  <artifactId>app2</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>Test MyMojo</name>
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
-      <version>3.9.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.plugin-tools</groupId>
-      <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.9.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>3.9.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.shared</groupId>
-      <artifactId>maven-verifier</artifactId>
-      <version>2.0.0-M1</version>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>python-embedding-tools</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.graalvm.python</groupId>
+      <artifactId>python-community</artifactId>
+      <version>${env.GRAALPY_VERSION}</version>
+      <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.graalvm.python</groupId>
-      <artifactId>python-launcher</artifactId>
-      <version>${project.polyglot.version}</version>
-      <scope>runtime</scope>
+      <artifactId>python-embedding</artifactId>
+      <version>${env.GRAALPY_VERSION}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.graalvm.python.tests</groupId>
+      <artifactId>app1</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <groupId>org.graalvm.python</groupId>
+        <artifactId>graalpy-maven-plugin</artifactId>
+        <version>${env.GRAALPY_VERSION}</version>
         <executions>
           <execution>
-            <id>run-integration-tests</id>
-            <phase>verify</phase>
             <goals>
-              <goal>exec</goal>
+              <goal>process-graalpy-resources</goal>
             </goals>
-            <configuration>
-              <executable>python3</executable>
-              <workingDirectory>${project.parent.basedir}/integration-tests</workingDirectory>
-              <commandlineArgs>run.py -v --graalpy-version ${project.polyglot.version} test_maven_plugin.py</commandlineArgs>
-            </configuration>
           </execution>
         </executions>
+        <configuration>
+          <packages>
+            <package>termcolor</package>
+          </packages>
+        </configuration>
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>native</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <version>0.9.28</version>
+            <extensions>true</extensions>
+            <executions>
+              <execution>
+                <id>build-native</id>
+                <goals>
+                  <goal>compile-no-fork</goal>
+                </goals>
+                <phase>package</phase>
+              </execution>
+            </executions>
+            <configuration>
+              <fallback>false</fallback>
+              <mainClass>app2.GraalPy</mainClass>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

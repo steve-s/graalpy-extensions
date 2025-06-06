@@ -1132,32 +1132,32 @@ public class VirtualFileSystemTest {
 
     }
 
-//    @Test
-//    public void testIsReadOnly() throws Exception {
-//        for (FileSystem fs : new FileSystem[]{rwHostIOVFS, rHostIOVFS, noHostIOVFS}) {
-//            assertTrue(fs.isFileStoreReadOnly(VFS_ROOT_PATH.resolve("file1")));
-//            Assert.assertThrows(NoSuchFileException.class, () -> fs.isFileStoreReadOnly(VFS_ROOT_PATH.resolve("bogus")));
-//        }
-//    }
-//
-//    @Test
-//    public void testGetFileStoreSpace() throws Exception {
-//        for (FileSystem fs : new FileSystem[]{rwHostIOVFS, rHostIOVFS, noHostIOVFS}) {
-//            long size = fs.getFileStoreTotalSpace(VFS_ROOT_PATH.resolve("file1"));
-//            /*
-//             * Approximate check so that we don't have to recalculate this for two platforms every
-//             * time we change the test VFS
-//             */
-//            assertTrue(size > 1000 && size < 2000);
-//            assertEquals(0, fs.getFileStoreUnallocatedSpace(VFS_ROOT_PATH.resolve("file1")));
-//            assertEquals(0, fs.getFileStoreUsableSpace(VFS_ROOT_PATH.resolve("file1")));
-//            assertEquals(4096, fs.getFileStoreBlockSize(VFS_ROOT_PATH.resolve("file1")));
-//            Assert.assertThrows(NoSuchFileException.class, () -> fs.isFileStoreReadOnly(VFS_ROOT_PATH.resolve("bogus")));
-//            Assert.assertThrows(NoSuchFileException.class, () -> fs.getFileStoreUnallocatedSpace(VFS_ROOT_PATH.resolve("bogus")));
-//            Assert.assertThrows(NoSuchFileException.class, () -> fs.getFileStoreUsableSpace(VFS_ROOT_PATH.resolve("bogus")));
-//            Assert.assertThrows(NoSuchFileException.class, () -> fs.getFileStoreBlockSize(VFS_ROOT_PATH.resolve("bogus")));
-//        }
-//    }
+    @Test
+    public void testIsReadOnly() throws Exception {
+        for (FileSystem fs : new FileSystem[]{rwHostIOVFS, rHostIOVFS, noHostIOVFS}) {
+            assertTrue(fs.isFileStoreReadOnly(VFS_ROOT_PATH.resolve("file1")));
+            assertThrows(NoSuchFileException.class, () -> fs.isFileStoreReadOnly(VFS_ROOT_PATH.resolve("bogus")));
+        }
+    }
+
+    @Test
+    public void testGetFileStoreSpace() throws Exception {
+        for (FileSystem fs : new FileSystem[]{rwHostIOVFS, rHostIOVFS, noHostIOVFS}) {
+            long size = fs.getFileStoreTotalSpace(VFS_ROOT_PATH.resolve("file1"));
+            /*
+             * Approximate check so that we don't have to recalculate this for two platforms every
+             * time we change the test VFS
+             */
+            assertTrue(size > 1000 && size < 2000);
+            assertEquals(0, fs.getFileStoreUnallocatedSpace(VFS_ROOT_PATH.resolve("file1")));
+            assertEquals(0, fs.getFileStoreUsableSpace(VFS_ROOT_PATH.resolve("file1")));
+            assertEquals(4096, fs.getFileStoreBlockSize(VFS_ROOT_PATH.resolve("file1")));
+            assertThrows(NoSuchFileException.class, () -> fs.isFileStoreReadOnly(VFS_ROOT_PATH.resolve("bogus")));
+            assertThrows(NoSuchFileException.class, () -> fs.getFileStoreUnallocatedSpace(VFS_ROOT_PATH.resolve("bogus")));
+            assertThrows(NoSuchFileException.class, () -> fs.getFileStoreUsableSpace(VFS_ROOT_PATH.resolve("bogus")));
+            assertThrows(NoSuchFileException.class, () -> fs.getFileStoreBlockSize(VFS_ROOT_PATH.resolve("bogus")));
+        }
+    }
 
     @Test
     public void testImpl() throws Exception {

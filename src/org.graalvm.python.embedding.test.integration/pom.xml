@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.graalvm.python</groupId>
         <artifactId>graalpy-extensions</artifactId>
-        <version>24.2.0</version>
+        <version>25.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>python-embedding-test-integration</artifactId>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>org.graalvm.python</groupId>
             <artifactId>python-embedding</artifactId>
-            <version>24.2.0</version>
+            <version>25.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

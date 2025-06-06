@@ -41,32 +41,6 @@
 
 package org.graalvm.python.embedding.test;
 
-import static com.oracle.graal.python.test.integration.Utils.IS_WINDOWS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.function.Function;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Context.Builder;
 import org.graalvm.polyglot.HostAccess;
@@ -75,69 +49,74 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.io.IOAccess;
 import org.graalvm.python.embedding.GraalPyResources;
 import org.graalvm.python.embedding.VirtualFileSystem;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.function.Function;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static org.graalvm.python.embedding.test.TestUtils.IS_WINDOWS;
+import static org.junit.jupiter.api.Assertions.*;
+
 public class VirtualFileSystemIntegrationTest {
 
     static final String VFS_UNIX_MOUNT_POINT = "/test_mount_point";
     static final String VFS_WIN_MOUNT_POINT = "X:\\test_win_mount_point";
     static final String VFS_MOUNT_POINT = IS_WINDOWS ? VFS_WIN_MOUNT_POINT : VFS_UNIX_MOUNT_POINT;
+    static final String VFS_DIRECTORIES_SOURCE = "vfsDirectories";
 
     static final String PYTHON = "python";
     static final String USE_DEFAULT_VFS_DIR = "--default--";
 
-    private final String resourceDirectory;
-
     /**
      * We run most of the tests with two identical filesystems in different locations.
      */
-    @Parameters
+    @SuppressWarnings("unused") // used as JUnit parameter source
     public static Collection<String> vfsDirectories() {
         // null stands for the "default"
         return List.of(USE_DEFAULT_VFS_DIR, "GRAALPY-VFS/com.oracle.graal.python.test/integration");
     }
 
     @SuppressWarnings("StringEquality")
-    private boolean useDefaultResourcesDir() {
+    private boolean useDefaultResourcesDir(String resourceDirectory) {
         return resourceDirectory == USE_DEFAULT_VFS_DIR;
     }
 
-    // For tests that do not use the parameter
-    private void assumeDefaultResourcesDir() {
-        Assume.assumeTrue(useDefaultResourcesDir());
-    }
-
-    private VirtualFileSystem createVirtualFileSystem() {
-        if (useDefaultResourcesDir()) {
+    private VirtualFileSystem createVirtualFileSystem(String resourceDirectory) {
+        if (useDefaultResourcesDir(resourceDirectory)) {
             return VirtualFileSystem.create();
         }
         return VirtualFileSystem.newBuilder().resourceDirectory(resourceDirectory).build();
     }
 
-    private Context.Builder newContextBuilder() {
-        if (useDefaultResourcesDir()) {
+    private Context.Builder newContextBuilder(String resourceDirectory) {
+        if (useDefaultResourcesDir(resourceDirectory)) {
             return GraalPyResources.contextBuilder();
         }
-        return GraalPyResources.contextBuilder(createVirtualFileSystem());
+        return GraalPyResources.contextBuilder(createVirtualFileSystem(resourceDirectory));
     }
 
-    private VirtualFileSystem.Builder newVirtualFileSystemBuilder() {
+    private VirtualFileSystem.Builder newVirtualFileSystemBuilder(String resourceDirectory) {
         VirtualFileSystem.Builder builder = VirtualFileSystem.newBuilder();
-        if (!useDefaultResourcesDir()) {
+        if (!useDefaultResourcesDir(resourceDirectory)) {
             builder.resourceDirectory(resourceDirectory);
         }
         return builder;
     }
 
-    public VirtualFileSystemIntegrationTest(String resourceDirectory) {
-        this.resourceDirectory = resourceDirectory;
+    public VirtualFileSystemIntegrationTest() {
         Logger logger = Logger.getLogger(VirtualFileSystem.class.getName());
         for (Handler handler : logger.getHandlers()) {
             handler.setLevel(Level.FINE);
@@ -145,17 +124,19 @@ public class VirtualFileSystemIntegrationTest {
         logger.setLevel(Level.FINE);
     }
 
-    @Test
-    public void defaultValues() throws IOException {
-        try (VirtualFileSystem fs = createVirtualFileSystem(); VirtualFileSystem fs2 = createVirtualFileSystem()) {
+    @ParameterizedTest
+    @MethodSource(VFS_DIRECTORIES_SOURCE)
+    public void defaultValues(String vfsDir) throws IOException {
+        try (VirtualFileSystem fs = createVirtualFileSystem(vfsDir); VirtualFileSystem fs2 = createVirtualFileSystem(vfsDir)) {
             assertEquals(fs.getMountPoint(), fs2.getMountPoint());
             assertEquals(IS_WINDOWS ? "X:\\graalpy_vfs" : "/graalpy_vfs", fs.getMountPoint());
         }
     }
 
-    @Test
-    public void mountPoints() throws IOException {
-        try (VirtualFileSystem vfs = newVirtualFileSystemBuilder().//
+    @ParameterizedTest
+    @MethodSource(VFS_DIRECTORIES_SOURCE)
+    public void mountPoints(String vfsDir) throws IOException {
+        try (VirtualFileSystem vfs = newVirtualFileSystemBuilder(vfsDir).//
                         unixMountPoint(VFS_UNIX_MOUNT_POINT).//
                         windowsMountPoint(VFS_WIN_MOUNT_POINT).build()) {
             assertEquals(VFS_MOUNT_POINT, vfs.getMountPoint());
@@ -163,7 +144,7 @@ public class VirtualFileSystemIntegrationTest {
 
         String multiPathUnixMountPoint = "/test/mount/point";
         String multiPathWinMountPoint = "X:\\test\\win\\mount\\point";
-        VirtualFileSystem vfs = newVirtualFileSystemBuilder().//
+        VirtualFileSystem vfs = newVirtualFileSystemBuilder(vfsDir).//
                         unixMountPoint(multiPathUnixMountPoint).//
                         windowsMountPoint(multiPathWinMountPoint).//
                         resourceLoadingClass(VirtualFileSystemIntegrationTest.class).build();
@@ -176,43 +157,30 @@ public class VirtualFileSystemIntegrationTest {
         assertTrue(Files.exists(extractedFile));
         List<String> lines = Files.readAllLines(extractedFile);
         if (expectedContens != null) {
-            assertEquals("expected " + expectedContens.length + " lines in extracted file '" + extractedFile + "'", expectedContens.length, lines.size());
+            assertEquals(expectedContens.length, lines.size(), "expected " + expectedContens.length + " lines in extracted file '" + extractedFile + "'");
             for (String line : expectedContens) {
-                assertTrue("expected line '" + line + "' in file '" + extractedFile + "' with contents:\n" + expectedContens, lines.contains(line));
+                assertTrue(lines.contains(line), "expected line '" + line + "' in file '" + extractedFile + "' with contents:\n" + Arrays.toString(expectedContens));
             }
         } else {
-            assertEquals("extracted file '" + extractedFile + "' expected to be empty, but had " + lines.size() + " lines", 0, lines.size());
+            assertEquals(0, lines.size(), "extracted file '" + extractedFile + "' expected to be empty, but had " + lines.size() + " lines");
         }
     }
 
-    private static void checkException(Class<?> exType, Callable<Object> c) {
-        checkException(exType, c, null);
-    }
-
-    private static void checkException(Class<?> exType, Callable<Object> c, String msg) {
-        boolean gotEx = false;
-        try {
-            c.call();
-        } catch (Exception e) {
-            assertEquals(e.getClass(), exType);
-            gotEx = true;
-        }
-        assertTrue(msg != null ? msg : "expected " + exType.getName(), gotEx);
-    }
-
-    @Test
-    public void fsOperations() {
-        try (Context ctx = createContext(null, null)) {
+    @ParameterizedTest
+    @MethodSource(VFS_DIRECTORIES_SOURCE)
+    public void fsOperations(String vfsDir) {
+        try (Context ctx = createContext(vfsDir)) {
             fsOperations(ctx, "/test_mount_point/");
         }
-        try (Context ctx = createContext(null, b -> b.currentWorkingDirectory(Path.of(VFS_MOUNT_POINT)))) {
+        try (Context ctx = createContext(vfsDir, null, b -> b.currentWorkingDirectory(Path.of(VFS_MOUNT_POINT)))) {
             fsOperations(ctx, "");
         }
     }
 
-    @Test
-    @Ignore // GR-61545
-    public void parallelFsOperations() throws ExecutionException, InterruptedException {
+    @ParameterizedTest
+    @MethodSource(VFS_DIRECTORIES_SOURCE)
+    @Disabled // GR-61545
+    public void parallelFsOperations(String vfsDir) throws ExecutionException, InterruptedException {
         int threadsCount = Runtime.getRuntime().availableProcessors();
         CountDownLatch latch = new CountDownLatch(threadsCount);
         ExecutorService executorService = Executors.newFixedThreadPool(threadsCount, new ThreadFactory() {
@@ -224,7 +192,7 @@ public class VirtualFileSystemIntegrationTest {
             }
         });
 
-        try (Context ctx = createContext(null, null)) {
+        try (Context ctx = createContext(vfsDir, null, null)) {
             Future<?>[] tasks = new Future<?>[threadsCount];
             for (int i = 0; i < threadsCount; i++) {
                 tasks[i] = executorService.submit(() -> {
@@ -513,9 +481,10 @@ public class VirtualFileSystemIntegrationTest {
                         """, pathPrefix);
     }
 
-    @Test
-    public void osChdir() {
-        try (Context ctx = createContext(null, null)) {
+    @ParameterizedTest
+    @MethodSource(VFS_DIRECTORIES_SOURCE)
+    public void osChdir(String vfsDir) {
+        try (Context ctx = createContext(vfsDir)) {
             // os.path.exists
             eval(ctx, """
                             import os
@@ -526,9 +495,10 @@ public class VirtualFileSystemIntegrationTest {
         }
     }
 
-    @Test
-    public void fsOperationsCaseInsensitive() {
-        try (Context ctx = createContext(b -> b.caseInsensitive(true), null)) {
+    @ParameterizedTest
+    @MethodSource(VFS_DIRECTORIES_SOURCE)
+    public void fsOperationsCaseInsensitive(String vfsDir) {
+        try (Context ctx = createContext(vfsDir, b -> b.caseInsensitive(true), null)) {
             eval(ctx, """
                             import os
                             assert os.path.exists('/test_mount_point/SomeFile')
@@ -555,8 +525,12 @@ public class VirtualFileSystemIntegrationTest {
         return src;
     }
 
-    public Context createContext(Function<VirtualFileSystem.Builder, VirtualFileSystem.Builder> vfsBuilderFunction, Function<Context.Builder, Context.Builder> ctxBuilderFunction) {
-        VirtualFileSystem.Builder builder = newVirtualFileSystemBuilder().//
+    public Context createContext(String vfsDir) {
+        return createContext(vfsDir, null, null);
+    }
+
+    public Context createContext(String vfsDir, Function<VirtualFileSystem.Builder, VirtualFileSystem.Builder> vfsBuilderFunction, Function<Context.Builder, Context.Builder> ctxBuilderFunction) {
+        VirtualFileSystem.Builder builder = newVirtualFileSystemBuilder(vfsDir).//
                         unixMountPoint(VFS_MOUNT_POINT).//
                         windowsMountPoint(VFS_WIN_MOUNT_POINT).//
                         extractFilter(p -> p.getFileName().toString().endsWith(".tso")).//
@@ -572,13 +546,14 @@ public class VirtualFileSystemIntegrationTest {
         return ctxBuilder.build();
     }
 
-    @Test
-    public void vfsBuilderTest() {
-        try (Context context = addTestOptions(newContextBuilder()).allowAllAccess(true).allowHostAccess(HostAccess.ALL).build()) {
+    @ParameterizedTest
+    @MethodSource(VFS_DIRECTORIES_SOURCE)
+    public void vfsBuilderTest(String vfsDir) {
+        try (Context context = addTestOptions(newContextBuilder(vfsDir)).allowAllAccess(true).allowHostAccess(HostAccess.ALL).build()) {
             context.eval(PYTHON, "import java; java.type('java.lang.String')");
         }
 
-        try (Context context = addTestOptions(newContextBuilder()).allowAllAccess(false).allowHostAccess(HostAccess.NONE).build()) {
+        try (Context context = addTestOptions(newContextBuilder(vfsDir)).allowAllAccess(false).allowHostAccess(HostAccess.NONE).build()) {
             context.eval(PYTHON, """
                             import java
                             try:
@@ -589,7 +564,7 @@ public class VirtualFileSystemIntegrationTest {
                                 assert False, 'expected NotImplementedError'
                             """);
         }
-        VirtualFileSystem fs = newVirtualFileSystemBuilder().//
+        VirtualFileSystem fs = newVirtualFileSystemBuilder(vfsDir).//
                         unixMountPoint(VFS_MOUNT_POINT).//
                         windowsMountPoint(VFS_WIN_MOUNT_POINT).//
                         resourceLoadingClass(VirtualFileSystemIntegrationTest.class).build();
@@ -597,10 +572,10 @@ public class VirtualFileSystemIntegrationTest {
             context.eval(PYTHON, patchMountPoint("from os import listdir; listdir('/test_mount_point')"));
         }
 
-        try (Context context = newContextBuilder().build()) {
+        try (Context context = newContextBuilder(vfsDir).build()) {
             context.eval(PYTHON, "from os import listdir; listdir('.')");
         }
-        try (Context context = addTestOptions(newContextBuilder()).allowIO(IOAccess.NONE).build()) {
+        try (Context context = addTestOptions(newContextBuilder(vfsDir)).allowIO(IOAccess.NONE).build()) {
             boolean gotPE = false;
             try {
                 context.eval(PYTHON, "from os import listdir; listdir('.')");
@@ -611,10 +586,11 @@ public class VirtualFileSystemIntegrationTest {
         }
     }
 
-    @Test
-    public void externalResourcesBuilderTest() throws IOException {
+    @ParameterizedTest
+    @MethodSource(VFS_DIRECTORIES_SOURCE)
+    public void externalResourcesBuilderTest(String vfsDir) throws IOException {
         Path resourcesDir = Files.createTempDirectory("vfs-test-resources");
-        try (VirtualFileSystem fs = newVirtualFileSystemBuilder().//
+        try (VirtualFileSystem fs = newVirtualFileSystemBuilder(vfsDir).//
                         resourceLoadingClass(VirtualFileSystemIntegrationTest.class).build()) {
             // extract VFS
             GraalPyResources.extractVirtualFileSystemResources(fs, resourcesDir);
@@ -644,44 +620,44 @@ public class VirtualFileSystemIntegrationTest {
 
     @Test
     public void vfsMountPointTest() {
-        assumeDefaultResourcesDir();
         if (IS_WINDOWS) {
-            checkException(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("test"));
-            checkException(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("test\\"));
-            checkException(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("\\test\\"));
-            checkException(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("\\test"));
-            checkException(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("X:\\test\\"));
-            checkException(InvalidPathException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("X:\\test|test"));
+            assertThrows(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("test"));
+            assertThrows(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("test\\"));
+            assertThrows(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("\\test\\"));
+            assertThrows(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("\\test"));
+            assertThrows(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("X:\\test\\"));
+            assertThrows(InvalidPathException.class, () -> VirtualFileSystem.newBuilder().windowsMountPoint("X:\\test|test"));
         } else {
-            checkException(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().unixMountPoint("test"));
-            checkException(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().unixMountPoint("test/"));
-            checkException(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().unixMountPoint("/test/"));
-            checkException(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().unixMountPoint("X:\\test"));
-            checkException(InvalidPathException.class, () -> VirtualFileSystem.newBuilder().unixMountPoint("/test/\0"));
+            assertThrows(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().unixMountPoint("test"));
+            assertThrows(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().unixMountPoint("test/"));
+            assertThrows(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().unixMountPoint("/test/"));
+            assertThrows(IllegalArgumentException.class, () -> VirtualFileSystem.newBuilder().unixMountPoint("X:\\test"));
+            assertThrows(InvalidPathException.class, () -> VirtualFileSystem.newBuilder().unixMountPoint("/test/\0"));
         }
     }
 
     @SuppressWarnings("unchecked")
-    @Test
-    public void pythonPathsTest() throws IOException {
+    @ParameterizedTest
+    @MethodSource(VFS_DIRECTORIES_SOURCE)
+    public void pythonPathsTest(String vfsDir) throws IOException {
         String defaultMountPoint;
-        try (VirtualFileSystem vfs = createVirtualFileSystem()) {
+        try (VirtualFileSystem vfs = createVirtualFileSystem(vfsDir)) {
             defaultMountPoint = vfs.getMountPoint();
         }
 
         String getPathsSource = "import sys; [sys.path, sys.executable]";
-        try (Context ctx = newContextBuilder().build()) {
+        try (Context ctx = newContextBuilder(vfsDir).build()) {
             Value paths = ctx.eval("python", getPathsSource);
 
             assertEquals(IS_WINDOWS ? "X:\\graalpy_vfs" : "/graalpy_vfs", defaultMountPoint);
             checkPaths(paths.as(List.class), defaultMountPoint);
         }
 
-        try (Context ctx = newContextBuilder().build()) {
+        try (Context ctx = newContextBuilder(vfsDir).build()) {
             Value paths = ctx.eval("python", getPathsSource);
             checkPaths(paths.as(List.class), defaultMountPoint);
         }
-        VirtualFileSystem vfs = newVirtualFileSystemBuilder().//
+        VirtualFileSystem vfs = newVirtualFileSystemBuilder(vfsDir).//
                         unixMountPoint(VFS_UNIX_MOUNT_POINT).//
                         windowsMountPoint(VFS_WIN_MOUNT_POINT).build();
         assertEquals(VFS_MOUNT_POINT, vfs.getMountPoint());
@@ -711,7 +687,6 @@ public class VirtualFileSystemIntegrationTest {
 
     @Test
     public void testAnotherVfs() throws IOException {
-        assumeDefaultResourcesDir();
         try (var vfs = VirtualFileSystem.newBuilder().resourceDirectory("GRAALPY-VFS/foo").build()) {
             try (Context ctx = GraalPyResources.contextBuilder(vfs).build()) {
                 eval(ctx, """
@@ -726,7 +701,7 @@ public class VirtualFileSystemIntegrationTest {
                                 """);
                 Value test = ctx.getBindings("python").getMember("test");
                 Value result = test.execute(vfs.getMountPoint());
-                Assert.assertEquals("world", result.asString());
+                assertEquals("world", result.asString());
             }
         }
     }

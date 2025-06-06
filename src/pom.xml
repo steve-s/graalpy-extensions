@@ -4,12 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.graalvm.python</groupId>
     <artifactId>graalpy-extensions</artifactId>
-    <version>24.2.0</version>
+    <version>25.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <project.polyglot.version>24.2.0</project.polyglot.version>
+        <project.polyglot.version>25.0.0-SNAPSHOT</project.polyglot.version>
+        <project.python.artifact>python-community</project.python.artifact>
         <project.junit.version>5.7.0</project.junit.version>
     </properties>
 
@@ -30,8 +31,8 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>org.graalvm.polyglot</groupId>
-                <artifactId>python</artifactId>
+                <groupId>org.graalvm.python</groupId>
+                <artifactId>${project.python.artifact}</artifactId>
                 <version>${project.polyglot.version}</version>
             </dependency>
             <dependency>
