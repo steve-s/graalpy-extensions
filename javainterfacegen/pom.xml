@@ -55,6 +55,11 @@ SOFTWARE.
     the Graal Polyglot API behind the scenes.</description>
     <packaging>jar</packaging>
 
+    <properties>
+        <!-- overridden to G1 on Linux -->
+        <native.image.gc>serial</native.image.gc>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.graalvm.python</groupId>
@@ -138,6 +143,18 @@ SOFTWARE.
 
     <profiles>
         <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                </os>
+            </activation>
+            <properties>
+                <native.image.gc>G1</native.image.gc>
+            </properties>
+        </profile>
+        <profile>
             <id>native</id>
             <build>
                 <plugins>
@@ -163,7 +180,7 @@ SOFTWARE.
                                 <buildArg>-Dtruffle.TruffleRuntime=com.oracle.truffle.api.impl.DefaultTruffleRuntime</buildArg>
                                 <buildArg>-Dpolyglot.engine.WarnInterpreterOnly=false</buildArg>
                                 <buildArg>-Dimage-build-time.PreinitializeContexts=</buildArg>
-                                <buildArg>--gc=G1</buildArg>
+                                <buildArg>--gc=${native.image.gc}</buildArg>
                             </buildArgs>
                             <fallback>false</fallback>
                             <mainClass>org.graalvm.python.javainterfacegen.Main</mainClass>
