@@ -11,7 +11,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
+        include:
+          - os: ubuntu-latest
+            os_name: linux
+          - os: macos-latest
+            os_name: macos
 
     steps:
       - name: Checkout code
@@ -29,9 +33,12 @@ jobs:
       - name: Build javainterfacegen tool
         run: mvn --batch-mode -s settings.xml -DskipTests -pl javainterfacegen -am -Pnative package
 
+      - name: Detect architecture
+        run: echo "ARCH=$(uname -m)" >> $GITHUB_ENV
+
       - name: Publish javainterfacegen tool
         uses: actions/upload-artifact@v4
         with:
-          name: javainterfacegen
+          name: javainterfacegen-${{ matrix.os_name }}-${{ env.ARCH }}
           path: |
             javainterfacegen/target/javainterfacegen
