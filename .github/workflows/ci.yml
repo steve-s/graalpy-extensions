@@ -19,51 +19,10 @@ jobs:
         uses: graalvm/setup-graalvm@v1
         with:
           distribution: 'graalvm'
-          java-version: 'latest-ea'
+          java-version: '25-ea'
 
-      - name: Setup GraalVM Manven bundle - download
-        run: curl -L -o maven-resource-bundle.zip https://github.com/graalvm/oracle-graalvm-ea-builds/releases/download/jdk-25.0.0-ea.27/maven-resource-bundle-25.0.0-ea.27.zip
-
-      - name: Setup GraalVM Manven bundle - extract
-        run: unzip -o maven-resource-bundle.zip -d ./maven-resource-bundle
-
-      - name: Setup GraalVM Manven bundle - settings.xml
-        run: |
-          cat > ./settings.xml <<EOF
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
-                                        https://maven.apache.org/xsd/settings-1.0.0.xsd">
-            <profiles>
-              <profile>
-                <id>local-repo-profile</id>
-                <pluginRepositories>
-                  <pluginRepository>
-                    <id>local-repo</id>
-                    <name>local-repo</name>
-                    <url>file://${{ github.workspace }}/maven-resource-bundle</url>
-                  </pluginRepository>
-                </pluginRepositories>
-                <repositories>
-                  <repository>
-                    <id>local-repo</id>
-                    <name>local-repo</name>
-                    <url>file://${{ github.workspace }}/maven-resource-bundle</url>
-                    <releases>
-                      <enabled>true</enabled>
-                    </releases>
-                    <snapshots>
-                      <enabled>true</enabled>
-                    </snapshots>
-                  </repository>
-                </repositories>
-              </profile>
-            </profiles>
-            <activeProfiles>
-              <activeProfile>local-repo-profile</activeProfile>
-            </activeProfiles>
-          </settings>
-          EOF
+      - name: Setup Polyglot Maven bundle
+        uses: ./.github/actions/setup-polyglot-mvn-repo
 
       - name: Run Maven package install
         run: mvn --batch-mode -s settings.xml package install

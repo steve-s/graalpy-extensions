@@ -22,6 +22,7 @@
         <module>org.graalvm.python.embedding</module>
         <module>org.graalvm.python.embedding.tools</module>
         <module>org.graalvm.python.jbang</module>
+        <module>javainterfacegen</module>
         <!-- TODO: see the Gradle plugin pom.xml -->
         <!-- <module>org.graalvm.python.gradle.plugin</module> -->
     </modules>

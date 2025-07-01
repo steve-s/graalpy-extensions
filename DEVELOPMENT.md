@@ -47,8 +47,7 @@ integration tests.
 tl;dr:
 
 ```
-mvn install
-mvn exec:java@integration-tests -Dintegration.test.args="test_maven_plugin.py"
+mvn install exec:java@integration-tests -Dintegration.test.args="test_maven_plugin.py"
 ```
 
 The integration tests are driven by Python and implemented using unittest framework, which is
