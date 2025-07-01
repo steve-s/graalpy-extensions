@@ -12,6 +12,7 @@
         <project.polyglot.version>25.0.0-SNAPSHOT</project.polyglot.version>
         <project.python.artifact>python-community</project.python.artifact>
         <project.junit.version>5.7.0</project.junit.version>
+        <!-- TODO: default test to run in GitHub CI for now -->
         <integration.tests.args>test_maven_plugin.MavenPluginTest.test_generated_app</integration.tests.args>
     </properties>
 
@@ -20,6 +21,9 @@
         <module>graalpy-maven-plugin</module>
         <module>org.graalvm.python.embedding</module>
         <module>org.graalvm.python.embedding.tools</module>
+        <module>org.graalvm.python.jbang</module>
+        <!-- TODO: see the Gradle plugin pom.xml -->
+        <!-- <module>org.graalvm.python.gradle.plugin</module> -->
     </modules>
 
     <dependencyManagement>

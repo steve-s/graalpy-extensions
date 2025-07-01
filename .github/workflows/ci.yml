@@ -65,14 +65,8 @@ jobs:
           </settings>
           EOF
 
-      - name: Setup GraalVM Manven bundle - check settings.xml
-        run: cat ./settings.xml
-
-      - name: Setup GraalVM Manven bundle - check PWD
-        run: echo "$PWD"
-
       - name: Run Maven package install
-        run: mvn -f src/pom.xml --batch-mode -s settings.xml package install
+        run: mvn --batch-mode -s settings.xml package install
 
       - name: Run integration tests
-        run: mvn  -f src/pom.xml --batch-mode -s settings.xml exec:java@integration-tests
+        run: mvn --batch-mode -s settings.xml exec:java@integration-tests

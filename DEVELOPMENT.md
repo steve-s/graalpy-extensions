@@ -30,9 +30,39 @@ your local repository (e.g., `~/.m2/repository`) and Maven projects can just
 use the version `25.0.0-SNAPSHOT` without any extra configuration. Installation
 to the local repository also omits the license checks.
 
-## Maven workflow
+## Structure
 
-**Changing version**:
+This repository is structured as a Maven multi-module project. There is also a Gradle project
+for the Gradle plugin: `org.graalvm.python.gradle.plugin`.
+
+To be implemented: A Maven project and pom.xml
+exist for the Gradle plugin, but solely to delegate most of the lifecycle tasks to Gradle.
+This allows you to run those tasks with a single Maven command.
+
+Some subprojects contain standard JUnit tests, and there are also Python-driven
+integration tests.
+
+### Integration tests
+
+tl;dr:
+
+```
+mvn install
+mvn exec:java@integration-tests -Dintegration.test.args="test_maven_plugin.py"
+```
+
+The integration tests are driven by Python and implemented using unittest framework, which is
+part of Python standard library. The tests expect that the relevant Maven artifacts are available, 
+which can be achieved, for example, by `mvn install`. But they can also run on released artifacts
+published in Mavencentral or some snapshot repository configured in Maven settings. 
+
+The whole execution of the tests is wrapped in Maven goal `exec:java@integration-tests`, which passes
+some necessary arguments to the test driver Python script. One can pass additional arguments for the
+unittest framework using system property `integration.test.args`, for example, tests to execute or
+verbosity level.
+
+
+## Changing version
 
 For Maven projects:
 

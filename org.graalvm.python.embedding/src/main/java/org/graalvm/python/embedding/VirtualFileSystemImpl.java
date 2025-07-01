@@ -304,11 +304,11 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
      * causing that no extraction will happen.
      */
     VirtualFileSystemImpl(Predicate<Path> extractFilter,
-                    Path mountPoint,
-                    String resourceDirectory,
-                    HostIO allowHostIO,
-                    Class<?> resourceLoadingClass,
-                    boolean caseInsensitive) {
+                          Path mountPoint,
+                          String resourceDirectory,
+                          HostIO allowHostIO,
+                          Class<?> resourceLoadingClass,
+                          boolean caseInsensitive) {
         if (resourceLoadingClass != null) {
             this.resourceLoadingClass = resourceLoadingClass;
         } else {
@@ -322,7 +322,7 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
         this.platformSrcPath = resourcePathToPlatformPath(absoluteResourcePath(vfsRoot, VFS_SRC));
 
         fine("VirtualFilesystem %s, allowHostIO: %s, resourceLoadingClass: %s, caseInsensitive: %s, extractOnStartup: %s%s",
-                        mountPoint, allowHostIO.toString(), this.resourceLoadingClass.getName(), caseInsensitive, extractOnStartup, extractFilter != null ? "" : ", extractFilter: null");
+                mountPoint, allowHostIO.toString(), this.resourceLoadingClass.getName(), caseInsensitive, extractOnStartup, extractFilter != null ? "" : ", extractFilter: null");
 
         this.extractFilter = extractFilter;
         if (extractFilter != null) {
@@ -398,7 +398,7 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
         String relative = resourcePath.substring(1);
         if (!(relative.length() > vfsRoot.length() && relative.startsWith(vfsRoot))) {
             String msg = "Resource path is expected to start with '/" + vfsRoot + "' but was '" + resourcePath + "'.\n" +
-                            "Please also ensure that your virtual file system resources root directory is '" + vfsRoot + "'";
+                    "Please also ensure that your virtual file system resources root directory is '" + vfsRoot + "'";
             throw new IllegalArgumentException(msg);
         }
         var path = resourcePath.substring(vfsRoot.length() + 2);
@@ -518,7 +518,7 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
                             }
                             if (filelistUrls.size() > 1 && !resourcePath.startsWith(venvPath) && !resourcePath.equals(absFilelistPath)) {
                                 reportFailedMultiVFSCheck(multipleLocationsErrorMessage("There are duplicate entries originating from different virtual " +
-                                                "filesystem instances. The duplicate entries path: %s.", resourcePath));
+                                        "filesystem instances. The duplicate entries path: %s.", resourcePath));
                             }
                             fine(multipleLocationsErrorMessage("Duplicate entries virtual filesystem entries: " + resourcePath));
                         }
@@ -612,11 +612,39 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
                     String platform = line.substring(KEY_PLATFORM.length() + 1);
                     if (!platform.equals(PLATFORM)) {
                         extendedWarn(String.format("Virtual filesystem contains third-party Python packages built for %s, which is not compatible with the current platform %s.",
-                                        platform, PLATFORM));
+                                platform, PLATFORM));
                     }
                     break;
                 }
             }
+        }
+    }
+
+    private static final class URLWrapper {
+        private final URL url;
+        private final String sUrl;
+
+        private URLWrapper(URL url) {
+            this.url = url;
+            this.sUrl = url.toString();
+        }
+
+        @Override
+        public String toString() {
+            return sUrl;
+        }
+
+        @Override
+        public int hashCode() {
+            return sUrl.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof URLWrapper other) {
+                return sUrl.equals(other.sUrl);
+            }
+            return false;
         }
     }
 
@@ -627,6 +655,18 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
         } catch (IOException e) {
             throw new IllegalStateException("IO error during reading the VirtualFileSystem metadata", e);
         }
+
+        // Remove duplicates, simply by equality of the URL string representation to avoid any host names resolving,
+        // this is best effort approach to avoid annoying the users in case of duplicate class-path entries etc.
+        Set<URLWrapper> filelistUrlsSet = new HashSet<>(filelistUrls.size());
+        for (URL url : filelistUrls) {
+            filelistUrlsSet.add(new URLWrapper(url));
+        }
+        filelistUrls.clear();
+        for (URLWrapper urlWrapper : filelistUrlsSet) {
+            filelistUrls.add(urlWrapper.url);
+        }
+
         if (filelistUrls.isEmpty()) {
             throw new IllegalStateException(String.format("Could not find VirtualFileSystem metadata in Java resources. " +
                             "Resource not found: %s.", filelistPath));
@@ -688,7 +728,7 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
         }
         if (installedUrls.size() != filelistUrls.size()) {
             warn("Could not read the list of installed packages for all virtual environments. Lists found:\n%s",
-                            installedUrls.stream().map(URL::toString).collect(Collectors.joining("\n")));
+                    installedUrls.stream().map(URL::toString).collect(Collectors.joining("\n")));
         }
         HashMap<String, String> pkgToVersion = new HashMap<>();
         for (URL installedUrl : installedUrls) {
@@ -712,7 +752,7 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
                     if (originalVer != null && !originalVer.equals(version)) {
                         reportFailedMultiVFSCheck(String.format("Package '%s' is installed in different versions ('%s' and '%s') in different virtual environments. " +
                                         "This may result in disrupted functionality of the package or packages depending on it.",
-                                        parts[0], originalVer, version));
+                                parts[0], originalVer, version));
                     }
                 }
             } catch (IOException e) {
@@ -730,7 +770,7 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
         }
         if (contentsUrls.size() != filelistUrls.size()) {
             warn("Could not read the GraalPy version for all virtual environments. Version files found:\n%s",
-                            contentsUrls.stream().map(URL::toString).collect(Collectors.joining("\n")));
+                    contentsUrls.stream().map(URL::toString).collect(Collectors.joining("\n")));
         }
         String graalPyVersion = null;
         URL graalPyVersionUrl = null;
@@ -750,7 +790,7 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
                     graalPyVersionUrl = installedUrl;
                 } else if (!graalPyVersion.equals(ver)) {
                     reportFailedMultiVFSCheck("Following virtual environments appear to have been created by different GraalPy versions:\n" +
-                                    graalPyVersionUrl + '\n' + installedUrl);
+                            graalPyVersionUrl + '\n' + installedUrl);
                     break;
                 }
             } catch (IOException e) {
@@ -1090,12 +1130,12 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
     }
 
     private static final Set<? extends OpenOption> READ_OPTIONS = Set.of(
-                    StandardOpenOption.READ,
-                    StandardOpenOption.DSYNC,
-                    StandardOpenOption.SPARSE,
-                    StandardOpenOption.SYNC,
-                    StandardOpenOption.TRUNCATE_EXISTING,
-                    LinkOption.NOFOLLOW_LINKS);
+            StandardOpenOption.READ,
+            StandardOpenOption.DSYNC,
+            StandardOpenOption.SPARSE,
+            StandardOpenOption.SYNC,
+            StandardOpenOption.TRUNCATE_EXISTING,
+            LinkOption.NOFOLLOW_LINKS);
 
     /**
      * copied from FileSystems.ReadOnlyFileSystem

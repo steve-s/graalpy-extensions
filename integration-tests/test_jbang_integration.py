@@ -46,7 +46,7 @@ import tempfile
 import time
 import unittest
 
-from tests.standalone import util
+import util
 
 is_enabled = 'ENABLE_JBANG_INTEGRATION_UNITTESTS' in os.environ and os.environ['ENABLE_JBANG_INTEGRATION_UNITTESTS'] == "true"
 MAVEN_REPO_LOCAL_URL = os.environ.get('org.graalvm.maven.downloader.repository')
@@ -76,7 +76,6 @@ class TestJBangIntegration(unittest.TestCase):
         if not is_enabled:
             return
         cls.ensureProxy()
-        cls.ensureLocalMavenRepo()
         cls.clearCache()
         cls.catalog_file = cls.getCatalogFile()
 
@@ -117,11 +116,6 @@ class TestJBangIntegration(unittest.TestCase):
             os.environ['JAVA_TOOL_OPTIONS'] = java_tools
 
     @staticmethod
-    def ensureLocalMavenRepo():
-        if MAVEN_REPO_LOCAL_URL is None:
-            raise RuntimeError("'org.graalvm.maven.downloader.repository' is not defined")
-
-    @staticmethod
     def clearCache():
         command = [JBANG_CMD, "cache", "--verbose", "clear"]
         run_cmd(command)
@@ -129,8 +123,6 @@ class TestJBangIntegration(unittest.TestCase):
     @staticmethod
     def getCatalogFile():
         catalog_dir = os.path.dirname(os.path.abspath(__file__))
-        for _ in range(5):
-            catalog_dir = os.path.dirname(catalog_dir)
         return os.path.join(catalog_dir, 'jbang-catalog.json')
 
     def getCatalogData(self, catalog_file):
@@ -175,7 +167,6 @@ class TestJBangIntegration(unittest.TestCase):
         shutil.copyfile(template, target)
         self.addLocalMavenRepo(target)
 
-    @unittest.skipUnless(is_enabled, "ENABLE_JBANG_INTEGRATION_UNITTESTS is not true")
     def test_register_catalog(self):
         alias = "graalpy_test_catalog_" + str(int(time.time()))
 
@@ -190,7 +181,6 @@ class TestJBangIntegration(unittest.TestCase):
         if result != 0:
             self.fail(f"Problem during removing catalog")
 
-    @unittest.skipUnless(is_enabled, "ENABLE_JBANG_INTEGRATION_UNITTESTS is not true")
     def test_catalog(self):
         json_data = self.getCatalogData(self.catalog_file)
         for alias in json_data.get("aliases", {}).values():
@@ -203,7 +193,6 @@ class TestJBangIntegration(unittest.TestCase):
                 file_path = os.path.normpath(os.path.join(os.path.dirname(self.catalog_file), file_ref))
                 self.assertTrue(os.path.isfile(file_path), f"The path definied in catalog is not found: {file_path}")
 
-    @unittest.skipUnless(is_enabled, "ENABLE_JBANG_INTEGRATION_UNITTESTS is not true")
     def test_graalpy_template(self):
         template_name = "graalpy"
         test_file = "graalpy_test.java"
@@ -225,7 +214,6 @@ class TestJBangIntegration(unittest.TestCase):
         self.assertTrue("Successfully installed termcolor" in out, f"Expected text:\nSuccessfully installed termcolor\nbut in stdout was:\n{out}")
         self.assertTrue("hello java" in out, f"Expected text:\nhello java\nbut in stdout was:\n{out}")
 
-    @unittest.skipUnless(is_enabled, "ENABLE_JBANG_INTEGRATION_UNITTESTS is not true")
     @unittest.skipUnless('win32' not in sys.platform, "Currently the jbang native image on Win gate fails.")
     def test_graalpy_template_native(self):
         template_name = "graalpy"
@@ -246,8 +234,6 @@ class TestJBangIntegration(unittest.TestCase):
         self.assertTrue("Successfully installed termcolor" in out, f"Expected text:\nSuccessfully installed termcolor")
         self.assertTrue("hello java" in out, f"Expected text:\nhello java\nbut in stdout was:\n{out}")
 
-
-    @unittest.skipUnless(is_enabled, "ENABLE_JBANG_INTEGRATION_UNITTESTS is not true")
     def test_graalpy_local_repo_template(self):
         template_name = "graalpy_local_repo"
         test_file = "graalpy_test_local_repo.java"
@@ -266,7 +252,6 @@ class TestJBangIntegration(unittest.TestCase):
         self.assertTrue("Successfully installed termcolor" in out, f"Expected text:\nSuccessfully installed termcolor")
         self.assertTrue("hello java" in out, f"Expected text:\nhello java\nbut in stdout was:\n{out}")
 
-    @unittest.skipUnless(is_enabled, "ENABLE_JBANG_INTEGRATION_UNITTESTS is not true")
     def test_hello_example(self):
         work_dir = self.tmpdir
         hello_java_file = self.prepare_hello_example(work_dir)
@@ -287,7 +272,6 @@ class TestJBangIntegration(unittest.TestCase):
             self.assertTrue("Successfully installed termcolor" in out, f"Expected text:\nSuccessfully installed termcolor")
             self.assertTrue("hello java" in out, f"Expected text:\nhello java\nbut in stdout was:\n{out}")
 
-    @unittest.skipUnless(is_enabled, "ENABLE_JBANG_INTEGRATION_UNITTESTS is not true")
     def test_external_dir(self):
         work_dir = self.tmpdir
         hello_java_file = self.prepare_hello_example(work_dir)
@@ -372,7 +356,6 @@ def hello():
         self.assertTrue(result == 0, f"Execution failed with code {result}\n    command: {command}\n    stdout: {out}")
         self.assertFalse("[graalpy jbang integration]" in out, f"Did not expect text:\n[graalpy jbang integration]")
 
-    @unittest.skipUnless(is_enabled, "ENABLE_JBANG_INTEGRATION_UNITTESTS is not true")
     def test_malformed_tag_formats(self):
         jbang_templates_dir = os.path.join(os.path.dirname(__file__), "jbang")
         work_dir = self.tmpdir
@@ -389,7 +372,6 @@ def hello():
         self.prepare_template(os.path.join(jbang_templates_dir, "EmptyPythonResourceCommentWithBlanks.j"), java_file)
         self.check_empty_comments(work_dir, java_file)
 
-    @unittest.skipUnless(is_enabled, "ENABLE_JBANG_INTEGRATION_UNITTESTS is not true")
     def test_no_pkgs_but_resource_dir(self):
         jbang_templates_dir = os.path.join(os.path.dirname(__file__), "jbang")
         work_dir = self.tmpdir
@@ -404,7 +386,6 @@ def hello():
         self.assertFalse("-m ensurepip" in out)
         self.assertFalse("pip install" in out)
 
-    @unittest.skipUnless(is_enabled, "ENABLE_JBANG_INTEGRATION_UNITTESTS is not true")
     def test_two_resource_dirs(self):
         jbang_templates_dir = os.path.join(os.path.dirname(__file__), "jbang")
         work_dir = self.tmpdir
