@@ -1,0 +1,50 @@
+name: Setup Polyglot Maven Artifacts
+runs:
+  using: "composite"
+  steps:
+    - name: Setup GraalVM Maven bundle - download
+      run: curl -L -o maven-resource-bundle.zip https://github.com/graalvm/oracle-graalvm-ea-builds/releases/download/jdk-25.0.0-ea.27/maven-resource-bundle-25.0.0-ea.27.zip
+      shell: bash
+
+    - name: Setup GraalVM Maven bundle - extract
+      run: unzip -o maven-resource-bundle.zip -d ./maven-resource-bundle
+      shell: bash
+
+    - name: Setup GraalVM Maven bundle - settings.xml
+      run: |
+        cat > ./settings.xml <<EOF
+        <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
+          <profiles>
+            <profile>
+              <id>local-repo-profile</id>
+              <pluginRepositories>
+                <pluginRepository>
+                  <id>local-repo</id>
+                  <name>local-repo</name>
+                  <url>file://${{ github.workspace }}/maven-resource-bundle</url>
+                </pluginRepository>
+              </pluginRepositories>
+              <repositories>
+                <repository>
+                  <id>local-repo</id>
+                  <name>local-repo</name>
+                  <url>file://${{ github.workspace }}/maven-resource-bundle</url>
+                  <releases>
+                    <enabled>true</enabled>
+                  </releases>
+                  <snapshots>
+                    <enabled>true</enabled>
+                  </snapshots>
+                </repository>
+              </repositories>
+            </profile>
+          </profiles>
+          <activeProfiles>
+            <activeProfile>local-repo-profile</activeProfile>
+          </activeProfiles>
+        </settings>
+        EOF
+      shell: bash
