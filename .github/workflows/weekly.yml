@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: '25-ea'
+
+      - name: Setup Polyglot Maven bundle
+        uses: ./.github/actions/setup-polyglot-mvn-repo
+
+      - name: Run Maven package install
+        run: mvn --batch-mode -s settings.xml package install
+
+      - name: Run integration tests
+        run: mvn --batch-mode -s settings.xml exec:java@integration-tests
+
+  run-jbang-tests-on-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: '24'
+
+      # doesn't even build the project, we just need polyglot dependencies
+      # to run the GraalPy launcher to drive the Python based test
+      - name: Run JBang integration tests
+        run: mvn --batch-mode exec:java@integration-tests -Dproject.polyglot.version=24.1.2 -Dintegration.tests.args="test_jbang_integration.py --jbang-graalpy-version=24.2.1"
+
+
+  run-jbang-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: '25-ea'
+
+      - name: Setup Polyglot Maven bundle
+        uses: ./.github/actions/setup-polyglot-mvn-repo
+
+      - name: Run Maven package install
+        run: mvn --batch-mode -DskipTests -s settings.xml package install
+
+      - name: Run integration tests
+        run: mvn --batch-mode -s settings.xml exec:java@integration-tests
