@@ -7,6 +7,8 @@
     <version>${revision}</version>
     <packaging>pom</packaging>
     <properties>
+        <!-- NOTE: revision is special and once can change it from cmd line: `mvn -Drevision=... package` -->
+        <!-- See https://maven.apache.org/guides/mini/guide-maven-ci-friendly.html -->
         <revision>25.0.0-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -16,6 +18,21 @@
         <!-- TODO: default test to run in GitHub CI for now -->
         <integration.tests.args>test_maven_plugin.MavenPluginTest.test_generated_app</integration.tests.args>
     </properties>
+
+    <developers>
+        <developer>
+            <name>GraalVM Development</name>
+            <email>graalvm-dev@oss.oracle.com</email>
+            <organization>Oracle Corporation</organization>
+            <organizationUrl>http://www.graalvm.org/</organizationUrl>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>Universal Permissive License, Version 1.0</name>
+            <url>http://opensource.org/licenses/UPL</url>
+        </license>
+    </licenses>
 
     <modules>
         <module>graalpy-archetype-polyglot-app</module>
@@ -71,9 +88,61 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <!-- "flattens" the pom.xml (inherited by submodules, so also theirs) before publishing to Maven repository. -->
+                <!-- Flattening resolves some placeholders, most importantly {revision} and removes the parent pom reference,
+                     so that we do not have to deploy the parent pom. -->
+                <!-- See https://maven.apache.org/guides/mini/guide-maven-ci-friendly.html -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.7.1</version>
+                <configuration>
+                    <flattenMode>ossrh</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- prevent deployment of the parent pom, intentionally not inherited by submodules -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.4</version>
+                <inherited>false</inherited>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- prevent installation of the parent pom, intentionally not inherited by submodules -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.4</version>
+                <inherited>false</inherited>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- Runs the integration tests through Maven passing some of the flags to the test driver automatically -->
+                <!-- The tests are run on GraalPy to avoid dependency on python3 installed on the system -->
+                <!-- One must run "mvn install" before running this goal -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
+                <inherited>false</inherited>
                 <executions>
                     <execution>
                         <id>integration-tests</id>
