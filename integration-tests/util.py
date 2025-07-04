@@ -119,6 +119,7 @@ class BuildToolTestBase(unittest.TestCase):
     def setUpClass(cls):
         cls.env = os.environ.copy()
         cls.env["PYLAUNCHER_DEBUG"] = "1"
+        cls.env["GRAALPY_VERSION"] = get_graalvm_version()
 
         cls.archetypeGroupId = "org.graalvm.python"
         cls.archetypeArtifactId = "graalpy-archetype-polyglot-app"

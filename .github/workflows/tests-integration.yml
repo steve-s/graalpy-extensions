@@ -1,37 +1,31 @@
-name: CI
+name: Integration Tests
 
 on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
 
 jobs:
-  unit-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up GraalVM
-        uses: graalvm/setup-graalvm@v1
-        with:
-          distribution: 'graalvm'
-          java-version: '25-ea'
-
-      - name: Setup Polyglot Maven bundle
-        uses: ./.github/actions/setup-polyglot-mvn-repo
-
-      - name: Run Maven package install
-        run: mvn --batch-mode -s settings.xml package
-
   integration-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         # TODO: enable more integration tests
-        test_name: [ test_jbang_integration.py, test_maven_plugin.MavenPluginTest.test_generated_app ]
+        test_name: [ test_jbang_integration.py, test_maven_plugin.py ]
 
     steps:
+      - name: Set integration tests flags
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "TEST_FLAGS=--skip-long-running" >> $GITHUB_ENV
+          else
+            echo "TEST_FLAGS=" >> $GITHUB_ENV
+          fi
+        shell: bash
+
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -56,4 +50,4 @@ jobs:
       - name: Run integration tests
         run: |
           mvn --batch-mode -s settings.xml exec:java@integration-tests \
-              -Dintegration.tests.args="${{ matrix.test_name }}"
+              -Dintegration.tests.args="${{ matrix.test_name }} $TEST_FLAGS"
