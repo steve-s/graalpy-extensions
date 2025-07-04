@@ -72,10 +72,10 @@ class GradlePluginTestBase(util.BuildToolTestBase):
 
     def copy_build_files(self, target_dir):
         build_file = os.path.join(target_dir, self.build_file_name)
-        shutil.copyfile(os.path.join(os.path.dirname(__file__), "gradle", "build", self.build_file_name), build_file)
+        shutil.copyfile(os.path.join(os.path.dirname(__file__), "gradle", "scripts", self.build_file_name), build_file)
         util.replace_in_file(build_file, "$VERSION$", util.get_graalvm_version())
         settings_file = os.path.join(target_dir, self.settings_file_name)
-        shutil.copyfile(os.path.join(os.path.dirname(__file__), "gradle", "build", self.settings_file_name), settings_file)
+        shutil.copyfile(os.path.join(os.path.dirname(__file__), "gradle", "scripts", self.settings_file_name), settings_file)
 
     def empty_plugin(self, community):
         pass
@@ -115,6 +115,10 @@ class GradlePluginTestBase(util.BuildToolTestBase):
                     shutil.move(os.path.join(root, file), os.path.join(root, file[0:len(file)- 1] + "java"))
 
         self.copy_build_files(target_dir)
+
+        # at the moment the gradle demon does not run with jdk <= 22
+        assert util.gradle_java_home, "in order to run standalone gradle tests, the 'GRADLE_JAVA_HOME' env var has to be set to a jdk <= 22"
+        util.replace_in_file(os.path.join(target_dir, "gradle.properties"), "{GRADLE_JAVA_HOME}", util.gradle_java_home.replace("\\", "\\\\"))
 
         meta_inf_native_image_dir = os.path.join(target_dir, "src", "main", "resources", "META-INF", "native-image")
         os.makedirs(meta_inf_native_image_dir, exist_ok=True)
