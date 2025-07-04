@@ -53,7 +53,7 @@ VENV_UPTODATE = "Virtual environment is up to date with lock file, skipping inst
 
 class MavenPluginTest(util.BuildToolTestBase):
 
-    def generate_app(self, tmpdir, target_dir, target_name, pom_template=None, group_id="archetype.it", package="it.pkg"):
+    def generate_app(self, tmpdir, target_dir, target_name, pom_template=None, group_id="archetype.it", package="it.pkg", log=Logger()):
         cmd = util.GLOBAL_MVN_CMD + [
             "archetype:generate",
             "-B",
@@ -65,8 +65,8 @@ class MavenPluginTest(util.BuildToolTestBase):
             f"-Dpackage={package}",
             "-Dversion=0.1-SNAPSHOT",
         ]
-        out, return_code = util.run_cmd(cmd, self.env, cwd=str(tmpdir))
-        util.check_ouput("BUILD SUCCESS", out)
+        out, return_code = util.run_cmd(cmd, self.env, cwd=str(tmpdir), logger=log)
+        util.check_ouput("BUILD SUCCESS", out, logger=log)
 
         if pom_template:
             shutil.copyfile(pom_template, os.path.join(target_dir, "pom.xml"))
@@ -86,8 +86,9 @@ class MavenPluginTest(util.BuildToolTestBase):
             if use_default_vfs_path:
                 target_name += "_default_vfs_path"
 
+            log = Logger()
             target_dir = os.path.join(str(tmpdir), target_name)
-            self.generate_app(tmpdir, target_dir, target_name)
+            self.generate_app(tmpdir, target_dir, target_name, log=log)
 
             vfs_prefix = os.path.join('GRAALPY-VFS', 'archetype.it', target_name)
             graalpy_main_src = os.path.join(target_dir, "src", "main", "java", "it", "pkg", "GraalPy.java")
@@ -101,7 +102,6 @@ class MavenPluginTest(util.BuildToolTestBase):
                 vfs_prefix = util.DEFAULT_VFS_PREFIX
 
             mvnw_cmd = util.get_mvn_wrapper(target_dir, self.env)
-            log = Logger()
 
             # build
             cmd = mvnw_cmd + ["package", "-Pnative", "-DmainClass=it.pkg.GraalPy"]

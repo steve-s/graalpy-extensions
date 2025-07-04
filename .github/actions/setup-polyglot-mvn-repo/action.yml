@@ -3,7 +3,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup GraalVM Maven bundle - download
-      run: curl -L -o maven-resource-bundle.zip https://github.com/graalvm/oracle-graalvm-ea-builds/releases/download/jdk-25.0.0-ea.27/maven-resource-bundle-25.0.0-ea.27.zip
+      run: curl -L -o maven-resource-bundle.zip https://github.com/graalvm/oracle-graalvm-ea-builds/releases/download/jdk-25.0.0-ea.28/maven-resource-bundle-25.0.0-ea.28.zip
       shell: bash
 
     - name: Setup GraalVM Maven bundle - extract
