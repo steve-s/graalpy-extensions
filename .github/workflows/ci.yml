@@ -29,7 +29,7 @@ jobs:
     strategy:
       matrix:
         # TODO: enable more integration tests
-        test_name: [ test_jbang_integration.py, test_maven_plugin.MavenPluginTest.test_generated_app ]
+        test_name: [ test_jbang_integration.py, test_maven_plugin.py ]
 
     steps:
       - name: Checkout code
