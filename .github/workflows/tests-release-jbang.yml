@@ -1,4 +1,4 @@
-name: Weekly CI
+name: Tests JBang catalog with the latest release
 
 on:
   schedule:
