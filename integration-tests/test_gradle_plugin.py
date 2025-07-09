@@ -237,6 +237,10 @@ class GradlePluginTestBase(util.BuildToolTestBase):
             assert os.path.exists(os.path.join(target_dir, "test-graalpy.lock"))
 
             # add termcolor and build - fails as it is not part of lock file
+            # Gradle does not know how file 'build/generated/graalpy/resources/org.graalvm.python.vfs/venv/lib/python3.11/site-packages/urllib3/util/__pycache__/wait.graalpy250dev4a25dcd3c4-311.pyc'
+            # was created (output property 'output'). Task output caching requires exclusive access to output paths to guarantee correctness (i.e. multiple tasks are not allowed to
+            # produce output in the same location).
+
             log = Logger()
             self.copy_build_files(target_dir)
             append(build_file, self.lock_packages_config(pkgs=["requests==2.32.3", "termcolor==2.2"], lock_file="test-graalpy.lock", community=True))
