@@ -39,7 +39,7 @@
  * SOFTWARE.
  */
 
-package org.graalvm.python.embedding.test;
+package org.graalvm.python.embedding.test.integration;
 
 import org.graalvm.polyglot.*;
 import org.graalvm.polyglot.Context.Builder;

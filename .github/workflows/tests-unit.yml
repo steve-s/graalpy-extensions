@@ -1,19 +1,36 @@
 name: Unit Tests
 
 on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Build Artifacts"]
+    types:
+      - completed
 
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - job_name: "unit"
+            maven_args: "test"
+            display: "All Unit Tests"
+          - job_name: "isolate-integration"
+            maven_args: >-
+              -Pisolate -Dpolyglot.engine.AllowExperimentalOptions=true -Dpolyglot.engine.SpawnIsolate=true -Dpolyglot.engine.IsolateMode=external -Dtest=org.graalvm.python.embedding.test.integration.* test
+            display: "Isolated Embedding Integration Unit Tests"
+
+    name: ${{ matrix.display }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+
+      - name: Extract build artifacts
+        run: |
+          tar -xzf all-targets.tgz
 
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
@@ -24,5 +41,5 @@ jobs:
       - name: Setup Polyglot Maven bundle
         uses: ./.github/actions/setup-polyglot-mvn-repo
 
-      - name: Run Maven package install
-        run: mvn --batch-mode -s settings.xml package
+      - name: Run Maven tests
+        run: mvn --batch-mode -s settings.xml ${{ matrix.maven_args }}
