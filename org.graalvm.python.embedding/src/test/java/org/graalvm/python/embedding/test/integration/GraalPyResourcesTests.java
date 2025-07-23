@@ -38,7 +38,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.graalvm.python.embedding.test;
+package org.graalvm.python.embedding.test.integration;
 
 import java.nio.file.Path;
 

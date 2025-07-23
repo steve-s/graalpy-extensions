@@ -1,0 +1,140 @@
+name: Build Artifacts
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  graalvm_version: '26-ea'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: ${{ env.graalvm_version }}
+
+      - name: Setup Polyglot Maven bundle
+        run: ./scripts/setup-maven-bundle.sh "${{ github.workspace }}/maven-resource-bundle"
+
+      - name: Build project (skip tests)
+        run: mvn --batch-mode -DskipTests -s settings.xml package install
+
+      - name: Archive Maven build outputs (all targets)
+        # We need all "target" directories from submodules
+        run: |
+          mkdir build-artifacts
+          find . -type d -name target | tar -czf build-artifacts/all-targets.tgz --files-from=-
+        shell: bash
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: build-artifacts/all-targets.tgz
+
+  integration-tests:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # TODO: enable more integration tests
+        test_name: [ test_jbang_integration.py, test_maven_plugin.py ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set integration tests flags
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "TEST_FLAGS=--skip-long-running" >> $GITHUB_ENV
+          else
+            echo "TEST_FLAGS=" >> $GITHUB_ENV
+          fi
+        shell: bash
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+
+      - name: Extract build artifacts
+        run: |
+          tar -xzf all-targets.tgz
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: ${{ env.graalvm_version }}
+
+      - name: Setup Polyglot Maven bundle
+        run: ./scripts/setup-maven-bundle.sh "${{ github.workspace }}/maven-resource-bundle"
+
+      - name: Run Maven install
+        run: mvn --batch-mode -DskipTests -s settings.xml install
+
+      - name: Install JBang
+        if: matrix.test_name == 'test_jbang_integration.py'
+        run: |
+          curl -Ls https://sh.jbang.dev | bash
+          echo "$HOME/.jbang/bin" >> $GITHUB_PATH
+
+      - name: Run integration tests
+        run: |
+          mvn --batch-mode -s settings.xml exec:java@integration-tests \
+              -Dintegration.tests.args="${{ matrix.test_name }} $TEST_FLAGS"
+
+  unit-tests:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - job_name: "unit"
+            maven_args: "test"
+            display: "All Unit Tests"
+          - job_name: "isolate-integration"
+            maven_args: >-
+              -pl org.graalvm.python.embedding -Pisolate -Dpolyglot.engine.AllowExperimentalOptions=true -Dpolyglot.engine.SpawnIsolate=true -Dpolyglot.engine.IsolateMode=external -Dtest=org.graalvm.python.embedding.test.integration.** -am test
+            display: "Isolated Embedding Integration Unit Tests"
+
+    name: ${{ matrix.display }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+
+      - name: Extract build artifacts
+        run: |
+          tar -xzf all-targets.tgz
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: ${{ env.graalvm_version }}
+
+      - name: Setup Polyglot Maven bundle
+        run: ./scripts/setup-maven-bundle.sh "${{ github.workspace }}/maven-resource-bundle"
+
+      - name: Run Maven install
+        run: mvn --batch-mode -DskipTests -s settings.xml install
+
+      - name: Run Maven tests
+        run: mvn --batch-mode -s settings.xml ${{ matrix.maven_args }}

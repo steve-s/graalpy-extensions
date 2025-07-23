@@ -63,19 +63,6 @@ verbosity level.
 
 ## Changing version
 
-For Maven projects:
-
-```
-mvn versions:set -DnewVersion=26.0.0-SNAPSHOT -DgenerateBackupPoms=false
-```
-
-For Gradle projects: change the version manually in `build.gradle`. There is
-only one Gradle project in the repo at the time of the writing.
-
-Update the version manually in:
-
-```
-graalpy-archetype-polyglot-app/src/main/resources/archetype-resources/pom.xml
-```
-
-TODO: can the archetype take the version from the parent pom?
+- property `revision` in top level `pom.xml`
+- property `version` in `gradle.build` of the Gradle plugin (TODO: propagate from revision)
+- property `graalpy.version` in `graalpy-archetype-polyglot-app/src/main/resources/archetype-resources/pom.xml` (TODO: propagate from revision)
