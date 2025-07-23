@@ -231,8 +231,6 @@ public class VirtualFileSystemIntegrationTest {
         eval(ctx, "import os; assert os.path.exists('{pathPrefix}emptydir')", pathPrefix);
         eval(ctx, "import os; assert os.path.exists('{pathPrefix}emptydir/')", pathPrefix);
         eval(ctx, "import os; assert os.path.exists('{pathPrefix}dir1/file2')", pathPrefix);
-        Assumptions.assumeFalse(Boolean.getBoolean("polyglot.engine.SpawnIsolate"),
-                "[GR-66484] FileNotFoundException is not translated properly to isolate and then the Python code gets a generic I/O error");
         eval(ctx, "import os; assert not os.path.exists('{pathPrefix}doesnotexist')", pathPrefix);
         eval(ctx, "import os; assert not os.path.exists('{pathPrefix}doesnotexist/')", pathPrefix);
 
