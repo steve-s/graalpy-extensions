@@ -1,0 +1,55 @@
+name: Integration Tests
+
+on:
+  workflow_run:
+    workflows: ["Build Artifacts"]
+    types:
+      - completed
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # TODO: enable more integration tests
+        test_name: [ test_jbang_integration.py, test_maven_plugin.py ]
+
+    steps:
+      - name: Set integration tests flags
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "TEST_FLAGS=--skip-long-running" >> $GITHUB_ENV
+          else
+            echo "TEST_FLAGS=" >> $GITHUB_ENV
+          fi
+        shell: bash
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+
+      - name: Extract build artifacts
+        run: |
+          tar -xzf all-targets.tgz
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: '25-ea'
+
+      - name: Setup Polyglot Maven bundle
+        uses: ./.github/actions/setup-polyglot-mvn-repo
+
+      - name: Install JBang
+        if: matrix.test_name == 'test_jbang_integration.py'
+        run: |
+          curl -Ls https://sh.jbang.dev | bash
+          echo "$HOME/.jbang/bin" >> $GITHUB_PATH
+
+      - name: Run integration tests
+        run: |
+          mvn --batch-mode -s settings.xml exec:java@integration-tests \
+              -Dintegration.tests.args="${{ matrix.test_name }} $TEST_FLAGS"

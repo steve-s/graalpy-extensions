@@ -54,6 +54,7 @@ GRADLE_VERSION = "8.9"
 DEFAULT_VFS_PREFIX = "org.graalvm.python.vfs"
 
 graalvmVersion = None
+jbang_graalpy_version = None
 long_running_test_disabled = False
 no_clean = False
 test_native_image = True
@@ -118,6 +119,7 @@ class BuildToolTestBase(unittest.TestCase):
     def setUpClass(cls):
         cls.env = os.environ.copy()
         cls.env["PYLAUNCHER_DEBUG"] = "1"
+        cls.env["GRAALPY_VERSION"] = get_graalvm_version()
 
         cls.archetypeGroupId = "org.graalvm.python"
         cls.archetypeArtifactId = "graalpy-archetype-polyglot-app"

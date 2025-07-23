@@ -1,0 +1,39 @@
+name: Build Artifacts
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: '25-ea'
+
+      - name: Setup Polyglot Maven bundle
+        uses: ./.github/actions/setup-polyglot-mvn-repo
+
+      - name: Build project (skip tests)
+        run: mvn --batch-mode -DskipTests -s settings.xml package install
+
+      - name: Archive Maven build outputs (all targets)
+        # We need all "target" directories from submodules
+        run: |
+          mkdir build-artifacts
+          find . -type d -name target | tar -czf build-artifacts/all-targets.tgz --files-from=-
+        shell: bash
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: build-artifacts/all-targets.tgz

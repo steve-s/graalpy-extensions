@@ -12,3 +12,4 @@ build
 TODO
 __pycache__
 *.swp
+.flattened-pom.xml
