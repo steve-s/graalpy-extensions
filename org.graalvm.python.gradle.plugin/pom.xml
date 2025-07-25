@@ -114,7 +114,26 @@ SOFTWARE.
               <workingDirectory>${project.basedir}</workingDirectory>
               <arguments>
                 <argument>-Dorg.gradle.java.home=${gradle.java.home}</argument>
+                <argument>-Pversion=${revision}</argument>
+                <argument>-Ppolyglot.version=${project.polyglot.version}</argument>
                 <argument>build</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>gradle-clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${project.basedir}/gradlew</executable>
+              <workingDirectory>${project.basedir}</workingDirectory>
+              <arguments>
+                <argument>-Dorg.gradle.java.home=${gradle.java.home}</argument>
+                <argument>-Pversion=${revision}</argument>
+                <argument>-Ppolyglot.version=${project.polyglot.version}</argument>
+                <argument>clean</argument>
               </arguments>
             </configuration>
           </execution>
@@ -129,6 +148,8 @@ SOFTWARE.
               <workingDirectory>${project.basedir}</workingDirectory>
               <arguments>
                 <argument>-Dorg.gradle.java.home=${gradle.java.home}</argument>
+                <argument>-Pversion=${revision}</argument>
+                <argument>-Ppolyglot.version=${project.polyglot.version}</argument>
                 <argument>publishToMavenLocal</argument>
               </arguments>
             </configuration>

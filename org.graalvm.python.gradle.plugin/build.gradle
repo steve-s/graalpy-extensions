@@ -4,8 +4,13 @@ plugins {
     id 'maven-publish'
 }
 
-version = '26.0.0-SNAPSHOT'
+if (!project.hasProperty('version')) {
+    throw new GradleException("You must specify the project version using -Pversion=x.y.z. " +
+            "If executed via Maven, this is a bug: the option should have been passed by the exec goal in the Maven script.")
+}
+version = project.version
 group = 'org.graalvm.python'
+def polyglotVersion = project.properties.getOrDefault('polyglot.version', version)
 
 repositories {
     mavenLocal()
@@ -30,7 +35,7 @@ java {
 sourceSets.main.java.srcDirs += ['../org.graalvm.python.embedding.tools/src/main/java']
 
 dependencies {
-    implementation "org.graalvm.python:python-launcher:${project.version}"
+    implementation "org.graalvm.python:python-launcher:${polyglotVersion}"
 }
 
 publishing {
