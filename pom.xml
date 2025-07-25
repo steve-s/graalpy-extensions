@@ -17,6 +17,7 @@
         <gradle.java.home>${java.home}</gradle.java.home>
         <project.python.artifact>python-community</project.python.artifact>
         <project.junit.version>5.7.0</project.junit.version>
+        <project.hamcrest.version>3.0</project.hamcrest.version>
         <integration.tests.args>--help</integration.tests.args>
     </properties>
 
@@ -62,6 +63,12 @@
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
                 <version>${project.junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest</artifactId>
+                <version>${project.hamcrest.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
