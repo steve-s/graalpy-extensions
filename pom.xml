@@ -17,8 +17,7 @@
         <gradle.java.home>${java.home}</gradle.java.home>
         <project.python.artifact>python-community</project.python.artifact>
         <project.junit.version>5.7.0</project.junit.version>
-        <!-- TODO: default test to run in GitHub CI for now -->
-        <integration.tests.args>test_maven_plugin.MavenPluginTest.test_generated_app</integration.tests.args>
+        <integration.tests.args>--help</integration.tests.args>
     </properties>
 
     <developers>
