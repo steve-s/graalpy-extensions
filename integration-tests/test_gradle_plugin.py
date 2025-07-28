@@ -47,7 +47,7 @@ import util
 from util import TemporaryTestDirectory, Logger, long_running_test
 
 MISSING_FILE_WARNING = "The list of installed Python packages does not match the packages specified in the graalpy-maven-plugin configuration"
-PACKAGES_CHANGED_ERROR = "packages and their version constraints in graalpy-maven-plugin configuration are different then previously used to generate the lock file"
+PACKAGES_CHANGED_ERROR = "packages and their version constraints in graalpy-gradle-plugin configuration are different then previously used to generate the lock file"
 VENV_UPTODATE = "Virtual environment is up to date with lock file, skipping install"
 
 def append(file, txt):
@@ -200,11 +200,6 @@ class GradlePluginTestBase(util.BuildToolTestBase):
             self.check_filelist(target_dir2, log)
 
     def check_lock_packages(self, community):
-        raise unittest.SkipTest("Gradle complains that it does not know how some *.pyc was created, GR-68083")
-        # Gradle does not know how file 'build/generated/graalpy/resources/org.graalvm.python.vfs/venv/lib/python3.11/site-packages/urllib3/util/__pycache__/wait.graalpy250dev4a25dcd3c4-311.pyc'
-        # was created (output property 'output'). Task output caching requires exclusive access to output paths to guarantee correctness (i.e. multiple tasks are not allowed to
-        # produce output in the same location). See https://github.com/oracle/graalpy-extensions/actions/runs/16169031895/job/45637716521?pr=7
-
         with util.TemporaryTestDirectory() as tmpdir:
 
             target_dir = os.path.join(str(tmpdir), "lock_packages" + self.target_dir_name_sufix())
@@ -216,50 +211,53 @@ class GradlePluginTestBase(util.BuildToolTestBase):
             # start with requests package without version
             append(build_file, self.lock_packages_config(pkgs=["requests"], lock_file="test-graalpy.lock", community=True))
 
+            log = Logger()
+
             # build
             cmd = gradlew_cmd + ["build"]
-            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir)
-            util.check_ouput("pip install", out)
-            util.check_ouput("BUILD SUCCESS", out)
-            util.check_ouput(MISSING_FILE_WARNING, out, contains=True)
-            assert not os.path.exists(os.path.join(target_dir, "test-graalpy.lock"))
+            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir, logger=log)
+            util.check_ouput("pip install", out, logger=log)
+            util.check_ouput("BUILD SUCCESS", out, logger=log)
+            util.check_ouput(MISSING_FILE_WARNING, out, contains=True, logger=log)
+            assert not os.path.exists(os.path.join(target_dir, "test-graalpy.lock")), log
 
             # lock without version
             cmd = gradlew_cmd + ["graalpyLockPackages"]
-            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir)
-            util.check_ouput("BUILD SUCCESS", out, contains=True)
-            util.check_ouput(MISSING_FILE_WARNING, out, contains=False)
-            assert os.path.exists(os.path.join(target_dir, "test-graalpy.lock"))
+            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir, logger=log)
+            util.check_ouput("BUILD SUCCESS", out, contains=True, logger=log)
+            util.check_ouput(MISSING_FILE_WARNING, out, contains=False, logger=log)
+            assert os.path.exists(os.path.join(target_dir, "test-graalpy.lock")), log
             os.remove(os.path.join(target_dir, "test-graalpy.lock"))
 
             # lock with correct version
-            log = Logger()
             self.copy_build_files(target_dir)
             append(build_file, self.lock_packages_config(pkgs=["requests==2.32.3"], lock_file="test-graalpy.lock", community=True))
             cmd = gradlew_cmd + ["graalpyLockPackages"]
-            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir)
-            util.check_ouput("BUILD SUCCESS", out, contains=True)
-            util.check_ouput(MISSING_FILE_WARNING, out, contains=False)
-            assert os.path.exists(os.path.join(target_dir, "test-graalpy.lock"))
+            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir, logger=log)
+            util.check_ouput("BUILD SUCCESS", out, contains=True, logger=log)
+            util.check_ouput(MISSING_FILE_WARNING, out, contains=False, logger=log)
+            assert os.path.exists(os.path.join(target_dir, "test-graalpy.lock")), log
 
             # add termcolor and build - fails as it is not part of lock file
-            log = Logger()
             self.copy_build_files(target_dir)
             append(build_file, self.lock_packages_config(pkgs=["requests==2.32.3", "termcolor==2.2"], lock_file="test-graalpy.lock", community=True))
             cmd = gradlew_cmd + ["build"]
-            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir)
-            util.check_ouput("BUILD SUCCESS", out, contains=False)
-            util.check_ouput(PACKAGES_CHANGED_ERROR, out)
-            util.check_ouput(MISSING_FILE_WARNING, out, contains=False)
-            assert os.path.exists(os.path.join(target_dir, "test-graalpy.lock"))
+            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir, logger=log)
+            util.check_ouput("BUILD SUCCESS", out, contains=False, logger=log)
+            util.check_ouput(PACKAGES_CHANGED_ERROR, out, logger=log)
+            util.check_ouput(MISSING_FILE_WARNING, out, contains=False, logger=log)
+            assert os.path.exists(os.path.join(target_dir, "test-graalpy.lock")), log
+            # TODO:
+            # Gradle does not know how file 'build/generated/graalpy/resources/org.graalvm.python.vfs/venv/lib/python3.11/site-packages/urllib3/util/__pycache__/wait.graalpy250dev4a25dcd3c4-311.pyc'
+            # was created (output property 'output'). Task output caching requires exclusive access to output paths to guarantee correctness (i.e. multiple tasks are not allowed to
+            # produce output in the same location).
 
             # lock with termcolor
-            log = Logger()
             cmd = gradlew_cmd + ["graalpyLockPackages"]
-            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir)
-            util.check_ouput("BUILD SUCCESS", out, contains=True)
-            util.check_ouput(MISSING_FILE_WARNING, out, contains=False)
-            assert os.path.exists(os.path.join(target_dir, "test-graalpy.lock"))
+            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir, logger=log)
+            util.check_ouput("BUILD SUCCESS", out, contains=True, logger=log)
+            util.check_ouput(MISSING_FILE_WARNING, out, contains=False, logger=log)
+            assert os.path.exists(os.path.join(target_dir, "test-graalpy.lock")), log
 
             # should be able to import requests if installed
             util.replace_in_file(os.path.join(target_dir, "src", "main", "java", "org", "example", "GraalPy.java"),
@@ -268,11 +266,11 @@ class GradlePluginTestBase(util.BuildToolTestBase):
 
             # rebuild with lock and exec
             cmd = gradlew_cmd + ["build", "run"]
-            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir)
-            util.check_ouput("BUILD SUCCESS", out)
-            util.check_ouput(VENV_UPTODATE, out)
-            util.check_ouput("hello java", out)
-            util.check_ouput(MISSING_FILE_WARNING, out, contains=False)
+            out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir, logger=log)
+            util.check_ouput("BUILD SUCCESS", out, logger=log)
+            util.check_ouput(VENV_UPTODATE, out, logger=log)
+            util.check_ouput("hello java", out, logger=log)
+            util.check_ouput(MISSING_FILE_WARNING, out, contains=False, logger=log)
 
             # run with no packages, only lock file
             self.copy_build_files(target_dir)
@@ -284,8 +282,8 @@ class GradlePluginTestBase(util.BuildToolTestBase):
             # clean and rebuild fails
             cmd = gradlew_cmd + ["clean", "build", "run"]
             out, return_code = util.run_cmd(cmd, self.env, cwd=target_dir)
-            util.check_ouput("BUILD SUCCESS", out, contains=False)
-            util.check_ouput(MISSING_FILE_WARNING, out, contains=False)
+            util.check_ouput("BUILD SUCCESS", out, contains=False, logger=log)
+            util.check_ouput(MISSING_FILE_WARNING, out, contains=False, logger=log)
 
     def check_gradle_generated_app_external_resources(self):
         with TemporaryTestDirectory() as tmpdir:
