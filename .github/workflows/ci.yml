@@ -124,6 +124,14 @@ jobs:
           - job_name: "unit"
             maven_args: "test"
             display: "All Unit Tests"
+          - job_name: "unit-modulepath"
+            maven_args: >-
+              -pl org.graalvm.python.embedding -Ptest.modules -am test
+            display: "Embedding Unit Tests Using Modulepath"
+          - job_name: "integration-modulepath"
+            maven_args: >-
+              -pl org.graalvm.python.embedding -Ptest.modules.integration -Dtest=org.graalvm.python.embedding.test.integration.** -am test
+            display: "Embedding Integration Unit Tests Using Modulepath"
           - job_name: "isolate-integration"
             maven_args: >-
               -pl org.graalvm.python.embedding -Pisolate -Dpolyglot.engine.AllowExperimentalOptions=true -Dpolyglot.engine.SpawnIsolate=true -Dpolyglot.engine.IsolateMode=external -Dtest=org.graalvm.python.embedding.test.integration.** -am test
