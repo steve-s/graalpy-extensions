@@ -49,37 +49,38 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface SymbolTable extends GuestValue {
 
-    public static final String FQN = "mypy.nodes.SymbolTable";
+	public static final String FQN = "mypy.nodes.SymbolTable";
 
-    static class SymbolTableImpl extends GuestValueDefaultImpl implements SymbolTable {
+	static class SymbolTableImpl extends GuestValueDefaultImpl implements SymbolTable {
 
-        private Map<String, SymbolTableNode> table;
+		private Map<String, SymbolTableNode> table;
 
-        public SymbolTableImpl(Value instance) {
-            super(instance);
-            table = null;
-        }
+		public SymbolTableImpl(Value instance) {
+			super(instance);
+			table = null;
+		}
 
-        @Override
-        public Map<String, SymbolTableNode> getTable() {
-            if (table == null) {
-                table = new HashMap();
-                Value keyIterator = getValue().getHashKeysIterator();
-                while (keyIterator.hasIteratorNextElement()) {
-                    String key =  keyIterator.getIteratorNextElement().asString();
-                    Value value = getValue().getHashValue(key);
-                    String pythonFQN = Utils.getFullyQualifedName(value);
-                    if (SymbolTableNode.FQN.equals(pythonFQN)) {
-                        table.put(key, new SymbolTableNode.SymbolTableNodeImpl(value));
-                    } else {
-                        throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-                    }
-                }
-            }
-            return table;
-        }
+		@Override
+		public Map<String, SymbolTableNode> getTable() {
+			if (table == null) {
+				table = new HashMap();
+				Value keyIterator = getValue().getHashKeysIterator();
+				while (keyIterator.hasIteratorNextElement()) {
+					String key = keyIterator.getIteratorNextElement().asString();
+					Value value = getValue().getHashValue(key);
+					String pythonFQN = Utils.getFullyQualifedName(value);
+					if (SymbolTableNode.FQN.equals(pythonFQN)) {
+						table.put(key, new SymbolTableNode.SymbolTableNodeImpl(value));
+					} else {
+						throw new UnsupportedOperationException(
+								"Unknown Python type " + pythonFQN + " to map to Java type.");
+					}
+				}
+			}
+			return table;
+		}
 
-    }
+	}
 
-    Map<String, SymbolTableNode> getTable();
+	Map<String, SymbolTableNode> getTable();
 }

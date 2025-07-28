@@ -44,33 +44,32 @@ package org.graalvm.python.javainterfacegen.mypy.nodes;
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.python.Utils;
 
-
 public interface StrExpr extends Expression {
 
-    public static final String FQN = "mypy.nodes.StrExpr";
+	public static final String FQN = "mypy.nodes.StrExpr";
 
-    static class StrExprImpl extends Expression.ExpressionImpl implements StrExpr {
+	static class StrExprImpl extends Expression.ExpressionImpl implements StrExpr {
 
+		public StrExprImpl(Value instance) {
+			super(instance);
+			String instanceFQN = Utils.getFullyQualifedName(instance);
+			if (!StrExpr.FQN.equals(instanceFQN)) {
+				throw new UnsupportedOperationException(
+						"Can not create new StrExprImpl from Guest instance " + instanceFQN);
+			}
 
-        public StrExprImpl(Value instance) {
-            super(instance);
-            String instanceFQN = Utils.getFullyQualifedName(instance);
-            if (!StrExpr.FQN.equals(instanceFQN)) {
-                throw new UnsupportedOperationException("Can not create new StrExprImpl from Guest instance " + instanceFQN);
-            }
+		}
 
-        }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
+		@Override
+		public String getText() {
+			return getValue().getMember("value").asString();
+		}
+	}
 
-        @Override
-        public String getText() {
-            return getValue().getMember("value").asString();
-        }
-    }
-
-    String getText();
+	String getText();
 }

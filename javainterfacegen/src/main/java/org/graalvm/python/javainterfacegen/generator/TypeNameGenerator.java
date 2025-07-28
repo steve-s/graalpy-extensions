@@ -64,149 +64,149 @@ import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
 
 public class TypeNameGenerator implements TypeVisitor<String> {
 
-    private boolean firstLevel = true;
+	private boolean firstLevel = true;
 
-    public static String createName(Type type) {
-        String name = type.accept(new TypeNameGenerator());
-        while(name.charAt(name.length() - 1) == '_') {
-            name = name.substring(0, name.length() - 1);
-        }
-        return name;
-    }
+	public static String createName(Type type) {
+		String name = type.accept(new TypeNameGenerator());
+		while (name.charAt(name.length() - 1) == '_') {
+			name = name.substring(0, name.length() - 1);
+		}
+		return name;
+	}
 
-    @Override
-    public String visit(AnyType anyType) {
-        return "Any";
-    }
+	@Override
+	public String visit(AnyType anyType) {
+		return "Any";
+	}
 
-    @Override
-    public String visit(CallableType callableType) {
-        // TODO
-        return "Callable";
-    }
+	@Override
+	public String visit(CallableType callableType) {
+		// TODO
+		return "Callable";
+	}
 
-    @Override
-    public String visit(Instance instance) {
-        List<Type> args = instance.getArgs();
+	@Override
+	public String visit(Instance instance) {
+		List<Type> args = instance.getArgs();
 
-        TypeInfo info = instance.getType();
-        String pythonName = GeneratorUtils.convertToJavaClassName(info.getName());
-        if (args.size() == 0) {
-            return pythonName;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(pythonName).append("Of");
-        for (int i = 0; i < args.size(); i++) {
-            sb.append(args.get(i).accept(this));
-        }
-        sb.append("_");
-        return sb.toString();
+		TypeInfo info = instance.getType();
+		String pythonName = GeneratorUtils.convertToJavaClassName(info.getName());
+		if (args.size() == 0) {
+			return pythonName;
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append(pythonName).append("Of");
+		for (int i = 0; i < args.size(); i++) {
+			sb.append(args.get(i).accept(this));
+		}
+		sb.append("_");
+		return sb.toString();
 
-    }
+	}
 
-    @Override
-    public String visit(NoneType noneType) {
-        return "None";
-    }
+	@Override
+	public String visit(NoneType noneType) {
+		return "None";
+	}
 
-    @Override
-    public String visit(UnionType unionType) {
-        Set<String> parts = new TreeSet();
-        List<Type> items = unionType.getItems();
+	@Override
+	public String visit(UnionType unionType) {
+		Set<String> parts = new TreeSet();
+		List<Type> items = unionType.getItems();
 
-        boolean hasNone = false;
-        boolean wasFirstLevel = firstLevel;
-        firstLevel = false;
-        for (int i = 0; i < items.size(); i++) {
-            Type typeItem = items.get(i);
-            if (typeItem instanceof NoneType) {
-                hasNone = true;
-            } else {
-                String name = typeItem.accept(this);
-                parts.add(name);
-            }
-        }
-        StringBuilder sb = new StringBuilder();
-        if (!wasFirstLevel) {
-            sb.append("UnionOf");
-        }
-        boolean first = true;
-        for (String part : parts) {
-            if (first) {
-                first = false;
-            } else {
-                sb.append("Or");
-            }
-            sb.append(part);
-        }
-        if (hasNone) {
-            sb.append("OrNone");
-        }
-        if (!wasFirstLevel) {
-            sb.append("_");
-        } else {
-            // remove '_' at the end
-            int index = sb.length();
-            while (sb.charAt(--index) == '_') {
-                sb.deleteCharAt(index);
-            }
-        }
+		boolean hasNone = false;
+		boolean wasFirstLevel = firstLevel;
+		firstLevel = false;
+		for (int i = 0; i < items.size(); i++) {
+			Type typeItem = items.get(i);
+			if (typeItem instanceof NoneType) {
+				hasNone = true;
+			} else {
+				String name = typeItem.accept(this);
+				parts.add(name);
+			}
+		}
+		StringBuilder sb = new StringBuilder();
+		if (!wasFirstLevel) {
+			sb.append("UnionOf");
+		}
+		boolean first = true;
+		for (String part : parts) {
+			if (first) {
+				first = false;
+			} else {
+				sb.append("Or");
+			}
+			sb.append(part);
+		}
+		if (hasNone) {
+			sb.append("OrNone");
+		}
+		if (!wasFirstLevel) {
+			sb.append("_");
+		} else {
+			// remove '_' at the end
+			int index = sb.length();
+			while (sb.charAt(--index) == '_') {
+				sb.deleteCharAt(index);
+			}
+		}
 
-        return sb.toString();
-    }
+		return sb.toString();
+	}
 
-    @Override
-    public String visit(UninhabitedType uType) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public String visit(UninhabitedType uType) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public String visit(TupleType tupleType) {
-        return tupleType.getPartialFallback().accept(this);
-    }
+	@Override
+	public String visit(TupleType tupleType) {
+		return tupleType.getPartialFallback().accept(this);
+	}
 
-    @Override
-    public String visit(TypeAliasType typeAliasType) {
-        return typeAliasType.getAlias().getTarget().accept(this);
-    }
+	@Override
+	public String visit(TypeAliasType typeAliasType) {
+		return typeAliasType.getAlias().getTarget().accept(this);
+	}
 
-    @Override
-    public String visit(TypeVarType typeVarType) {
-        return "Value";
-//        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public String visit(TypeVarType typeVarType) {
+		return "Value";
+		// throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public String visit(LiteralType literalType) {
-        return literalType.getFallback().accept(this);
-    }
+	@Override
+	public String visit(LiteralType literalType) {
+		return literalType.getFallback().accept(this);
+	}
 
-    @Override
-    public String visit(TypeType typeType) {
-        // TODO
-        return "TypeType";
-    }
+	@Override
+	public String visit(TypeType typeType) {
+		// TODO
+		return "TypeType";
+	}
 
-    @Override
-    public String visit(Overloaded overloaded) {
-        // TODO
-        return "Overloaded";
-    }
+	@Override
+	public String visit(Overloaded overloaded) {
+		// TODO
+		return "Overloaded";
+	}
 
-    @Override
-    public String visit(ParamSpecType paramSpec) {
-        // TODO
-        return "ParamSpecType";
-    }
+	@Override
+	public String visit(ParamSpecType paramSpec) {
+		// TODO
+		return "ParamSpecType";
+	}
 
-    @Override
-    public String visit(Parameters parameters) {
-        return "Parameters";
-    }
+	@Override
+	public String visit(Parameters parameters) {
+		return "Parameters";
+	}
 
-    @Override
-    public String visit(TypedDictType typedDict) {
-        return "TypedDictType";
-    }
+	@Override
+	public String visit(TypedDictType typedDict) {
+		return "TypedDictType";
+	}
 
 }

@@ -47,17 +47,18 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface Node extends GuestValue {
 
-    static class NodeImpl extends GuestValueDefaultImpl implements Node {
+	static class NodeImpl extends GuestValueDefaultImpl implements Node {
 
-        public NodeImpl(Value instance) {
-            super(instance);
-        }
+		public NodeImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            throw new UnsupportedOperationException("Not implemented accept method for Python type " + Utils.getFullyQualifedName(getValue()));
-        }
-    }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			throw new UnsupportedOperationException(
+					"Not implemented accept method for Python type " + Utils.getFullyQualifedName(getValue()));
+		}
+	}
 
-    <T> T accept(NodeVisitor<T> visitor);
+	<T> T accept(NodeVisitor<T> visitor);
 }

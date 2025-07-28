@@ -52,52 +52,53 @@ import org.graalvm.python.javainterfacegen.configuration.Configuration;
 
 public class BaseClassManager {
 
-    private final GeneratorContext globalContext;
+	private final GeneratorContext globalContext;
 
-    public BaseClassManager(Configuration configuration) {
-        this.globalContext = new GeneratorContext(null, configuration, null);
-    }
+	public BaseClassManager(Configuration configuration) {
+		this.globalContext = new GeneratorContext(null, configuration, null);
+	}
 
-    public void createBaseClasses() {
-        Map<String, Object> globalProperties = globalContext.getConfiguration();
-        boolean copy = "true".equals(globalProperties.get(Configuration.P_GENERATE_BASE_CLASSES).toString().toLowerCase());
+	public void createBaseClasses() {
+		Map<String, Object> globalProperties = globalContext.getConfiguration();
+		boolean copy = "true"
+				.equals(globalProperties.get(Configuration.P_GENERATE_BASE_CLASSES).toString().toLowerCase());
 
-        if (copy) {
-            String apiPackage = globalProperties.get(Configuration.P_BASE_INTERFACE_PACKAGE).toString();
-            String implPakage = globalProperties.get(Configuration.P_BASE_CLASSES_PACKAGE).toString();
+		if (copy) {
+			String apiPackage = globalProperties.get(Configuration.P_BASE_INTERFACE_PACKAGE).toString();
+			String implPakage = globalProperties.get(Configuration.P_BASE_CLASSES_PACKAGE).toString();
 
-            Set<String> apiTemplates = Set.of("GuestValue", "GuestArray", "Utils");
-            Set<String> implTemplates = Set.of("GuestValueDefaultImpl");
+			Set<String> apiTemplates = Set.of("GuestValue", "GuestArray", "Utils");
+			Set<String> implTemplates = Set.of("GuestValueDefaultImpl");
 
-            try {
-                for (String apiTemplate : apiTemplates) {
-                    processTemplate("baseFileTemplates/" + apiTemplate + ".template", apiPackage, apiTemplate);
-                }
+			try {
+				for (String apiTemplate : apiTemplates) {
+					processTemplate("baseFileTemplates/" + apiTemplate + ".template", apiPackage, apiTemplate);
+				}
 
-                for (String implTemplate : implTemplates) {
-                    processTemplate("baseFileTemplates/" + implTemplate + ".template", apiPackage, implTemplate);
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(BaseClassManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
+				for (String implTemplate : implTemplates) {
+					processTemplate("baseFileTemplates/" + implTemplate + ".template", apiPackage, implTemplate);
+				}
+			} catch (IOException ex) {
+				Logger.getLogger(BaseClassManager.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+	}
 
-    private void processTemplate(String templatePath, String packageFQN, String className) throws IOException {
-        InputStream inputStream = BaseClassManager.class.getClassLoader().getResourceAsStream(templatePath);
-        if (inputStream == null) {
-            throw new IOException("Template not found: " + templatePath);
-        }
+	private void processTemplate(String templatePath, String packageFQN, String className) throws IOException {
+		InputStream inputStream = BaseClassManager.class.getClassLoader().getResourceAsStream(templatePath);
+		if (inputStream == null) {
+			throw new IOException("Template not found: " + templatePath);
+		}
 
-        String content = new String(inputStream.readAllBytes());
-        content = content.replace("{{package}}", packageFQN);
+		String content = new String(inputStream.readAllBytes());
+		content = content.replace("{{package}}", packageFQN);
 
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		LocalDateTime currentDateTime = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        content = content.replace("{{generated}}", "// Generated at " + currentDateTime.format(formatter));
+		content = content.replace("{{generated}}", "// Generated at " + currentDateTime.format(formatter));
 
-        GeneratorUtils.saveFile(globalContext, packageFQN, className, content);
-    }
+		GeneratorUtils.saveFile(globalContext, packageFQN, className, content);
+	}
 
 }

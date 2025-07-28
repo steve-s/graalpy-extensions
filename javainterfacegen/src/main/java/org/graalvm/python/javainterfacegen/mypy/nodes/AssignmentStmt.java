@@ -46,89 +46,88 @@ import org.graalvm.python.javainterfacegen.python.GuestArray;
 import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface AssignmentStmt extends Statement {
-    public static final String FQN = "mypy.nodes.AssignmentStmt";
+	public static final String FQN = "mypy.nodes.AssignmentStmt";
 
-    static class AssignmentStmtImpl extends Statement.StatementImpl implements AssignmentStmt {
+	static class AssignmentStmtImpl extends Statement.StatementImpl implements AssignmentStmt {
 
+		public AssignmentStmtImpl(Value instance) {
+			super(instance);
+			String instanceFQN = Utils.getFullyQualifedName(instance);
+			if (!FQN.equals(instanceFQN)) {
+				throw new UnsupportedOperationException(
+						"Can not create new AssignmentStmtImpl from Guest instance " + instanceFQN);
+			}
+		}
 
-        public AssignmentStmtImpl(Value instance) {
-            super(instance);
-            String instanceFQN = Utils.getFullyQualifedName(instance);
-            if (!FQN.equals(instanceFQN)) {
-                throw new UnsupportedOperationException("Can not create new AssignmentStmtImpl from Guest instance " + instanceFQN);
-            }
-        }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
 
+		@Override
+		public GuestArray<Expression> getLvalues() {
+			Value orig = getValue().getMember("lvalues");
+			GuestArray<Expression> result = new GuestArray<>(orig, (value) -> {
+				String pythonFQN = Utils.getFullyQualifedName(value);
+				switch (pythonFQN) {
+					case NameExpr.FQN :
+						return new NameExpr.NameExprImpl(value);
+				}
+				throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+			});
+			return result;
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
+		@Override
+		public Expression getRvalue() {
+			Value orig = getValue().getMember("rvalue");
 
-        @Override
-        public GuestArray<Expression> getLvalues() {
-            Value orig = getValue().getMember("lvalues");
-            GuestArray<Expression> result = new GuestArray<>(orig, (value) -> {
-                String pythonFQN = Utils.getFullyQualifedName(value);
-                switch (pythonFQN){
-                    case NameExpr.FQN:
-                        return new NameExpr.NameExprImpl(value);
-                }
-                throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-            });
-            return result;
-        }
+			String pythonFQN = Utils.getFullyQualifedName(orig);
+			switch (pythonFQN) {
+				case TupleExpr.FQN :
+					return new TupleExpr.TupleExprImpl(orig);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		}
 
-        @Override
-        public Expression getRvalue() {
-            Value orig = getValue().getMember("rvalue");
+		@Override
+		public Value getType() {
+			return getValue().getMember("type");
+		}
 
-            String pythonFQN = Utils.getFullyQualifedName(orig);
-            switch (pythonFQN){
-                case TupleExpr.FQN:
-                    return new TupleExpr.TupleExprImpl(orig);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        }
+		@Override
+		public Value getUnanalyzedType() {
+			return getValue().getMember("unanalyzed_type");
+		}
 
-        @Override
-        public Value getType() {
-            return getValue().getMember("type");
-        }
+		@Override
+		public boolean newSyntax() {
+			return getValue().getMember("new_syntax").asBoolean();
+		}
 
-        @Override
-        public Value getUnanalyzedType() {
-            return getValue().getMember("unanalyzed_type");
-        }
+		@Override
+		public boolean isAliasDef() {
+			return getValue().getMember("is_alias_def").asBoolean();
+		}
 
-        @Override
-        public boolean newSyntax() {
-            return getValue().getMember("new_syntax").asBoolean();
-        }
+		@Override
+		public boolean isFinalDef() {
+			return getValue().getMember("is_final_def").asBoolean();
+		}
 
-        @Override
-        public boolean isAliasDef() {
-            return getValue().getMember("is_alias_def").asBoolean();
-        }
+		@Override
+		public boolean invalidRecursiveAlias() {
+			return getValue().getMember("invalid_recursive_alias").asBoolean();
+		}
+	}
 
-        @Override
-        public boolean isFinalDef() {
-            return getValue().getMember("is_final_def").asBoolean();
-        }
-
-        @Override
-        public boolean invalidRecursiveAlias() {
-            return getValue().getMember("invalid_recursive_alias").asBoolean();
-        }
-    }
-
-    GuestArray<Expression> getLvalues();
-    Expression getRvalue();
-    Value getType();
-    Value getUnanalyzedType();
-    boolean newSyntax();
-    boolean isAliasDef();
-    boolean isFinalDef();
-    boolean invalidRecursiveAlias();
+	GuestArray<Expression> getLvalues();
+	Expression getRvalue();
+	Value getType();
+	Value getUnanalyzedType();
+	boolean newSyntax();
+	boolean isAliasDef();
+	boolean isFinalDef();
+	boolean invalidRecursiveAlias();
 
 }

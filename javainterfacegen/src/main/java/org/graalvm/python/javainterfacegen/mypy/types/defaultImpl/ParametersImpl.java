@@ -50,142 +50,143 @@ import org.graalvm.python.javainterfacegen.mypy.types.Type;
 import org.graalvm.python.javainterfacegen.mypy.types.TypeVarLikeType;
 import org.graalvm.python.javainterfacegen.mypy.types.TypeVisitor;
 
-
 public class ParametersImpl extends TypeImpl implements Parameters {
 
-    public ParametersImpl(Value instance) {
-        super(instance);
-    }
+	public ParametersImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public List<Value> formalArguments() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public List<Value> formalArguments() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public List<Value> formalArguments(boolean include_star_args) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public List<Value> formalArguments(boolean include_star_args) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Set<TypeVarLikeType> getVariables() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Set<TypeVarLikeType> getVariables() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Value varArg() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Value varArg() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public int getMinArgs() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public int getMinArgs() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public boolean impreciseArgKinds() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public boolean impreciseArgKinds() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Value argumentByPosition() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Value argumentByPosition() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Value argumentByPosition(int position) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Value argumentByPosition(int position) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public boolean isEllipsisArgs() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public boolean isEllipsisArgs() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public List<ArgKind> getArgKinds() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public List<ArgKind> getArgKinds() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public List<String> getArgNames() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public List<String> getArgNames() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Value trySynthesizingArgFromVararg() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Value trySynthesizingArgFromVararg() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Value trySynthesizingArgFromVararg(int position) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Value trySynthesizingArgFromVararg(int position) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Value kwArg() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Value kwArg() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Value argumentByName(String name) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Value argumentByName(String name) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Value trySynthesizingArgFromKwarg(String name) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Value trySynthesizingArgFromKwarg(String name) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public List<Type> getArgTypes() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public List<Type> getArgTypes() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Parameters copyModified() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Parameters copyModified() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Parameters copyModified(CopyModifiedArgs optionalArgs) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Parameters copyModified(CopyModifiedArgs optionalArgs) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
-//    public Value<TypeVarLikeType> getVariables() {
-//        return getValue().getMember("variables"); // TODO handle Value<TypeVarLikeType>
-//    }
-//
-//
-//    public int getMinArgs() {
-//        return getValue().getMember("min_args"); // TODO handle int
-//    }
-//    @Override
-//    public boolean impreciseArgKinds() {
-//        return getValue().getMember("imprecise_arg_kinds"); // TODO handle boolean
-//    }
-//
-//
-//    public boolean isEllipsisArgs() {
-//        return getValue().getMember("is_ellipsis_args"); // TODO handle boolean
-//    }
-//
-//
-//    public List<ArgKind> getArgKinds() {
-//        return getValue().getMember("arg_kinds"); // TODO handle List<ArgKind>
-//    }
-//    @Override
-//    public List<Optional<String>> getArgNames() {
-//        return getValue().getMember("arg_names"); // TODO handle List<Optional<String>>
-//    }
-//
-//    public List<Type> getArgTypes() {
-//        return getValue().getMember("arg_types"); // TODO handle List<Type>
-//    }
+	// public Value<TypeVarLikeType> getVariables() {
+	// return getValue().getMember("variables"); // TODO handle
+	// Value<TypeVarLikeType>
+	// }
+	//
+	//
+	// public int getMinArgs() {
+	// return getValue().getMember("min_args"); // TODO handle int
+	// }
+	// @Override
+	// public boolean impreciseArgKinds() {
+	// return getValue().getMember("imprecise_arg_kinds"); // TODO handle boolean
+	// }
+	//
+	//
+	// public boolean isEllipsisArgs() {
+	// return getValue().getMember("is_ellipsis_args"); // TODO handle boolean
+	// }
+	//
+	//
+	// public List<ArgKind> getArgKinds() {
+	// return getValue().getMember("arg_kinds"); // TODO handle List<ArgKind>
+	// }
+	// @Override
+	// public List<Optional<String>> getArgNames() {
+	// return getValue().getMember("arg_names"); // TODO handle
+	// List<Optional<String>>
+	// }
+	//
+	// public List<Type> getArgTypes() {
+	// return getValue().getMember("arg_types"); // TODO handle List<Type>
+	// }
 
 }

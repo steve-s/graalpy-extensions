@@ -44,10 +44,11 @@ import java.util.List;
 import org.graalvm.polyglot.TypeLiteral;
 
 public interface FormalArgument {
-    public static TypeLiteral<List<FormalArgument>> LIST_OF_FormalArgument = new TypeLiteral<List<FormalArgument>>(){};
+	public static TypeLiteral<List<FormalArgument>> LIST_OF_FormalArgument = new TypeLiteral<List<FormalArgument>>() {
+	};
 
-    String name();
-    long pos();
-    Type typ();
-    boolean required();
+	String name();
+	long pos();
+	Type typ();
+	boolean required();
 }

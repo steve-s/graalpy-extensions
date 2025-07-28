@@ -49,24 +49,24 @@ import org.yaml.snakeyaml.Yaml;
 
 public class YamlConfigurationLoader implements ConfigurationLoader {
 
-    private final Path configurationFile;
+	private final Path configurationFile;
 
-    public YamlConfigurationLoader(Path file) {
-        this.configurationFile = file;
-    }
+	public YamlConfigurationLoader(Path file) {
+		this.configurationFile = file;
+	}
 
-    @Override
-    public Map<String, Object> loadConfiguration() throws Exception {
-        Map<String, Object> defaultConfig = new DefaultConfigurationLoader().loadConfiguration();
-        Map<String, Object> yamlConfig = null;
-        try (InputStream inputStream = Files.newInputStream(configurationFile)) {
-            Yaml yaml = new Yaml();
-            yamlConfig = yaml.load(inputStream);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        return Configuration.merge(defaultConfig, yamlConfig);
-    }
+	@Override
+	public Map<String, Object> loadConfiguration() throws Exception {
+		Map<String, Object> defaultConfig = new DefaultConfigurationLoader().loadConfiguration();
+		Map<String, Object> yamlConfig = null;
+		try (InputStream inputStream = Files.newInputStream(configurationFile)) {
+			Yaml yaml = new Yaml();
+			yamlConfig = yaml.load(inputStream);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		return Configuration.merge(defaultConfig, yamlConfig);
+	}
 
 }

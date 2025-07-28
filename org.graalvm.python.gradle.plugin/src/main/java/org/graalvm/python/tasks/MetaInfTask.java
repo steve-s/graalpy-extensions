@@ -55,25 +55,26 @@ import static org.graalvm.python.embedding.tools.vfs.VFSUtils.VFS_ROOT;
 
 public abstract class MetaInfTask extends DefaultTask {
 
-    private static final String GRAALPY_GRADLE_PLUGIN_ARTIFACT_ID = "org.graalvm.python.gradle.plugin";
+	private static final String GRAALPY_GRADLE_PLUGIN_ARTIFACT_ID = "org.graalvm.python.gradle.plugin";
 
-    @OutputDirectory
-    public abstract DirectoryProperty getManifestOutputDir();
+	@OutputDirectory
+	public abstract DirectoryProperty getManifestOutputDir();
 
-    /**
-     * The directory where the VFS was generated within Java resources.
-     */
-    @Input
-    @Optional
-    public abstract Property<String> getResourceDirectory();
+	/**
+	 * The directory where the VFS was generated within Java resources.
+	 */
+	@Input
+	@Optional
+	public abstract Property<String> getResourceDirectory();
 
-    @TaskAction
-    public void exec() {
-        String vfsRoot = getResourceDirectory().getOrElse(VFS_ROOT);
-        try {
-            VFSUtils.writeNativeImageConfig(getManifestOutputDir().get().getAsFile().toPath(), GRAALPY_GRADLE_PLUGIN_ARTIFACT_ID, vfsRoot);
-        } catch (IOException e) {
-            throw new GradleScriptException("failed to create native image configuration files", e);
-        }
-    }
+	@TaskAction
+	public void exec() {
+		String vfsRoot = getResourceDirectory().getOrElse(VFS_ROOT);
+		try {
+			VFSUtils.writeNativeImageConfig(getManifestOutputDir().get().getAsFile().toPath(),
+					GRAALPY_GRADLE_PLUGIN_ARTIFACT_ID, vfsRoot);
+		} catch (IOException e) {
+			throw new GradleScriptException("failed to create native image configuration files", e);
+		}
+	}
 }

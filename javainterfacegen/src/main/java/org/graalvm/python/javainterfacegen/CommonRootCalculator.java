@@ -46,30 +46,30 @@ import java.util.List;
 
 public class CommonRootCalculator {
 
-    public static Path findCommonRoot(List<Path> paths) {
-        Path commonRoot = null;
-        if (!(paths == null || paths.isEmpty())) {
-            commonRoot = paths.get(0);
-            for (int i = 1; i < paths.size(); i++) {
-                commonRoot = getCommonPath(commonRoot, paths.get(i));
-            }
-        }
-        return commonRoot;
-    }
+	public static Path findCommonRoot(List<Path> paths) {
+		Path commonRoot = null;
+		if (!(paths == null || paths.isEmpty())) {
+			commonRoot = paths.get(0);
+			for (int i = 1; i < paths.size(); i++) {
+				commonRoot = getCommonPath(commonRoot, paths.get(i));
+			}
+		}
+		return commonRoot;
+	}
 
-    private static Path getCommonPath(Path path1, Path path2) {
-        int minLength = Math.min(path1.getNameCount(), path2.getNameCount());
-        Path commonPath = path1.isAbsolute() ? path1.getRoot() : path2.isAbsolute() ? path2.getRoot() :Paths.get("");
+	private static Path getCommonPath(Path path1, Path path2) {
+		int minLength = Math.min(path1.getNameCount(), path2.getNameCount());
+		Path commonPath = path1.isAbsolute() ? path1.getRoot() : path2.isAbsolute() ? path2.getRoot() : Paths.get("");
 
-        for (int i = 0; i < minLength; i++) {
-            if (path1.getName(i).equals(path2.getName(i))) {
-                commonPath = commonPath.resolve(path1.getName(i));
-            } else {
-                break;
-            }
-        }
+		for (int i = 0; i < minLength; i++) {
+			if (path1.getName(i).equals(path2.getName(i))) {
+				commonPath = commonPath.resolve(path1.getName(i));
+			} else {
+				break;
+			}
+		}
 
-        return commonPath;
-    }
+		return commonPath;
+	}
 
 }

@@ -56,50 +56,49 @@ import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
 import org.graalvm.python.javainterfacegen.python.GuestArray;
 import org.graalvm.python.javainterfacegen.python.Utils;
 
-
 public class TypeVarTypeImpl extends TypeVarLikeTypeImpl implements TypeVarType {
 
-    public TypeVarTypeImpl(Value instance) {
-        super(instance);
-    }
+	public TypeVarTypeImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
-    @Override
-    public int getVariance() {
-        return getValue().getMember("variance").asInt();
-    }
+	@Override
+	public int getVariance() {
+		return getValue().getMember("variance").asInt();
+	}
 
-    @Override
-    public List<Type> getValues() {
-        Value values = getValue().getMember("values");
-        GuestArray<Type> result = new GuestArray<>(values, (value) -> {
-            String pythonFQN = Utils.getFullyQualifedName(value);
-            switch (pythonFQN) {
-                case CallableType.FQN:
-                    return new CallableTypeImpl(value);
-                case Instance.FQN:
-                    return new InstanceImpl(value);
-                case NoneType.FQN:
-                    return new NoneTypeImpl(value);
-                case AnyType.FQN:
-                    return new AnyTypeImpl(value);
-                case UnionType.FQN:
-                    return new UnionTypeImpl(value);
-                case TypeVarType.FQN:
-                    return new TypeVarTypeImpl(value);
-                case TypeAliasType.FQN:
-                    return new TypeAliasTypeImpl(value);
-                case TupleType.FQN:
-                    return new TupleTypeImpl(value);
-                case UninhabitedType.FQN:
-                return new UninhabitedTypeImpl(value);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        });
-        return result;
-    }
+	@Override
+	public List<Type> getValues() {
+		Value values = getValue().getMember("values");
+		GuestArray<Type> result = new GuestArray<>(values, (value) -> {
+			String pythonFQN = Utils.getFullyQualifedName(value);
+			switch (pythonFQN) {
+				case CallableType.FQN :
+					return new CallableTypeImpl(value);
+				case Instance.FQN :
+					return new InstanceImpl(value);
+				case NoneType.FQN :
+					return new NoneTypeImpl(value);
+				case AnyType.FQN :
+					return new AnyTypeImpl(value);
+				case UnionType.FQN :
+					return new UnionTypeImpl(value);
+				case TypeVarType.FQN :
+					return new TypeVarTypeImpl(value);
+				case TypeAliasType.FQN :
+					return new TypeAliasTypeImpl(value);
+				case TupleType.FQN :
+					return new TupleTypeImpl(value);
+				case UninhabitedType.FQN :
+					return new UninhabitedTypeImpl(value);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		});
+		return result;
+	}
 }

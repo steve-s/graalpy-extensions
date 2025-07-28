@@ -47,26 +47,26 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.ContextFactory;
 import org.graalvm.python.javainterfacegen.mypy.types.defaultImpl.UnionTypeImpl;
 
-public interface UnionType  extends ProperType {
-    
-    public static final String FQN = "mypy.types.UnionType";
-    
-    static UnionType createUnionType(List<Type> types )  {
-        Context context = ContextFactory.getContext();
-        String source = """
-                import mypy.types
-                mypy.types.UnionType
-                """;
-        Value pythonType = context.eval("python",source);
-        List<Value> values = new ArrayList(types.size());
-        for (Type type : types) {
-            values.add(type.getValue());
-        }
-        Value instance = pythonType.newInstance(values);
-        return new UnionTypeImpl(instance);
-    }
-    
-    List<Type> getItems();
-    boolean isEvaluated();
-    
+public interface UnionType extends ProperType {
+
+	public static final String FQN = "mypy.types.UnionType";
+
+	static UnionType createUnionType(List<Type> types) {
+		Context context = ContextFactory.getContext();
+		String source = """
+				import mypy.types
+				mypy.types.UnionType
+				""";
+		Value pythonType = context.eval("python", source);
+		List<Value> values = new ArrayList(types.size());
+		for (Type type : types) {
+			values.add(type.getValue());
+		}
+		Value instance = pythonType.newInstance(values);
+		return new UnionTypeImpl(instance);
+	}
+
+	List<Type> getItems();
+	boolean isEvaluated();
+
 }

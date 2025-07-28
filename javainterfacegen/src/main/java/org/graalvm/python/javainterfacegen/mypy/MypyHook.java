@@ -51,145 +51,152 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface MypyHook {
 
-//    static class MypyHookImpl extends GuestValueDefaultImpl implements MypyHook {
-//
-//        private final org.graalvm.polyglot.Context context;
-//
-//        public MypyHookImpl(Context context, Value instance) {
-//            super(instance);
-//            this.context = context;
-//        }
-//
-//        @Override
-//        public MypyFile getNodesForFile(String path) {
-//            Value value = getValue().invokeMember("getNodesForFile", path);
-//            return new MypyFile.MypyFileImpl(value);
-//        }
-//
-//        @Override
-//        public void serializeAST(MypyFile ast, String output) {
-//            getValue().invokeMember("serialize_ast", ast.getValue(), output);
-//        }
-//
-//        @Override
-//        public MypyFile loadAST(String filePath) {
-//            return new MypyFile.MypyFileImpl(getValue().invokeMember("load_ast", filePath));
-//        }
-//
-//        /**
-//         *
-//         * @param inputPath can be folder (if it's module) or path to a file
-//         * @param cacheFile where to serialize the parsed result
-//         * @return
-//         */
-//        @Override
-//        public Map<MypyFile> serializeResult(List<String> inputPaths, String cacheFile) {
-//            Value files = getValue().invokeMember("serialize_result", inputPaths, cacheFile);
-//            GuestArray<MypyFile> result = new GuestArray<>(files, (value) -> {
-//                String pythonFQN = Utils.getFullyQualifedName(value);
-//                if (MypyFile.FQN.equals(pythonFQN)) {
-//                    return new MypyFile.MypyFileImpl(value);
-//                }
-//                throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-//            });
-//            return result;
-//        }
-//
-//        @Override
-//        public List<MypyFile> deserializeResult(String serializedDataFile, List<String> inputPaths) {
-//            Value value = getValue().invokeMember("load_result", serializedDataFile, inputPaths);
-//            if (value.hasArrayElements()) {
-//                List<MypyFile> result = new ArrayList((int)value.getArraySize());
-//                for (int i = 0; i < value.getArraySize(); i++) {
-//                    result.add(new MypyFile.MypyFileImpl(value.getArrayElement(i)));
-//                }
-//                return result;
-//            }
-//            return null;
-//        }
-//
-//        @Override
-//        public void setMypyCacheFolder(String path) {
-//            getValue().invokeMember("set_mypy_cache_folder", path);
-//        }
-//    }
-//
-    public static MypyHook fromContext(Context context) throws java.io.IOException {
-        Value pythonBindings = context.getBindings(Utils.PYTHON);
-        if (!pythonBindings.hasMember("mypyhook_main")) {
-            pythonBindings.putMember("mypyhook_main", context.eval(Utils.PYTHON, "import analyzePath"));
-//            pythonBindings.putMember("mypyhook_main", context.eval(Utils.PYTHON, "import sys; print(sys.path); import analyzePath"));
+	// static class MypyHookImpl extends GuestValueDefaultImpl implements MypyHook {
+	//
+	// private final org.graalvm.polyglot.Context context;
+	//
+	// public MypyHookImpl(Context context, Value instance) {
+	// super(instance);
+	// this.context = context;
+	// }
+	//
+	// @Override
+	// public MypyFile getNodesForFile(String path) {
+	// Value value = getValue().invokeMember("getNodesForFile", path);
+	// return new MypyFile.MypyFileImpl(value);
+	// }
+	//
+	// @Override
+	// public void serializeAST(MypyFile ast, String output) {
+	// getValue().invokeMember("serialize_ast", ast.getValue(), output);
+	// }
+	//
+	// @Override
+	// public MypyFile loadAST(String filePath) {
+	// return new MypyFile.MypyFileImpl(getValue().invokeMember("load_ast",
+	// filePath));
+	// }
+	//
+	// /**
+	// *
+	// * @param inputPath can be folder (if it's module) or path to a file
+	// * @param cacheFile where to serialize the parsed result
+	// * @return
+	// */
+	// @Override
+	// public Map<MypyFile> serializeResult(List<String> inputPaths, String
+	// cacheFile) {
+	// Value files = getValue().invokeMember("serialize_result", inputPaths,
+	// cacheFile);
+	// GuestArray<MypyFile> result = new GuestArray<>(files, (value) -> {
+	// String pythonFQN = Utils.getFullyQualifedName(value);
+	// if (MypyFile.FQN.equals(pythonFQN)) {
+	// return new MypyFile.MypyFileImpl(value);
+	// }
+	// throw new UnsupportedOperationException("Unknown Python type " + pythonFQN +
+	// " to map to Java type.");
+	// });
+	// return result;
+	// }
+	//
+	// @Override
+	// public List<MypyFile> deserializeResult(String serializedDataFile,
+	// List<String> inputPaths) {
+	// Value value = getValue().invokeMember("load_result", serializedDataFile,
+	// inputPaths);
+	// if (value.hasArrayElements()) {
+	// List<MypyFile> result = new ArrayList((int)value.getArraySize());
+	// for (int i = 0; i < value.getArraySize(); i++) {
+	// result.add(new MypyFile.MypyFileImpl(value.getArrayElement(i)));
+	// }
+	// return result;
+	// }
+	// return null;
+	// }
+	//
+	// @Override
+	// public void setMypyCacheFolder(String path) {
+	// getValue().invokeMember("set_mypy_cache_folder", path);
+	// }
+	// }
+	//
+	public static MypyHook fromContext(Context context) throws java.io.IOException {
+		Value pythonBindings = context.getBindings(Utils.PYTHON);
+		if (!pythonBindings.hasMember("mypyhook_main")) {
+			pythonBindings.putMember("mypyhook_main", context.eval(Utils.PYTHON, "import analyzePath"));
+			// pythonBindings.putMember("mypyhook_main", context.eval(Utils.PYTHON, "import
+			// sys; print(sys.path); import analyzePath"));
 
-            // TODO we need to init it somewhere else
-            ArgKind.initFromContext(context);
-        }
-        Value mypyHook = pythonBindings.getMember("mypyhook_main").getMember("analyzePath");
+			// TODO we need to init it somewhere else
+			ArgKind.initFromContext(context);
+		}
+		Value mypyHook = pythonBindings.getMember("mypyhook_main").getMember("analyzePath");
 
-        return mypyHook.as(MypyHook.class);
-    }
+		return mypyHook.as(MypyHook.class);
+	}
 
-//    MypyFile getNodesForFile(String path);
-//
-//    void serializeAST(MypyFile ast, String output);
-//
-//    MypyFile loadAST(String filePath);
+	// MypyFile getNodesForFile(String path);
+	//
+	// void serializeAST(MypyFile ast, String output);
+	//
+	// MypyFile loadAST(String filePath);
 
-    Map<String, Value> serialize_result(List<String> inputPaths, String cacheFile);
+	Map<String, Value> serialize_result(List<String> inputPaths, String cacheFile);
 
-    void serialize_mypyfile(Object mypyFile, String ouputFile);
-    String serialize_mypyFile_toStr(Object mypyFile);
+	void serialize_mypyfile(Object mypyFile, String ouputFile);
+	String serialize_mypyFile_toStr(Object mypyFile);
 
-    Map<String, Value> load_result(String serializedData);
-    Map<String, Value> load_result(String serializedData, Map<String, Value> previous);
+	Map<String, Value> load_result(String serializedData);
+	Map<String, Value> load_result(String serializedData, Map<String, Value> previous);
 
-    Map<String, Value> create_mypyfile(String data);
+	Map<String, Value> create_mypyfile(String data);
 
-    Value extract_type_info (Object file_paths);
-    void set_mypy_cache_folder(String path);
+	Value extract_type_info(Object file_paths);
+	void set_mypy_cache_folder(String path);
 
-    void test_fn_noArgs();
+	void test_fn_noArgs();
 
-    void test_only_posArgs();
-    void test_only_posArgs(PositionalArguments args);
+	void test_only_posArgs();
+	void test_only_posArgs(PositionalArguments args);
 
-    void test_only_kwArgs();
-    void test_only_kwArgs(KeywordArguments kwargs);
+	void test_only_kwArgs();
+	void test_only_kwArgs(KeywordArguments kwargs);
 
-    void test_posArgs_kwArgs();
-    void test_posArgs_kwArgs(PositionalArguments args);
-    void test_posArgs_kwArgs(KeywordArguments kwArgs);
-    void test_posArgs_kwArgs(PositionalArguments args, KeywordArguments kwArgs);
+	void test_posArgs_kwArgs();
+	void test_posArgs_kwArgs(PositionalArguments args);
+	void test_posArgs_kwArgs(KeywordArguments kwArgs);
+	void test_posArgs_kwArgs(PositionalArguments args, KeywordArguments kwArgs);
 
-    void test_pos_posArgs(Object a1);
-    void test_pos_posArgs(Object a1, PositionalArguments args);
+	void test_pos_posArgs(Object a1);
+	void test_pos_posArgs(Object a1, PositionalArguments args);
 
-    void test_pos_kwArgs(Object a1);
-    void test_pos_kwArgs(Object a1, KeywordArguments kwArgs);
+	void test_pos_kwArgs(Object a1);
+	void test_pos_kwArgs(Object a1, KeywordArguments kwArgs);
 
-    void test_pos_posArgs_kwArgs(Object a1);
-    void test_pos_posArgs_kwArgs(Object a1, PositionalArguments args);
-    void test_pos_posArgs_kwArgs(Object a1, KeywordArguments kwArgs);
-    void test_pos_posArgs_kwArgs(Object a1, PositionalArguments args, KeywordArguments kwArgs);
+	void test_pos_posArgs_kwArgs(Object a1);
+	void test_pos_posArgs_kwArgs(Object a1, PositionalArguments args);
+	void test_pos_posArgs_kwArgs(Object a1, KeywordArguments kwArgs);
+	void test_pos_posArgs_kwArgs(Object a1, PositionalArguments args, KeywordArguments kwArgs);
 
-    void test_pos3_posArgs_kwArgs(Object a1, Object a2, Object a3);
-    void test_pos3_posArgs_kwArgs(Object a1, Object a2, Object a3, PositionalArguments args);
-    void test_pos3_posArgs_kwArgs(Object a1, Object a2, Object a3, KeywordArguments kwArgs);
-    void test_pos3_posArgs_kwArgs(Object a1, Object a2, Object a3, PositionalArguments args, KeywordArguments kwArgs);
+	void test_pos3_posArgs_kwArgs(Object a1, Object a2, Object a3);
+	void test_pos3_posArgs_kwArgs(Object a1, Object a2, Object a3, PositionalArguments args);
+	void test_pos3_posArgs_kwArgs(Object a1, Object a2, Object a3, KeywordArguments kwArgs);
+	void test_pos3_posArgs_kwArgs(Object a1, Object a2, Object a3, PositionalArguments args, KeywordArguments kwArgs);
 
-    void test_posArgs_named_args(KeywordArguments kwArgs);
-    void test_posArgs_named_args(PositionalArguments args, KeywordArguments kwArgs);
+	void test_posArgs_named_args(KeywordArguments kwArgs);
+	void test_posArgs_named_args(PositionalArguments args, KeywordArguments kwArgs);
 
-    Map<String, String> extract_docstrings(String path, String moduleFQN);
+	Map<String, String> extract_docstrings(String path, String moduleFQN);
 
-//    void test_posArgs_named_args(Object named1, Object named2); is not possible
-//
-//    void test_fn(PositionalArguments args);
-////    void test_fn(Object... args);
-//    void test_pos_args(Object arg1);
-//    void test_pos_args(Object arg1, PositionalArguments args);
-//    void test_posarg(PositionalArguments args);
-//
-//    void test_kwargsonly(KeywordArguments kwargs);
-//    void test_kwargsonly3(KeywordArguments kwargs);
+	// void test_posArgs_named_args(Object named1, Object named2); is not possible
+	//
+	// void test_fn(PositionalArguments args);
+	////    void test_fn(Object... args);
+	// void test_pos_args(Object arg1);
+	// void test_pos_args(Object arg1, PositionalArguments args);
+	// void test_posarg(PositionalArguments args);
+	//
+	// void test_kwargsonly(KeywordArguments kwargs);
+	// void test_kwargsonly3(KeywordArguments kwargs);
 
 }

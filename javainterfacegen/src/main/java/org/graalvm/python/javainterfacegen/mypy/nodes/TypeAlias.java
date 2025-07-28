@@ -65,45 +65,48 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface TypeAlias extends SymbolNode {
 
-    public static final String FQN = "mypy.nodes.TypeAlias";
+	public static final String FQN = "mypy.nodes.TypeAlias";
 
-    static class TypeAliasImpl extends SymbolNode.SymbolNodeImpl implements TypeAlias {
+	static class TypeAliasImpl extends SymbolNode.SymbolNodeImpl implements TypeAlias {
 
-        public TypeAliasImpl(Value instance) {
-            super(instance);
-        }
+		public TypeAliasImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
 
-        @Override
-        public Type getTarget() {
-            Value value = getValue().getMember("target");
-            return TypesFactory.createType(value);
-        }
+		@Override
+		public Type getTarget() {
+			Value value = getValue().getMember("target");
+			return TypesFactory.createType(value);
+		}
 
-        @Override
-        public boolean noArgs() {
-            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-        }
+		@Override
+		public boolean noArgs() {
+			throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																			// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+		}
 
-        @Override
-        public String getName() {
-            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-        }
+		@Override
+		public String getName() {
+			throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																			// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+		}
 
-        @Override
-        public String getFullName() {
-            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-        }
+		@Override
+		public String getFullName() {
+			throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																			// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+		}
 
-    }
+	}
 
-    public Type getTarget();
-    public boolean noArgs();
-    public String getName();
-    public String getFullName();
+	public Type getTarget();
+	public boolean noArgs();
+	public String getName();
+	public String getFullName();
 
 }

@@ -48,9 +48,9 @@ import java.util.Map;
 
 public interface JavadocStorageManager {
 
-    public void setReferenceFolder(Path folder);
-    public Path getStoragePath(GeneratorContext context);
-    public Map<String, String> load(InputStream input);
-    public void save(Map<String, String> map, Writer writer) throws IOException;
+	public void setReferenceFolder(Path folder);
+	public Path getStoragePath(GeneratorContext context);
+	public Map<String, String> load(InputStream input);
+	public void save(Map<String, String> map, Writer writer) throws IOException;
 
 }

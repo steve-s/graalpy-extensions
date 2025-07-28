@@ -42,49 +42,49 @@ package org.graalvm.python.javainterfacegen.generator;
 
 public class JavadocFormatter {
 
-    public static String removeLeadingSpaces(String text) {
-        if (text == null || text.isEmpty()) {
-            return "";
-        }
-        String[] parts = text.split("\n");
-//        char ch = parts[0].charAt(0);
-//        String line = parts[0];
-//
-//        int lineLen = line.length();
-//        line = line.st
-//        int lineLen2 = line
-//
-//
-        StringBuilder result = new StringBuilder();
-        boolean firstLineDone = false;
-        boolean secondLineDone = false;
-        String line;
-        String leadingSpaces="";
-        for (int i = 0; i < parts.length; i++) {
-            line = parts[i];
-            if (!firstLineDone) {
-                line = line.trim();
-                if (!line.isEmpty()) {
-                    result.append(line);
-                    firstLineDone = true;
-                }
-            } else if (!secondLineDone) {
-                int origLen = line.length();
-                line = line.stripLeading();
-                if (!line.isEmpty()) {
-                    leadingSpaces = parts[i].substring(0, origLen - line.length());
-                    secondLineDone = true;
-                    result.append('\n').append(line.stripTrailing());
-                } else if (i < parts.length -1) {
-                    result.append('\n');
-                }
-            } else {
-                if (!leadingSpaces.isEmpty() && line.startsWith(leadingSpaces)) {
-                    line = line.substring(leadingSpaces.length());
-                }
-                result.append('\n').append(line.stripTrailing());
-            }
-        }
-        return result.toString().stripTrailing();
-    }
+	public static String removeLeadingSpaces(String text) {
+		if (text == null || text.isEmpty()) {
+			return "";
+		}
+		String[] parts = text.split("\n");
+		// char ch = parts[0].charAt(0);
+		// String line = parts[0];
+		//
+		// int lineLen = line.length();
+		// line = line.st
+		// int lineLen2 = line
+		//
+		//
+		StringBuilder result = new StringBuilder();
+		boolean firstLineDone = false;
+		boolean secondLineDone = false;
+		String line;
+		String leadingSpaces = "";
+		for (int i = 0; i < parts.length; i++) {
+			line = parts[i];
+			if (!firstLineDone) {
+				line = line.trim();
+				if (!line.isEmpty()) {
+					result.append(line);
+					firstLineDone = true;
+				}
+			} else if (!secondLineDone) {
+				int origLen = line.length();
+				line = line.stripLeading();
+				if (!line.isEmpty()) {
+					leadingSpaces = parts[i].substring(0, origLen - line.length());
+					secondLineDone = true;
+					result.append('\n').append(line.stripTrailing());
+				} else if (i < parts.length - 1) {
+					result.append('\n');
+				}
+			} else {
+				if (!leadingSpaces.isEmpty() && line.startsWith(leadingSpaces)) {
+					line = line.substring(leadingSpaces.length());
+				}
+				result.append('\n').append(line.stripTrailing());
+			}
+		}
+		return result.toString().stripTrailing();
+	}
 }

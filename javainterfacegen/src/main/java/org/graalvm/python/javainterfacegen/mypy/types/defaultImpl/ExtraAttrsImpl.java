@@ -48,33 +48,30 @@ import org.graalvm.python.javainterfacegen.mypy.types.ExtraAttrs;
 import org.graalvm.python.javainterfacegen.mypy.types.Type;
 import org.graalvm.python.javainterfacegen.python.GuestValueDefaultImpl;
 
+public class ExtraAttrsImpl extends GuestValueDefaultImpl implements ExtraAttrs {
 
+	public ExtraAttrsImpl(Value value) {
+		super(value);
+	}
 
+	@Override
+	public Map<String, Value> serialize() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-public class ExtraAttrsImpl extends GuestValueDefaultImpl implements ExtraAttrs{
+	@Override
+	public Set<String> getImmutable() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    public ExtraAttrsImpl(Value value) {
-        super(value);
-    }
+	@Override
+	public Optional<String> getModName() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Map<String, Value> serialize() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Set<String> getImmutable() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Optional<String> getModName() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Map<String, Type> getAttrs() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Map<String, Type> getAttrs() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
 }

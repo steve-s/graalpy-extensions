@@ -46,32 +46,32 @@ import org.graalvm.python.javainterfacegen.python.GuestValueDefaultImpl;
 
 public class TypeVarIdImpl extends GuestValueDefaultImpl implements TypeVarId {
 
-    public TypeVarIdImpl(Value value) {
-        super(value);
-    }
+	public TypeVarIdImpl(Value value) {
+		super(value);
+	}
 
-    @Override
-    public int getRawId() {
-        return getValue().getMember("raw_id").asInt();
-    }
+	@Override
+	public int getRawId() {
+		return getValue().getMember("raw_id").asInt();
+	}
 
-    @Override
-    public String getNamespace() {
-        return getValue().getMember("namespace").asString();
-    }
+	@Override
+	public String getNamespace() {
+		return getValue().getMember("namespace").asString();
+	}
 
-    @Override
-    public int getMetaLevel() {
-        return getValue().getMember("meta_level").asInt();
-    }
+	@Override
+	public int getMetaLevel() {
+		return getValue().getMember("meta_level").asInt();
+	}
 
-    @Override
-    public int getNextRawId() {
-        return getValue().getMember("next_raw_id").asInt();
-    }
+	@Override
+	public int getNextRawId() {
+		return getValue().getMember("next_raw_id").asInt();
+	}
 
-    @Override
-    public boolean isMetaVar() {
-        return getValue().invokeMember("is_meta_var").asBoolean();
-    }
+	@Override
+	public boolean isMetaVar() {
+		return getValue().invokeMember("is_meta_var").asBoolean();
+	}
 }

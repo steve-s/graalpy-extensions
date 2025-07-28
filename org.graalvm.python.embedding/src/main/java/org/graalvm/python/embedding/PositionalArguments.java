@@ -47,29 +47,30 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 import java.util.List;
 
 /**
- * Represents positional arguments (`*args`) in Python. The {@code PositionalArguments} class
- * provides a way to pass and manage a variable number of positional arguments in a Java context,
- * mimicking the behavior of `*args` in Python. Instances of this class are immutable and can be
- * created using static factory methods for convenience.
+ * Represents positional arguments (`*args`) in Python. The
+ * {@code PositionalArguments} class provides a way to pass and manage a
+ * variable number of positional arguments in a Java context, mimicking the
+ * behavior of `*args` in Python. Instances of this class are immutable and can
+ * be created using static factory methods for convenience.
  *
  * <p>
- * Each {@code PositionalArguments} instance encapsulates an ordered list of arguments, which can be
- * of any type. These arguments are treated as if they were passed to a Python function using the
- * `*args` syntax.
+ * Each {@code PositionalArguments} instance encapsulates an ordered list of
+ * arguments, which can be of any type. These arguments are treated as if they
+ * were passed to a Python function using the `*args` syntax.
  * </p>
  *
  * <h3>Creating PositionalArguments</h3>
  *
  * <p>
- * You can create an instance of {@code PositionalArguments} using one of the provided static
- * factory methods:
+ * You can create an instance of {@code PositionalArguments} using one of the
+ * provided static factory methods:
  * </p>
  *
  * <ul>
- * <li>{@link #from(List)}: Creates {@code PositionalArguments} from a {@link java.util.List} of
- * arguments.</li>
- * <li>{@link #of(Object...)}: Creates {@code PositionalArguments} directly from a variable number
- * of arguments.</li>
+ * <li>{@link #from(List)}: Creates {@code PositionalArguments} from a
+ * {@link java.util.List} of arguments.</li>
+ * <li>{@link #of(Object...)}: Creates {@code PositionalArguments} directly from
+ * a variable number of arguments.</li>
  * </ul>
  *
  * <p>
@@ -84,96 +85,105 @@ import java.util.List;
  * PositionalArguments args2 = PositionalArguments.of(1, "hello", true);
  * }</pre>
  *
- * <h3>When to Use</h3> {@link PositionalArguments} should be used whenever a Python function
- * accepts variable-length positional arguments (i.e., {@code *args}). It can also be combined with
- * {@link KeywordArguments} to support functions that accept both types of arguments.
+ * <h3>When to Use</h3> {@link PositionalArguments} should be used whenever a
+ * Python function accepts variable-length positional arguments (i.e.,
+ * {@code *args}). It can also be combined with {@link KeywordArguments} to
+ * support functions that accept both types of arguments.
  *
  * <p>
- * <b>Important:</b> An instance of {@link PositionalArguments} can be used in one of the following
- * scenarios:
+ * <b>Important:</b> An instance of {@link PositionalArguments} can be used in
+ * one of the following scenarios:
  * </p>
  * <ul>
- * <li>As the penultimate argument, followed by an instance of {@link KeywordArguments}.</li>
- * <li>As the final argument, if the Python function does not accept named arguments.</li>
+ * <li>As the penultimate argument, followed by an instance of
+ * {@link KeywordArguments}.</li>
+ * <li>As the final argument, if the Python function does not accept named
+ * arguments.</li>
  * </ul>
- * This ensures proper alignment with Python's argument structure and guarantees that all arguments
- * are passed correctly.
+ * This ensures proper alignment with Python's argument structure and guarantees
+ * that all arguments are passed correctly.
  *
  * @see KeywordArguments
  */
 public abstract sealed class PositionalArguments permits PositionalArguments.Implementation {
 
-    static final class Implementation extends PositionalArguments implements ProxyArray, ProxyObject {
+	static final class Implementation extends PositionalArguments implements ProxyArray, ProxyObject {
 
-        public static final String MEMBER_KEY = "org.graalvm.python.embedding.PositionalArguments.is_positional_arguments";
-        private final Object[] values;
+		public static final String MEMBER_KEY = "org.graalvm.python.embedding.PositionalArguments.is_positional_arguments";
+		private final Object[] values;
 
-        private Implementation(Object[] values) {
-            this.values = values;
-        }
+		private Implementation(Object[] values) {
+			this.values = values;
+		}
 
-        @Override
-        public Object get(long index) {
-            return this.values[(int) index];
-        }
+		@Override
+		public Object get(long index) {
+			return this.values[(int) index];
+		}
 
-        @Override
-        public void set(long index, Value value) {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public void set(long index, Value value) {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public long getSize() {
-            return values.length;
-        }
+		@Override
+		public long getSize() {
+			return values.length;
+		}
 
-        @Override
-        public Object getMember(String key) {
-            if (MEMBER_KEY.equals(key)) {
-                return true;
-            }
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public Object getMember(String key) {
+			if (MEMBER_KEY.equals(key)) {
+				return true;
+			}
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public Object getMemberKeys() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public Object getMemberKeys() {
+			throw new UnsupportedOperationException();
+		}
 
-        @Override
-        public boolean hasMember(String key) {
-            return MEMBER_KEY.equals(key);
-        }
+		@Override
+		public boolean hasMember(String key) {
+			return MEMBER_KEY.equals(key);
+		}
 
-        @Override
-        public void putMember(String key, Value value) {
-            throw new UnsupportedOperationException();
-        }
-    }
+		@Override
+		public void putMember(String key, Value value) {
+			throw new UnsupportedOperationException();
+		}
+	}
 
-    private PositionalArguments() {
-    }
+	private PositionalArguments() {
+	}
 
-    /**
-     * Creates a {@link PositionalArguments} instance from the specified values.
-     *
-     * @param values the positional arguments to be included; each value represents an argument
-     *            passed to the Python function. Individual values can be {@code null}, which
-     *            translates to the Python value {@code None}.
-     * @return a new {@link PositionalArguments} instance containing the provided values
-     */
-    public static PositionalArguments of(Object... values) {
-        return new PositionalArguments.Implementation(values);
-    }
+	/**
+	 * Creates a {@link PositionalArguments} instance from the specified values.
+	 *
+	 * @param values
+	 *            the positional arguments to be included; each value represents an
+	 *            argument passed to the Python function. Individual values can be
+	 *            {@code null}, which translates to the Python value {@code None}.
+	 * @return a new {@link PositionalArguments} instance containing the provided
+	 *         values
+	 */
+	public static PositionalArguments of(Object... values) {
+		return new PositionalArguments.Implementation(values);
+	}
 
-    /**
-     * Creates a {@link PositionalArguments} instance from the specified list of values.
-     *
-     * @param values a list of positional arguments to be included; each value represents an
-     *            argument passed to the Python function. Null value can not be passed in this case.
-     * @return a new {@link PositionalArguments} instance containing the provided values
-     */
-    public static PositionalArguments from(List<Object> values) {
-        return new PositionalArguments.Implementation(values.toArray());
-    }
+	/**
+	 * Creates a {@link PositionalArguments} instance from the specified list of
+	 * values.
+	 *
+	 * @param values
+	 *            a list of positional arguments to be included; each value
+	 *            represents an argument passed to the Python function. Null value
+	 *            can not be passed in this case.
+	 * @return a new {@link PositionalArguments} instance containing the provided
+	 *         values
+	 */
+	public static PositionalArguments from(List<Object> values) {
+		return new PositionalArguments.Implementation(values.toArray());
+	}
 }

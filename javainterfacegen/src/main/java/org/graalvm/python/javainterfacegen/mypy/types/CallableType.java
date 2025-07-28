@@ -44,21 +44,21 @@ import java.util.List;
 import org.graalvm.python.javainterfacegen.mypy.nodes.SymbolNode;
 
 public interface CallableType extends FunctionLike {
-    public static final String FQN = "mypy.types.CallableType";
+	public static final String FQN = "mypy.types.CallableType";
 
-    List<Type> getArgTypes();
-    List<String> getArgNames();
-    List<ArgKind> getArgKinds();
+	List<Type> getArgTypes();
+	List<String> getArgNames();
+	List<ArgKind> getArgKinds();
 
-    CallableType withNormalizedVarArgs();
-    Type getRetType();
-    void setRetType(Type type);
-    int getMinArgs();
-    SymbolNode getDefinition();
-    List<TypeVarLikeType> getVariables();
-    int maxPossiblePositionalArgs();
-    List<FormalArgument> getFormalArguments (boolean includeStarArgs);
-    FormalArgument argumentByName(String name);
-    FormalArgument argumentByPosition(int position);
+	CallableType withNormalizedVarArgs();
+	Type getRetType();
+	void setRetType(Type type);
+	int getMinArgs();
+	SymbolNode getDefinition();
+	List<TypeVarLikeType> getVariables();
+	int maxPossiblePositionalArgs();
+	List<FormalArgument> getFormalArguments(boolean includeStarArgs);
+	FormalArgument argumentByName(String name);
+	FormalArgument argumentByPosition(int position);
 
 }

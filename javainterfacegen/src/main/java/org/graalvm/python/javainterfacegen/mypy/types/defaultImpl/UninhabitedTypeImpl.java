@@ -47,22 +47,22 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class UninhabitedTypeImpl extends TypeImpl implements UninhabitedType {
 
-    public UninhabitedTypeImpl(Value instance) {
-        super(instance);
-        String pythonFQN = Utils.getFullyQualifedName(instance);
-        if (!UninhabitedType.FQN.equals(pythonFQN)) {
-            throw new UnsupportedOperationException("Creating UninhabitedTypeImpl from " + pythonFQN + " Python type.");
-        }
-    }
+	public UninhabitedTypeImpl(Value instance) {
+		super(instance);
+		String pythonFQN = Utils.getFullyQualifedName(instance);
+		if (!UninhabitedType.FQN.equals(pythonFQN)) {
+			throw new UnsupportedOperationException("Creating UninhabitedTypeImpl from " + pythonFQN + " Python type.");
+		}
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
-    @Override
-    public boolean isAmbiguous() {
-        return getValue().getMember("ambiguous").asBoolean();
-    }
+	@Override
+	public boolean isAmbiguous() {
+		return getValue().getMember("ambiguous").asBoolean();
+	}
 
 }

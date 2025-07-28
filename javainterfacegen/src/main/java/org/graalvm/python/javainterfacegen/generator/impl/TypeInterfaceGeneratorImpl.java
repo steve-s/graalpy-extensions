@@ -64,199 +64,201 @@ import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
 
 public class TypeInterfaceGeneratorImpl implements TypeGenerator {
 
-    private static final String TEMPLATE_INTERFACE = """
-            {{license}}
+	private static final String TEMPLATE_INTERFACE = """
+			{{license}}
 
-            {{generatedinfo}}
+			{{generatedinfo}}
 
-            package {{package}};
+			package {{package}};
 
-            {{imports}}
+			{{imports}}
 
-            {{javadoc}}
-            public interface {{name}} extends {{extends}} {
-            {{type_literals}}
-            {{content}}
-            }
-            """;
+			{{javadoc}}
+			public interface {{name}} extends {{extends}} {
+			{{type_literals}}
+			{{content}}
+			}
+			""";
 
-    private static final String TEMPLATE_IS = """
-            {{indent}}static boolean is{{type_name}}(Object object) {
-            {{indent+1}}Value value = Value.asValue(object);                      
-            {{indent+1}}Value metaObject = value.getMetaObject();
-            {{indent+1}}String moduleName = metaObject.getMember("__module__").asString();
-            {{indent+1}}String typeName = metaObject.getMember("__name__").asString();
-            {{indent+1}}String fqn = moduleName + "." + typeName;
-            {{indent+1}}return "{{python_fqn}}".equals(fqn);
-            {{indent}}}
-            """;
+	private static final String TEMPLATE_IS = """
+			{{indent}}static boolean is{{type_name}}(Object object) {
+			{{indent+1}}Value value = Value.asValue(object);
+			{{indent+1}}Value metaObject = value.getMetaObject();
+			{{indent+1}}String moduleName = metaObject.getMember("__module__").asString();
+			{{indent+1}}String typeName = metaObject.getMember("__name__").asString();
+			{{indent+1}}String fqn = moduleName + "." + typeName;
+			{{indent+1}}return "{{python_fqn}}".equals(fqn);
+			{{indent}}}
+			""";
 
-    private static final String TEMPLATE_CAST = """
-            {{indent}}static {{java_type}} cast(Object object) {
-            {{indent+1}}if (is{{type_name}}(object)) {
-            {{indent+2}}Value v = Value.asValue(object);
-            {{indent+2}}return v.as({{as_java_type}});
-            {{indent+1}}}
-            {{indent+1}}throw new ClassCastException();
-            {{indent}}}
-            """;
+	private static final String TEMPLATE_CAST = """
+			{{indent}}static {{java_type}} cast(Object object) {
+			{{indent+1}}if (is{{type_name}}(object)) {
+			{{indent+2}}Value v = Value.asValue(object);
+			{{indent+2}}return v.as({{as_java_type}});
+			{{indent+1}}}
+			{{indent+1}}throw new ClassCastException();
+			{{indent}}}
+			""";
 
-    private static final String TEMPLATE_TYPELITERAL
-            = "{{indent}}static TypeLiteral<{{java_type}}> {{name}} = new TypeLiteral<{{java_type}}>(){};";
+	private static final String TEMPLATE_TYPELITERAL = "{{indent}}static TypeLiteral<{{java_type}}> {{name}} = new TypeLiteral<{{java_type}}>(){};";
 
-    @Override
-    public String createType(Type type, GeneratorContext context, String javaPackage, String name) {
-        String template = TEMPLATE_INTERFACE;
-        template = template.replace("{{license}}", GeneratorUtils.getLicense(context));
+	@Override
+	public String createType(Type type, GeneratorContext context, String javaPackage, String name) {
+		String template = TEMPLATE_INTERFACE;
+		template = template.replace("{{license}}", GeneratorUtils.getLicense(context));
 
-        template = template.replace("{{generatedinfo}}", context.addTimestamp() ? GeneratorUtils.generateTimeStamp() : "");
+		template = template.replace("{{generatedinfo}}",
+				context.addTimestamp() ? GeneratorUtils.generateTimeStamp() : "");
 
-        template = template.replace("{{package}}", javaPackage);
+		template = template.replace("{{package}}", javaPackage);
 
-        Configuration config = context.getConfig();
+		Configuration config = context.getConfig();
 
-        GeneratorContext fileContext = new GeneratorContext(null, config, null, true);
-        fileContext.setJavaFQN(javaPackage + "." + name);
-        fileContext.addImport("org.graalvm.polyglot.Value");
+		GeneratorContext fileContext = new GeneratorContext(null, config, null, true);
+		fileContext.setJavaFQN(javaPackage + "." + name);
+		fileContext.addImport("org.graalvm.polyglot.Value");
 
-        template = template.replace("{{javadoc}}", GeneratorUtils.createJavaDoc("Generated from Python type: " + type.toString()));
-        template = template.replace("{{name}}", name);
+		template = template.replace("{{javadoc}}",
+				GeneratorUtils.createJavaDoc("Generated from Python type: " + type.toString()));
+		template = template.replace("{{name}}", name);
 
-        template = template.replace("{{extends}}", createExtendsExpr(type, fileContext));
-        fileContext.increaseIndentLevel();
+		template = template.replace("{{extends}}", createExtendsExpr(type, fileContext));
+		fileContext.increaseIndentLevel();
 
-        List<String> typeLiterals = new ArrayList();
-        template = template.replace("{{content}}", createBody(type, fileContext, typeLiterals));
+		List<String> typeLiterals = new ArrayList();
+		template = template.replace("{{content}}", createBody(type, fileContext, typeLiterals));
 
-        template = template.replace("{{imports}}", GeneratorUtils.generateImports(fileContext.getImports()));
+		template = template.replace("{{imports}}", GeneratorUtils.generateImports(fileContext.getImports()));
 
-        if (typeLiterals.isEmpty()) {
-            template = template.replace("{{type_literals}}", "");
-        } else {
-            StringBuilder sb = new StringBuilder();
-            for (String typeLiteral : typeLiterals) {
-                sb.append(typeLiteral).append("\n");
-            }
-            template = template.replace("{{type_literals}}", sb.toString());
-        }
-        template = GeneratorUtils.indentTemplate(fileContext, template);
-        fileContext.decreaseIndentLevel();
-        try {
-            GeneratorUtils.saveFile(context, javaPackage, name, template);
-        } catch (IOException ex) {
-            Logger.getLogger(TransformerVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return template;
-    }
+		if (typeLiterals.isEmpty()) {
+			template = template.replace("{{type_literals}}", "");
+		} else {
+			StringBuilder sb = new StringBuilder();
+			for (String typeLiteral : typeLiterals) {
+				sb.append(typeLiteral).append("\n");
+			}
+			template = template.replace("{{type_literals}}", sb.toString());
+		}
+		template = GeneratorUtils.indentTemplate(fileContext, template);
+		fileContext.decreaseIndentLevel();
+		try {
+			GeneratorUtils.saveFile(context, javaPackage, name, template);
+		} catch (IOException ex) {
+			Logger.getLogger(TransformerVisitor.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		return template;
+	}
 
-    private static final Set<String> primitiveTypes = new HashSet<>(Arrays.asList(
-            "boolean", "byte", "char", "short", "int", "long", "float", "double"));
-    
-    private String createExtendsExpr(Type type, GeneratorContext context) {
-        StringBuilder sb = new StringBuilder();
-        if (type instanceof UnionType ut) {
-            List<Type> items = ut.getItems();
-            for (int i = 0; i < items.size(); i++) {
-                Type eType = items.get(i);
-                if (!(eType instanceof NoneType)){
-                    String javaType = TypeManager.get().resolveJavaType(context, eType, false, context.getDefaultJavaType());
-                    if (!primitiveTypes.contains(javaType)) {
-                        if (sb.length() > 0) {
-                            sb.append(", ");
-                        }
-                        sb.append(javaType);
-                    }
-                }
-            }
-        } else if (type instanceof Instance instance && isSupported(instance)) {
-            String javaType = TypeManager.get().resolveJavaType(context, instance, false, context.getDefaultJavaType());
-            sb.append(javaType);  
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-        return sb.toString();
-    }
+	private static final Set<String> primitiveTypes = new HashSet<>(
+			Arrays.asList("boolean", "byte", "char", "short", "int", "long", "float", "double"));
 
-    private static boolean isSupported(Instance instance) {
-        return "builtins.list".equals(instance.getType().getFullname());
-    }
-    
-    private static String createBody(Type type, GeneratorContext context, List<String> typeLiterals) {
-        StringBuilder sb = new StringBuilder();
-        if (type instanceof UnionType ut) {
-            List<Type> items = ut.getItems();
-            for (int i = 0; i < items.size(); i++) {
-                Type eType = items.get(i);
-                sb.append(createIsMethod(eType, context));
-                sb.append("\n");
-                if (!(eType instanceof NoneType)) {
-                    sb.append(createCastMethod(eType, context, typeLiterals));
-                    sb.append("\n");
-                }
-            }
-        } else if (type instanceof Instance instance && isSupported(instance)) {
-            sb.append(createIsMethod(instance, context));
-                sb.append("\n");
-                if (!(instance instanceof NoneType)) {
-                    sb.append(createCastMethod(instance, context, typeLiterals));
-                    sb.append("\n");
-                }
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-        return sb.toString();
-    }
+	private String createExtendsExpr(Type type, GeneratorContext context) {
+		StringBuilder sb = new StringBuilder();
+		if (type instanceof UnionType ut) {
+			List<Type> items = ut.getItems();
+			for (int i = 0; i < items.size(); i++) {
+				Type eType = items.get(i);
+				if (!(eType instanceof NoneType)) {
+					String javaType = TypeManager.get().resolveJavaType(context, eType, false,
+							context.getDefaultJavaType());
+					if (!primitiveTypes.contains(javaType)) {
+						if (sb.length() > 0) {
+							sb.append(", ");
+						}
+						sb.append(javaType);
+					}
+				}
+			}
+		} else if (type instanceof Instance instance && isSupported(instance)) {
+			String javaType = TypeManager.get().resolveJavaType(context, instance, false, context.getDefaultJavaType());
+			sb.append(javaType);
+		} else {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+		return sb.toString();
+	}
 
-    private static String createJavaName(String pythonFQN, Type type) {
-        String javaName;
-        if ("builtins.list".equals(pythonFQN)) {
-            javaName = "List";
-        } else {
-            javaName = TypeNameGenerator.createName(type);
-        }
-        while (javaName.endsWith("_")) {
-            javaName = javaName.substring(0, javaName.length() - 1);
-        }
-        return javaName;
-    }
-    
-    private static String createIsMethod(Type type, GeneratorContext context) {
-        String template = TEMPLATE_IS;
-        String pythonFQN = PythonFQNResolver.findPythonFQN(type);
-        String javaName = createJavaName(pythonFQN, type);
-        
-        template = template.replace("{{type_name}}", javaName);
-        template = template.replace("{{python_fqn}}", pythonFQN);
-        return template;
-    }
+	private static boolean isSupported(Instance instance) {
+		return "builtins.list".equals(instance.getType().getFullname());
+	}
 
-    private static String createCastMethod(Type type, GeneratorContext context, List<String> typeLiterals) {
-        String template = TEMPLATE_CAST;
-        
-        String javaType = TypeManager.get().resolveJavaType(context, type, false, "org.graalvm.polyglot.Value");
-        String pythonFQN = PythonFQNResolver.findPythonFQN(type);
-        String javaName = createJavaName(pythonFQN, type);
-        
-        template = template.replace("{{type_name}}", javaName);
-        template = template.replace("{{java_type}}", javaType);
+	private static String createBody(Type type, GeneratorContext context, List<String> typeLiterals) {
+		StringBuilder sb = new StringBuilder();
+		if (type instanceof UnionType ut) {
+			List<Type> items = ut.getItems();
+			for (int i = 0; i < items.size(); i++) {
+				Type eType = items.get(i);
+				sb.append(createIsMethod(eType, context));
+				sb.append("\n");
+				if (!(eType instanceof NoneType)) {
+					sb.append(createCastMethod(eType, context, typeLiterals));
+					sb.append("\n");
+				}
+			}
+		} else if (type instanceof Instance instance && isSupported(instance)) {
+			sb.append(createIsMethod(instance, context));
+			sb.append("\n");
+			if (!(instance instanceof NoneType)) {
+				sb.append(createCastMethod(instance, context, typeLiterals));
+				sb.append("\n");
+			}
+		} else {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+		return sb.toString();
+	}
 
-        String asJavaType;
-        switch (pythonFQN) {
-            case "builtins.list":
-            case "builtins.dict":
-                context.addImport("org.graalvm.polyglot.TypeLiteral");
-                String typeLiteral = TEMPLATE_TYPELITERAL;
-                typeLiteral = typeLiteral.replace("{{java_type}}", javaType);
-//                String javaNameUpper = javaName.toUpperCase();
-                typeLiteral = typeLiteral.replace("{{name}}", "TYPE_LITERAL");
-                typeLiterals.add(typeLiteral);
-                asJavaType = "TYPE_LITERAL";
-                break;
-            default:
-                asJavaType = javaType + ".class";
-        }
-        template = template.replace("{{as_java_type}}", asJavaType);
-        return template;
-    }
+	private static String createJavaName(String pythonFQN, Type type) {
+		String javaName;
+		if ("builtins.list".equals(pythonFQN)) {
+			javaName = "List";
+		} else {
+			javaName = TypeNameGenerator.createName(type);
+		}
+		while (javaName.endsWith("_")) {
+			javaName = javaName.substring(0, javaName.length() - 1);
+		}
+		return javaName;
+	}
+
+	private static String createIsMethod(Type type, GeneratorContext context) {
+		String template = TEMPLATE_IS;
+		String pythonFQN = PythonFQNResolver.findPythonFQN(type);
+		String javaName = createJavaName(pythonFQN, type);
+
+		template = template.replace("{{type_name}}", javaName);
+		template = template.replace("{{python_fqn}}", pythonFQN);
+		return template;
+	}
+
+	private static String createCastMethod(Type type, GeneratorContext context, List<String> typeLiterals) {
+		String template = TEMPLATE_CAST;
+
+		String javaType = TypeManager.get().resolveJavaType(context, type, false, "org.graalvm.polyglot.Value");
+		String pythonFQN = PythonFQNResolver.findPythonFQN(type);
+		String javaName = createJavaName(pythonFQN, type);
+
+		template = template.replace("{{type_name}}", javaName);
+		template = template.replace("{{java_type}}", javaType);
+
+		String asJavaType;
+		switch (pythonFQN) {
+			case "builtins.list" :
+			case "builtins.dict" :
+				context.addImport("org.graalvm.polyglot.TypeLiteral");
+				String typeLiteral = TEMPLATE_TYPELITERAL;
+				typeLiteral = typeLiteral.replace("{{java_type}}", javaType);
+				// String javaNameUpper = javaName.toUpperCase();
+				typeLiteral = typeLiteral.replace("{{name}}", "TYPE_LITERAL");
+				typeLiterals.add(typeLiteral);
+				asJavaType = "TYPE_LITERAL";
+				break;
+			default :
+				asJavaType = javaType + ".class";
+		}
+		template = template.replace("{{as_java_type}}", asJavaType);
+		return template;
+	}
 
 }

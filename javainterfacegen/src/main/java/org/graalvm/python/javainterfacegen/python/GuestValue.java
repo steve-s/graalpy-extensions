@@ -43,5 +43,5 @@ package org.graalvm.python.javainterfacegen.python;
 import org.graalvm.polyglot.Value;
 
 public interface GuestValue {
-    public Value getValue();
+	public Value getValue();
 }

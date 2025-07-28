@@ -65,54 +65,55 @@ import static org.graalvm.python.embedding.tools.vfs.VFSUtils.VFS_ROOT;
 @CacheableTask
 public abstract class VFSFilesListTask extends DefaultTask {
 
-    public static final String VFS_PREFIX = "org.graalvm.python.vfs";
+	public static final String VFS_PREFIX = "org.graalvm.python.vfs";
 
-    /**
-     * Directories that will be used as an input for the virtual filesystem contents. The paths
-     * should already point to directories that contain the directory with subdirectory named
-     * {@code VFS_PREFIX}.
-     */
-    @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
-    public abstract ConfigurableFileCollection getVfsDirectories();
+	/**
+	 * Directories that will be used as an input for the virtual filesystem
+	 * contents. The paths should already point to directories that contain the
+	 * directory with subdirectory named {@code VFS_PREFIX}.
+	 */
+	@InputFiles
+	@PathSensitive(PathSensitivity.RELATIVE)
+	public abstract ConfigurableFileCollection getVfsDirectories();
 
-    @OutputDirectory
-    public abstract DirectoryProperty getVfsFilesListOutputDir();
+	@OutputDirectory
+	public abstract DirectoryProperty getVfsFilesListOutputDir();
 
-    /**
-     * The directory where the VFS should be generated within Java resources.
-     */
-    @Input
-    @Optional
-    public abstract Property<String> getResourceDirectory();
+	/**
+	 * The directory where the VFS should be generated within Java resources.
+	 */
+	@Input
+	@Optional
+	public abstract Property<String> getResourceDirectory();
 
-    @TaskAction
-    public void exec() throws IOException {
-        String vfsRoot = getResourceDirectory().getOrElse(VFS_ROOT);
-        Path outputDir = getVfsFilesListOutputDir().get().getAsFile().toPath().resolve(vfsRoot);
-        Files.createDirectories(outputDir);
-        // Sort lines for reproducibility
-        var sorted = new TreeSet<String>();
-        getVfsDirectories().getElements().get().forEach(location -> {
-            var vfsParentDir = location.getAsFile().toPath();
-            if (Files.isDirectory(vfsParentDir)) {
-                var vfsDir = vfsParentDir.resolve(vfsRoot);
-                if (Files.isDirectory(vfsDir)) {
-                    try {
-                        VFSUtils.generateVFSFilesList(vfsParentDir, vfsDir, sorted, duplicate -> {
-                            this.getLogger().warn("Found duplicate file '{}' in multiple resource directories.", duplicate);
-                        });
-                    } catch (IOException e) {
-                        throw new GradleScriptException(String.format("failed to list files in '%s'", vfsDir), e);
-                    }
-                }
-            }
-        });
-        try {
-            var fileslist = outputDir.resolve("fileslist.txt");
-            Files.write(fileslist, sorted);
-        } catch (IOException e) {
-            throw new GradleScriptException(String.format("failed to generate files list in '%s'", outputDir), e);
-        }
-    }
+	@TaskAction
+	public void exec() throws IOException {
+		String vfsRoot = getResourceDirectory().getOrElse(VFS_ROOT);
+		Path outputDir = getVfsFilesListOutputDir().get().getAsFile().toPath().resolve(vfsRoot);
+		Files.createDirectories(outputDir);
+		// Sort lines for reproducibility
+		var sorted = new TreeSet<String>();
+		getVfsDirectories().getElements().get().forEach(location -> {
+			var vfsParentDir = location.getAsFile().toPath();
+			if (Files.isDirectory(vfsParentDir)) {
+				var vfsDir = vfsParentDir.resolve(vfsRoot);
+				if (Files.isDirectory(vfsDir)) {
+					try {
+						VFSUtils.generateVFSFilesList(vfsParentDir, vfsDir, sorted, duplicate -> {
+							this.getLogger().warn("Found duplicate file '{}' in multiple resource directories.",
+									duplicate);
+						});
+					} catch (IOException e) {
+						throw new GradleScriptException(String.format("failed to list files in '%s'", vfsDir), e);
+					}
+				}
+			}
+		});
+		try {
+			var fileslist = outputDir.resolve("fileslist.txt");
+			Files.write(fileslist, sorted);
+		} catch (IOException e) {
+			throw new GradleScriptException(String.format("failed to generate files list in '%s'", outputDir), e);
+		}
+	}
 }

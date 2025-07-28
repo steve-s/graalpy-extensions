@@ -57,166 +57,176 @@ import java.util.Set;
 
 public class GraalPyRunner {
 
-    private static final boolean IS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
-    private static final String BIN_DIR = IS_WINDOWS ? "Scripts" : "bin";
-    private static final String EXE_SUFFIX = IS_WINDOWS ? ".exe" : "";
+	private static final boolean IS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
+	private static final String BIN_DIR = IS_WINDOWS ? "Scripts" : "bin";
+	private static final String EXE_SUFFIX = IS_WINDOWS ? ".exe" : "";
 
-    public static String[] getExtraJavaOptions() {
-        String javaVersion = System.getProperty("java.version");
-        try {
-            if (Integer.parseInt(javaVersion) >= 24) {
-                return new String[]{"--sun-misc-unsafe-memory-access=allow"};
-            }
-        } catch (NumberFormatException ex) {
-            // covers also javaVersion being 'null'
-        }
-        return new String[0];
-    }
+	public static String[] getExtraJavaOptions() {
+		String javaVersion = System.getProperty("java.version");
+		try {
+			if (Integer.parseInt(javaVersion) >= 24) {
+				return new String[]{"--sun-misc-unsafe-memory-access=allow"};
+			}
+		} catch (NumberFormatException ex) {
+			// covers also javaVersion being 'null'
+		}
+		return new String[0];
+	}
 
-    public static void run(Set<String> classpath, BuildToolLog log, String... args) throws IOException, InterruptedException {
-        run(String.join(File.pathSeparator, classpath), log, args);
-    }
+	public static void run(Set<String> classpath, BuildToolLog log, String... args)
+			throws IOException, InterruptedException {
+		run(String.join(File.pathSeparator, classpath), log, args);
+	}
 
-    public static void run(String classpath, BuildToolLog log, String... args) throws IOException, InterruptedException {
-        String workdir = System.getProperty("exec.workingdir");
-        Path java = Paths.get(System.getProperty("java.home"), "bin", "java");
-        List<String> cmd = new ArrayList<>();
-        cmd.add(java.toString());
-        cmd.add("--enable-native-access=ALL-UNNAMED");
-        cmd.addAll(Arrays.asList(getExtraJavaOptions()));
-        cmd.add("-classpath");
-        cmd.add(classpath);
-        cmd.add("com.oracle.graal.python.shell.GraalPythonMain");
-        cmd.addAll(List.of(args));
-        var pb = new ProcessBuilder(cmd);
-        if (workdir != null) {
-            pb.directory(new File(workdir));
-        }
-        infoCmd(log, "Running GraalPy:", cmd);
-        runProcess(pb, log);
-    }
+	public static void run(String classpath, BuildToolLog log, String... args)
+			throws IOException, InterruptedException {
+		String workdir = System.getProperty("exec.workingdir");
+		Path java = Paths.get(System.getProperty("java.home"), "bin", "java");
+		List<String> cmd = new ArrayList<>();
+		cmd.add(java.toString());
+		cmd.add("--enable-native-access=ALL-UNNAMED");
+		cmd.addAll(Arrays.asList(getExtraJavaOptions()));
+		cmd.add("-classpath");
+		cmd.add(classpath);
+		cmd.add("com.oracle.graal.python.shell.GraalPythonMain");
+		cmd.addAll(List.of(args));
+		var pb = new ProcessBuilder(cmd);
+		if (workdir != null) {
+			pb.directory(new File(workdir));
+		}
+		infoCmd(log, "Running GraalPy:", cmd);
+		runProcess(pb, log);
+	}
 
-    public static void runLauncher(String launcherPath, BuildToolLog log, String... args) throws IOException, InterruptedException {
-        var cmd = new ArrayList<String>();
-        cmd.add(launcherPath);
-        cmd.addAll(List.of(args));
-        infoCmd(log, "Running:", cmd);
-        var pb = new ProcessBuilder(cmd);
-        runProcess(pb, log);
-    }
+	public static void runLauncher(String launcherPath, BuildToolLog log, String... args)
+			throws IOException, InterruptedException {
+		var cmd = new ArrayList<String>();
+		cmd.add(launcherPath);
+		cmd.addAll(List.of(args));
+		infoCmd(log, "Running:", cmd);
+		var pb = new ProcessBuilder(cmd);
+		runProcess(pb, log);
+	}
 
-    public static void runPip(Path venvDirectory, String command, BuildToolLog log, String... args) throws IOException, InterruptedException {
-        var newArgs = new ArrayList<String>();
-        newArgs.add("-m");
-        newArgs.add("pip");
-        addProxy(newArgs);
-        newArgs.add(command);
-        newArgs.addAll(List.of(args));
+	public static void runPip(Path venvDirectory, String command, BuildToolLog log, String... args)
+			throws IOException, InterruptedException {
+		var newArgs = new ArrayList<String>();
+		newArgs.add("-m");
+		newArgs.add("pip");
+		addProxy(newArgs);
+		newArgs.add(command);
+		newArgs.addAll(List.of(args));
 
-        runVenvBin(venvDirectory, "graalpy", log, newArgs);
-    }
+		runVenvBin(venvDirectory, "graalpy", log, newArgs);
+	}
 
-    public static void runVenvBin(Path venvDirectory, String command, BuildToolLog log, String... args) throws IOException, InterruptedException {
-        runVenvBin(venvDirectory, command, log, List.of(args));
-    }
+	public static void runVenvBin(Path venvDirectory, String command, BuildToolLog log, String... args)
+			throws IOException, InterruptedException {
+		runVenvBin(venvDirectory, command, log, List.of(args));
+	}
 
-    private static void runVenvBin(Path venvDirectory, String command, BuildToolLog log, List<String> args) throws IOException, InterruptedException {
-        var cmd = new ArrayList<String>();
-        cmd.add(venvDirectory.resolve(BIN_DIR).resolve(command + EXE_SUFFIX).toString());
-        cmd.addAll(args);
-        infoCmd(log, "Executing:", cmd);
-        var pb = new ProcessBuilder(cmd);
-        runProcess(pb, log);
-    }
+	private static void runVenvBin(Path venvDirectory, String command, BuildToolLog log, List<String> args)
+			throws IOException, InterruptedException {
+		var cmd = new ArrayList<String>();
+		cmd.add(venvDirectory.resolve(BIN_DIR).resolve(command + EXE_SUFFIX).toString());
+		cmd.addAll(args);
+		infoCmd(log, "Executing:", cmd);
+		var pb = new ProcessBuilder(cmd);
+		runProcess(pb, log);
+	}
 
-    private static void addProxy(ArrayList<String> args) {
-        // if set, pip takes environment variables http_proxy and https_proxy
-        if (System.getenv("http_proxy") == null && System.getenv("https_proxy") == null) {
-            // if not set, use --proxy param
-            ProxySelector proxySelector = ProxySelector.getDefault();
-            List<Proxy> proxies = proxySelector.select(URI.create("https://pypi.org"));
+	private static void addProxy(ArrayList<String> args) {
+		// if set, pip takes environment variables http_proxy and https_proxy
+		if (System.getenv("http_proxy") == null && System.getenv("https_proxy") == null) {
+			// if not set, use --proxy param
+			ProxySelector proxySelector = ProxySelector.getDefault();
+			List<Proxy> proxies = proxySelector.select(URI.create("https://pypi.org"));
 
-            String proxyAddr = null;
-            for (Proxy proxy : proxies) {
-                if (proxy.type() == Proxy.Type.HTTP) {
-                    proxyAddr = fixProtocol(proxy.address().toString(), "http");
-                    break;
-                }
-            }
-            if (proxyAddr != null) {
-                args.add("--proxy");
-                args.add(proxyAddr);
-            }
-        }
-    }
+			String proxyAddr = null;
+			for (Proxy proxy : proxies) {
+				if (proxy.type() == Proxy.Type.HTTP) {
+					proxyAddr = fixProtocol(proxy.address().toString(), "http");
+					break;
+				}
+			}
+			if (proxyAddr != null) {
+				args.add("--proxy");
+				args.add(proxyAddr);
+			}
+		}
+	}
 
-    private static String fixProtocol(String proxyAddress, String protocol) {
-        return proxyAddress.startsWith(protocol) ? proxyAddress : protocol + "://" + proxyAddress;
-    }
+	private static String fixProtocol(String proxyAddress, String protocol) {
+		return proxyAddress.startsWith(protocol) ? proxyAddress : protocol + "://" + proxyAddress;
+	}
 
-    private static void runProcess(ProcessBuilder pb, BuildToolLog log) throws IOException, InterruptedException {
-        pb.redirectError();
-        pb.redirectOutput();
-        Process process = pb.start();
-        Thread outputReader = new Thread(() -> {
-            try (InputStream is = process.getInputStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    subProcessOut(log, line);
-                }
-            } catch (IOException e) {
-                // Do nothing for now. Probably is not good idea to stop the
-                // execution at this moment
-                warn(log, "exception while reading subprocess out", e);
-            }
-        });
-        outputReader.start();
+	private static void runProcess(ProcessBuilder pb, BuildToolLog log) throws IOException, InterruptedException {
+		pb.redirectError();
+		pb.redirectOutput();
+		Process process = pb.start();
+		Thread outputReader = new Thread(() -> {
+			try (InputStream is = process.getInputStream();
+					BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					subProcessOut(log, line);
+				}
+			} catch (IOException e) {
+				// Do nothing for now. Probably is not good idea to stop the
+				// execution at this moment
+				warn(log, "exception while reading subprocess out", e);
+			}
+		});
+		outputReader.start();
 
-        Thread errorReader = new Thread(() -> {
-            try {
-                BufferedReader errorBufferedReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                String line;
-                while ((line = errorBufferedReader.readLine()) != null) {
-                    subProcessErr(log, line);
-                }
-            } catch (IOException e) {
-                // Do nothing for now. Probably is not good idea to stop the
-                // execution at this moment
-                warn(log, "exception while reading subprocess err", e);
-            }
-        });
-        errorReader.start();
+		Thread errorReader = new Thread(() -> {
+			try {
+				BufferedReader errorBufferedReader = new BufferedReader(
+						new InputStreamReader(process.getErrorStream()));
+				String line;
+				while ((line = errorBufferedReader.readLine()) != null) {
+					subProcessErr(log, line);
+				}
+			} catch (IOException e) {
+				// Do nothing for now. Probably is not good idea to stop the
+				// execution at this moment
+				warn(log, "exception while reading subprocess err", e);
+			}
+		});
+		errorReader.start();
 
-        process.waitFor();
-        outputReader.join();
-        errorReader.join();
+		process.waitFor();
+		outputReader.join();
+		errorReader.join();
 
-        if (process.exitValue() != 0) {
-            throw new RuntimeException(String.format("Running command: '%s' ended with code %d.See the error output above.", String.join(" ", pb.command()), process.exitValue()));
-        }
-    }
+		if (process.exitValue() != 0) {
+			throw new RuntimeException(
+					String.format("Running command: '%s' ended with code %d.See the error output above.",
+							String.join(" ", pb.command()), process.exitValue()));
+		}
+	}
 
-    private static void warn(BuildToolLog log, String txt, Throwable t) {
-        if (log.isWarningEnabled()) {
-            log.warning(txt, t);
-        }
-    }
+	private static void warn(BuildToolLog log, String txt, Throwable t) {
+		if (log.isWarningEnabled()) {
+			log.warning(txt, t);
+		}
+	}
 
-    private static void infoCmd(BuildToolLog log, String msg, List<String> cmd) {
-        if (log.isInfoEnabled()) {
-            log.info(String.format("%s %s", msg, String.join(" ", cmd)));
-        }
-    }
+	private static void infoCmd(BuildToolLog log, String msg, List<String> cmd) {
+		if (log.isInfoEnabled()) {
+			log.info(String.format("%s %s", msg, String.join(" ", cmd)));
+		}
+	}
 
-    private static void subProcessOut(BuildToolLog log, String txt) {
-        if (log.isSubprocessOutEnabled()) {
-            log.subProcessOut(txt);
-        }
-    }
+	private static void subProcessOut(BuildToolLog log, String txt) {
+		if (log.isSubprocessOutEnabled()) {
+			log.subProcessOut(txt);
+		}
+	}
 
-    private static void subProcessErr(BuildToolLog log, String txt) {
-        if (log.isErrorEnabled()) {
-            log.subProcessErr(txt);
-        }
-    }
+	private static void subProcessErr(BuildToolLog log, String txt) {
+		if (log.isErrorEnabled()) {
+			log.subProcessErr(txt);
+		}
+	}
 }

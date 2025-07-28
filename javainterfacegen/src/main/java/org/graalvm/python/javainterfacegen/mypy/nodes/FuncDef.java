@@ -47,121 +47,112 @@ import org.graalvm.python.javainterfacegen.mypy.types.ProperType;
 import org.graalvm.python.javainterfacegen.python.GuestValueDefaultImpl;
 import org.graalvm.python.javainterfacegen.python.Utils;
 
-
 public interface FuncDef extends FuncItem, SymbolNode, Statement {
-    public static final String FQN = "mypy.nodes.FuncDef";
+	public static final String FQN = "mypy.nodes.FuncDef";
 
-    static class FuncDefImpl extends FuncItem.FuncItemImpl implements FuncDef {
+	static class FuncDefImpl extends FuncItem.FuncItemImpl implements FuncDef {
 
-        public FuncDefImpl(Value instance) {
-            super(instance);
-            if (instance == null) {
-                throw new UnsupportedOperationException("Can not create new FuncDefImpl from Guest instance null");
-            }
-            String instanceFQN = Utils.getFullyQualifedName(instance);
-            if (!FQN.equals(instanceFQN)) {
-                throw new UnsupportedOperationException("Can not create new FuncDefImpl from Guest instance " + instanceFQN);
-            }
-        }
+		public FuncDefImpl(Value instance) {
+			super(instance);
+			if (instance == null) {
+				throw new UnsupportedOperationException("Can not create new FuncDefImpl from Guest instance null");
+			}
+			String instanceFQN = Utils.getFullyQualifedName(instance);
+			if (!FQN.equals(instanceFQN)) {
+				throw new UnsupportedOperationException(
+						"Can not create new FuncDefImpl from Guest instance " + instanceFQN);
+			}
+		}
 
-        @Override
-        public String getName() {
-            return getValue().getMember("name").asString();
-        }
+		@Override
+		public String getName() {
+			return getValue().getMember("name").asString();
+		}
 
-        @Override
-        public boolean isDecorated() {
-            return getValue().getMember("is_decorated").asBoolean();
-        }
+		@Override
+		public boolean isDecorated() {
+			return getValue().getMember("is_decorated").asBoolean();
+		}
 
+		@Override
+		public List<Argument> getArguments() {
+			return FuncItem.getArgumentsImpl(getValue());
+		}
 
-        @Override
-        public List<Argument> getArguments() {
-            return FuncItem.getArgumentsImpl(getValue());
-        }
+		@Override
+		public List<String> getArgNames() {
+			return FuncItem.getArgNames(getValue());
+		}
 
-        @Override
-        public List<String> getArgNames() {
-            return FuncItem.getArgNames(getValue());
-        }
+		@Override
+		public List<TypeParam> getTypeArgs() {
+			return FuncItem.getTypeArgs(getValue());
+		}
 
+		@Override
+		public ProperType getType() {
+			return FuncBase.getTypeImpl(this);
+		}
 
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
 
-        @Override
-        public List<TypeParam> getTypeArgs() {
-            return FuncItem.getTypeArgs(getValue());
-        }
+		@Override
+		public String fullname() {
+			// TODO this is wrong, fullname is defined in SymbolNode and we should
+			// share the implementation
+			return getValue().getMember("fullname").asString();
+			// System.out.println(Utils.dir(getValue()));
+			// return "ahoj";
+		}
 
+		@Override
+		public boolean isConditional() {
+			return getValue().getMember("is_conditional").asBoolean();
+		}
 
+		@Override
+		public Value getAbstractStatus() {
+			return getValue().getMember("abstract_status");
+		}
 
-        @Override
-        public ProperType getType() {
-            return FuncBase.getTypeImpl(this);
-        }
+		@Override
+		public Value getOriginalDef() {
+			return getValue().getMember("original_def");
+		}
 
+		@Override
+		public boolean isTrivialBody() {
+			return getValue().getMember("is_trivial_body").asBoolean();
+		}
 
+		@Override
+		public boolean isMypyOnly() {
+			return getValue().getMember("is_mypy_only").asBoolean();
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
+		@Override
+		public Value getDataclassTransformSpec() {
+			return getValue().getMember("dataclass_transform_spec");
+		}
 
+		@Override
+		public String getDocstring() {
+			return getValue().getMember("docstring").asString();
+		}
 
-        @Override
-        public String fullname() {
-            // TODO this is wrong, fullname is defined in SymbolNode and we should
-            // share the implementation
-            return getValue().getMember("fullname").asString();
-//            System.out.println(Utils.dir(getValue()));
-//            return "ahoj";
-        }
+	}
 
-        @Override
-        public boolean isConditional() {
-            return getValue().getMember("is_conditional").asBoolean();
-        }
-
-        @Override
-        public Value getAbstractStatus() {
-            return getValue().getMember("abstract_status");
-        }
-
-        @Override
-        public Value getOriginalDef() {
-            return getValue().getMember("original_def");
-        }
-
-        @Override
-        public boolean isTrivialBody() {
-            return getValue().getMember("is_trivial_body").asBoolean();
-        }
-
-        @Override
-        public boolean isMypyOnly() {
-            return getValue().getMember("is_mypy_only").asBoolean();
-        }
-
-        @Override
-        public Value getDataclassTransformSpec() {
-            return getValue().getMember("dataclass_transform_spec");
-        }
-
-        @Override
-        public String getDocstring() {
-            return getValue().getMember("docstring").asString();
-        }
-
-    }
-
-    String getName();
-    boolean isDecorated();
-    boolean isConditional();
-    Value getAbstractStatus();
-    Value getOriginalDef();
-    boolean isTrivialBody();
-    boolean isMypyOnly();
-    Value getDataclassTransformSpec();
-    String getDocstring();
-
+	String getName();
+	boolean isDecorated();
+	boolean isConditional();
+	Value getAbstractStatus();
+	Value getOriginalDef();
+	boolean isTrivialBody();
+	boolean isMypyOnly();
+	Value getDataclassTransformSpec();
+	String getDocstring();
 
 }

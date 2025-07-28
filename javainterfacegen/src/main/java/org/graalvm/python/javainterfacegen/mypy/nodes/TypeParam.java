@@ -52,49 +52,49 @@ import org.graalvm.python.javainterfacegen.python.GuestValueDefaultImpl;
 import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface TypeParam extends GuestValue {
-    //"name", "kind", "upper_bound", "values"
+	// "name", "kind", "upper_bound", "values"
 
-    public static final String FQN = "mypy.nodes.TypeParam";
+	public static final String FQN = "mypy.nodes.TypeParam";
 
-    static class TypeParamImpl extends GuestValueDefaultImpl implements TypeParam {
+	static class TypeParamImpl extends GuestValueDefaultImpl implements TypeParam {
 
+		public TypeParamImpl(Value instance) {
+			super(instance);
+		}
 
-        public TypeParamImpl(Value instance) {
-            super(instance);
-        }
+		@Override
+		public String getName() {
+			return getValue().getMember("name").asString();
+		}
 
-        @Override
-        public String getName() {
-            return getValue().getMember("name").asString();
-        }
+		@Override
+		public int getKind() {
+			return getValue().getMember("kind").asInt();
+		}
 
-        @Override
-        public int getKind() {
-            return getValue().getMember("kind").asInt();
-        }
+		@Override
+		public Type getUpperBound() {
+			throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																			// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+		}
 
-        @Override
-        public Type getUpperBound() {
-            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-        }
+		@Override
+		public List<Type> getValues() {
+			Value values = getValue().getMember("values");
+			GuestArray<Type> result = new GuestArray<>(values, (value) -> {
+				String pythonFQN = Utils.getFullyQualifedName(value);
+				switch (pythonFQN) {
+					case CallableType.FQN :
+						return new CallableTypeImpl(value);
+				}
+				throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+			});
+			return result;
+		}
+	}
 
-        @Override
-        public List<Type> getValues() {
-            Value values = getValue().getMember("values");
-            GuestArray<Type> result = new GuestArray<>(values, (value) -> {
-            String pythonFQN = Utils.getFullyQualifedName( value);
-            switch (pythonFQN) {
-                case CallableType.FQN:
-                    return new CallableTypeImpl(value);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        });
-        return result;
-        }
-    }
-
-    String getName();
-    int getKind();
-    Type getUpperBound();
-    List<Type> getValues();
+	String getName();
+	int getKind();
+	Type getUpperBound();
+	List<Type> getValues();
 }

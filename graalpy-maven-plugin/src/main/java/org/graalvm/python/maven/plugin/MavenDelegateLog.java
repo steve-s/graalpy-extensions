@@ -44,70 +44,70 @@ import org.apache.maven.plugin.logging.Log;
 import org.graalvm.python.embedding.tools.exec.BuildToolLog;
 
 final class MavenDelegateLog implements BuildToolLog {
-    private final Log delegate;
+	private final Log delegate;
 
-    MavenDelegateLog(Log delegate) {
-        this.delegate = delegate;
-    }
+	MavenDelegateLog(Log delegate) {
+		this.delegate = delegate;
+	}
 
-    @Override
-    public void info(String txt) {
-        delegate.info(txt);
-    }
+	@Override
+	public void info(String txt) {
+		delegate.info(txt);
+	}
 
-    @Override
-    public void warning(String txt) {
-        delegate.warn(txt);
-    }
+	@Override
+	public void warning(String txt) {
+		delegate.warn(txt);
+	}
 
-    @Override
-    public void warning(String txt, Throwable t) {
-        delegate.warn(txt, t);
-    }
+	@Override
+	public void warning(String txt, Throwable t) {
+		delegate.warn(txt, t);
+	}
 
-    @Override
-    public void error(String txt) {
-        delegate.error(txt);
-    }
+	@Override
+	public void error(String txt) {
+		delegate.error(txt);
+	}
 
-    @Override
-    public void debug(String txt) {
-        delegate.debug(txt);
-    }
+	@Override
+	public void debug(String txt) {
+		delegate.debug(txt);
+	}
 
-    @Override
-    public void subProcessOut(String out) {
-        // don't annotate output with [INFO]
-        System.out.println(out);
-    }
+	@Override
+	public void subProcessOut(String out) {
+		// don't annotate output with [INFO]
+		System.out.println(out);
+	}
 
-    @Override
-    public void subProcessErr(String err) {
-        delegate.error(err);
-    }
+	@Override
+	public void subProcessErr(String err) {
+		delegate.error(err);
+	}
 
-    @Override
-    public boolean isDebugEnabled() {
-        return delegate.isDebugEnabled();
-    }
+	@Override
+	public boolean isDebugEnabled() {
+		return delegate.isDebugEnabled();
+	}
 
-    @Override
-    public boolean isWarningEnabled() {
-        return delegate.isWarnEnabled();
-    }
+	@Override
+	public boolean isWarningEnabled() {
+		return delegate.isWarnEnabled();
+	}
 
-    @Override
-    public boolean isErrorEnabled() {
-        return delegate.isErrorEnabled();
-    }
+	@Override
+	public boolean isErrorEnabled() {
+		return delegate.isErrorEnabled();
+	}
 
-    @Override
-    public boolean isSubprocessOutEnabled() {
-        return delegate.isInfoEnabled();
-    }
+	@Override
+	public boolean isSubprocessOutEnabled() {
+		return delegate.isInfoEnabled();
+	}
 
-    @Override
-    public boolean isInfoEnabled() {
-        return delegate.isInfoEnabled();
-    }
+	@Override
+	public boolean isInfoEnabled() {
+		return delegate.isInfoEnabled();
+	}
 }

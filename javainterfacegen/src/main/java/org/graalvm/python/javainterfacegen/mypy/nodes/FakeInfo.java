@@ -46,31 +46,32 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo.TypeInfoImpl;
 import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface FakeInfo extends TypeInfo {
-    // Python def: FakeInfo(mypy.nodes.TypeInfo)
+	// Python def: FakeInfo(mypy.nodes.TypeInfo)
 
-    public static final String FFQN = "mypy.nodes.FakeInfo";
+	public static final String FFQN = "mypy.nodes.FakeInfo";
 
-    static class FakeInfoImpl extends TypeInfoImpl implements FakeInfo {
+	static class FakeInfoImpl extends TypeInfoImpl implements FakeInfo {
 
-        public FakeInfoImpl(Value instance) {
-            super(instance);
-            System.out.println("Creating Fake Info: " + instance.getMember("msg").asString());
-            String instanceFQN = Utils.getFullyQualifedName(instance);
-            if (!FFQN.equals(instanceFQN)) {
-                throw new UnsupportedOperationException("Can not create new FakeInfoImpl from Guest instance " + instanceFQN);
-            }
-        }
+		public FakeInfoImpl(Value instance) {
+			super(instance);
+			System.out.println("Creating Fake Info: " + instance.getMember("msg").asString());
+			String instanceFQN = Utils.getFullyQualifedName(instance);
+			if (!FFQN.equals(instanceFQN)) {
+				throw new UnsupportedOperationException(
+						"Can not create new FakeInfoImpl from Guest instance " + instanceFQN);
+			}
+		}
 
-        @Override
-        public String getMsg() {
-            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-        }
+		@Override
+		public String getMsg() {
+			throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																			// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+		}
 
+	}
 
-    }
-
-    // getter for class field 'msg', Python type: builtins.str
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public String getMsg();
+	// getter for class field 'msg', Python type: builtins.str
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public String getMsg();
 
 }

@@ -47,51 +47,56 @@ import java.util.Map;
 
 public class DefaultConfigurationLoader implements ConfigurationLoader {
 
-    private  Map<String, Object> global;
+	private Map<String, Object> global;
 
-    public DefaultConfigurationLoader() {
-        this.global = null;
-    }
+	public DefaultConfigurationLoader() {
+		this.global = null;
+	}
 
-    @Override
-    public Map<String, Object> loadConfiguration() throws Exception {
-        if (global == null) {
-            global = new HashMap();
-            global.put(Configuration.P_INDENTATION, 4);
-            global.put(Configuration.P_TARGET_INTERFACE_PACKAGE, "org.mycompany.api");
-            global.put(Configuration.P_TARGET_IMPLEMENTATION_PACKAGE, "org.mycompany.implementation");
-            global.put(Configuration.P_FUNCTION_GENERATORS, List.of("org.graalvm.python.javainterfacegen.generator.impl.JustInterfacesGeneratorImpl"));
-            global.put(Configuration.P_NAME_GENERATOR, "org.graalvm.python.javainterfacegen.generator.impl.NameGeneratorImpl");
-            global.put(Configuration.P_EXCLUDED_IMPORTS, List.of("java.lang.*"));
-            global.put(Configuration.P_ANY_JAVA_TYPE, "org.graalvm.polyglot.Value");
-            global.put(Configuration.P_TARGET_FOLDER, "./target/generated-sources/src");
-            global.put(Configuration.P_IMPLEMENTATION_NAME_SUFFIX, "Impl");
-            global.put(Configuration.P_GENERATE_BASE_CLASSES, "false");
-            global.put(Configuration.P_LOG_COMMENTS, "false");
+	@Override
+	public Map<String, Object> loadConfiguration() throws Exception {
+		if (global == null) {
+			global = new HashMap();
+			global.put(Configuration.P_INDENTATION, 4);
+			global.put(Configuration.P_TARGET_INTERFACE_PACKAGE, "org.mycompany.api");
+			global.put(Configuration.P_TARGET_IMPLEMENTATION_PACKAGE, "org.mycompany.implementation");
+			global.put(Configuration.P_FUNCTION_GENERATORS,
+					List.of("org.graalvm.python.javainterfacegen.generator.impl.JustInterfacesGeneratorImpl"));
+			global.put(Configuration.P_NAME_GENERATOR,
+					"org.graalvm.python.javainterfacegen.generator.impl.NameGeneratorImpl");
+			global.put(Configuration.P_EXCLUDED_IMPORTS, List.of("java.lang.*"));
+			global.put(Configuration.P_ANY_JAVA_TYPE, "org.graalvm.polyglot.Value");
+			global.put(Configuration.P_TARGET_FOLDER, "./target/generated-sources/src");
+			global.put(Configuration.P_IMPLEMENTATION_NAME_SUFFIX, "Impl");
+			global.put(Configuration.P_GENERATE_BASE_CLASSES, "false");
+			global.put(Configuration.P_LOG_COMMENTS, "false");
 
-            global.put(Configuration.P_TYPE_PACKAGE, "org.mycompany.api.types");
-            global.put(Configuration.P_TYPE_GENERATOR, "org.graalvm.python.javainterfacegen.generator.impl.TypeInterfaceGeneratorImpl");
+			global.put(Configuration.P_TYPE_PACKAGE, "org.mycompany.api.types");
+			global.put(Configuration.P_TYPE_GENERATOR,
+					"org.graalvm.python.javainterfacegen.generator.impl.TypeInterfaceGeneratorImpl");
 
-            global.put(Configuration.P_JAVADOC_STORAGE_MANAGER, "org.graalvm.python.javainterfacegen.generator.impl.JavadocStorageManagerYaml");
-            global.put(Configuration.P_JAVADOC_FOLDER, "./javadoc-cache");
-            global.put(Configuration.P_JAVADOC_GENERATORS, List.of("org.graalvm.python.javainterfacegen.generator.impl.JavadocGeneratorImpl"));
+			global.put(Configuration.P_JAVADOC_STORAGE_MANAGER,
+					"org.graalvm.python.javainterfacegen.generator.impl.JavadocStorageManagerYaml");
+			global.put(Configuration.P_JAVADOC_FOLDER, "./javadoc-cache");
+			global.put(Configuration.P_JAVADOC_GENERATORS,
+					List.of("org.graalvm.python.javainterfacegen.generator.impl.JavadocGeneratorImpl"));
 
-            global.put(Configuration.P_BASE_INTERFACE_PACKAGE, "org.mycompany.api.graalvm");
-            global.put(Configuration.P_ADD_GENERATED_TIMESTEMPS, true);
-            global.put(Configuration.P_ADD_LOCATION, true);
+			global.put(Configuration.P_BASE_INTERFACE_PACKAGE, "org.mycompany.api.graalvm");
+			global.put(Configuration.P_ADD_GENERATED_TIMESTEMPS, true);
+			global.put(Configuration.P_ADD_LOCATION, true);
 
-            global.put(Configuration.P_GENERATE_TYPE_INTERFACE, false);
+			global.put(Configuration.P_GENERATE_TYPE_INTERFACE, false);
 
-            global.put(Configuration.P_BASE_INTERFACE_PACKAGE, "org.mycompany.api");
-            global.put(Configuration.P_BASE_INTERFACE_NAME, "GraalValueBase");
+			global.put(Configuration.P_BASE_INTERFACE_PACKAGE, "org.mycompany.api");
+			global.put(Configuration.P_BASE_INTERFACE_NAME, "GraalValueBase");
 
-            global.put(Configuration.P_EXPORT_TYPES, true);
-            global.put(Configuration.P_EXPORT_EXCLUDED, Collections.EMPTY_LIST);
+			global.put(Configuration.P_EXPORT_TYPES, true);
+			global.put(Configuration.P_EXPORT_EXCLUDED, Collections.EMPTY_LIST);
 
-            global.put(Configuration.P_NATIVE_IMAGE_GENERATE_PROXY_CONFIG, true);
+			global.put(Configuration.P_NATIVE_IMAGE_GENERATE_PROXY_CONFIG, true);
 
-        }
-        return global;
-    }
+		}
+		return global;
+	}
 
 }

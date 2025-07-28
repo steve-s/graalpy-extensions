@@ -46,16 +46,16 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.MypyFile;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
 
 public interface NameGenerator {
-    String packageForInterface(Node node, GeneratorContext context);
-    String packageForImplementation(Node node, GeneratorContext context);
+	String packageForInterface(Node node, GeneratorContext context);
+	String packageForImplementation(Node node, GeneratorContext context);
 
-    String interfaceName(MypyFile mypyFile, GeneratorContext context);
-    String interfaceName(ClassDef classDef, GeneratorContext context);
+	String interfaceName(MypyFile mypyFile, GeneratorContext context);
+	String interfaceName(ClassDef classDef, GeneratorContext context);
 
-    String classImplementationName(MypyFile mypyFile, GeneratorContext context);
-    String classImplementationName(ClassDef classDef, GeneratorContext context);
+	String classImplementationName(MypyFile mypyFile, GeneratorContext context);
+	String classImplementationName(ClassDef classDef, GeneratorContext context);
 
-    String methodName(FuncDef funcDef, GeneratorContext context);
+	String methodName(FuncDef funcDef, GeneratorContext context);
 
-    String getterName(Node node, GeneratorContext context);
+	String getterName(Node node, GeneratorContext context);
 }

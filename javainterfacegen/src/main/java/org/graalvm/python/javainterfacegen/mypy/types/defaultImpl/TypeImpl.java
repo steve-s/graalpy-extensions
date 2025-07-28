@@ -48,36 +48,36 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class TypeImpl extends GuestValueDefaultImpl implements Type {
 
-    public TypeImpl(Value instance) {
-        super(instance);
-    }
+	public TypeImpl(Value instance) {
+		super(instance);
+	}
 
-//        @Override
-//        public <T> T accept(TypeVisitor<T> visitor) {
-//            throw new UnsupportedOperationException("Not implemented.");
-//        }
-    @Override
-    public boolean canBeTrue() {
-        return getValue().getMember("can_be_true").asBoolean();
-    }
+	// @Override
+	// public <T> T accept(TypeVisitor<T> visitor) {
+	// throw new UnsupportedOperationException("Not implemented.");
+	// }
+	@Override
+	public boolean canBeTrue() {
+		return getValue().getMember("can_be_true").asBoolean();
+	}
 
-    @Override
-    public boolean canBeFalse() {
-        return getValue().getMember("can_be_false").asBoolean();
-    }
+	@Override
+	public boolean canBeFalse() {
+		return getValue().getMember("can_be_false").asBoolean();
+	}
 
-    @Override
-    public boolean canBeTrueDefault() {
-        return getValue().invokeMember("can_be_true_default").asBoolean();
-    }
+	@Override
+	public boolean canBeTrueDefault() {
+		return getValue().invokeMember("can_be_true_default").asBoolean();
+	}
 
-    @Override
-    public boolean canBeFalseDefault() {
-        return getValue().invokeMember("can_be_false_default").asBoolean();
-    }
+	@Override
+	public boolean canBeFalseDefault() {
+		return getValue().invokeMember("can_be_false_default").asBoolean();
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        throw new UnsupportedOperationException("Not supported yet. " + Utils.getFullyQualifedName(getValue()));
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		throw new UnsupportedOperationException("Not supported yet. " + Utils.getFullyQualifedName(getValue()));
+	}
 }

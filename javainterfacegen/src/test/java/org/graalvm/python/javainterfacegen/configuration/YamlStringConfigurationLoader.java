@@ -8,23 +8,23 @@ import org.yaml.snakeyaml.Yaml;
 
 public class YamlStringConfigurationLoader implements ConfigurationLoader {
 
-    private final String text;
+	private final String text;
 
-    public YamlStringConfigurationLoader(String text) {
-        this.text = text;
-    }
+	public YamlStringConfigurationLoader(String text) {
+		this.text = text;
+	}
 
-    @Override
-    public Map<String, Object> loadConfiguration() throws Exception {
-        Map<String, Object> defaultConfig = new DefaultConfigurationLoader().loadConfiguration();
-        Map<String, Object> yamlConfig = null;
+	@Override
+	public Map<String, Object> loadConfiguration() throws Exception {
+		Map<String, Object> defaultConfig = new DefaultConfigurationLoader().loadConfiguration();
+		Map<String, Object> yamlConfig = null;
 
-        try (InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8))) {
-            Yaml yaml = new Yaml();
-            yamlConfig = yaml.load(inputStream);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return Configuration.merge(defaultConfig, yamlConfig);
-    }
+		try (InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8))) {
+			Yaml yaml = new Yaml();
+			yamlConfig = yaml.load(inputStream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return Configuration.merge(defaultConfig, yamlConfig);
+	}
 }

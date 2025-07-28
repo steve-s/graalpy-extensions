@@ -42,10 +42,9 @@ package org.graalvm.python.javainterfacegen.mypy.types;
 
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeAlias;
 
-
 public interface TypeAliasType extends Type {
-    public static final String FQN = "mypy.types.TypeAliasType";
+	public static final String FQN = "mypy.types.TypeAliasType";
 
-    TypeAlias getAlias();
-    String getTypeRef();
+	TypeAlias getAlias();
+	String getTypeRef();
 }

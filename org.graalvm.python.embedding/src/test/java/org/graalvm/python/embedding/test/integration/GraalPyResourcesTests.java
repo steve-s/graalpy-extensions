@@ -48,14 +48,14 @@ import org.graalvm.python.embedding.VirtualFileSystem;
 import org.junit.jupiter.api.Test;
 
 public class GraalPyResourcesTests {
-    @Test
-    public void sharedEngine() {
-        // simply check if we are able to create a context with a shared engine
-        Engine sharedEngine = Engine.create("python");
-        GraalPyResources.contextBuilder().engine(sharedEngine).build().close();
-        GraalPyResources.contextBuilder().engine(sharedEngine).build().close();
-        GraalPyResources.contextBuilder(Path.of("test")).engine(sharedEngine).build().close();
-        GraalPyResources.contextBuilder(VirtualFileSystem.newBuilder().build()).engine(sharedEngine).build().close();
-        sharedEngine.close();
-    }
+	@Test
+	public void sharedEngine() {
+		// simply check if we are able to create a context with a shared engine
+		Engine sharedEngine = Engine.create("python");
+		GraalPyResources.contextBuilder().engine(sharedEngine).build().close();
+		GraalPyResources.contextBuilder().engine(sharedEngine).build().close();
+		GraalPyResources.contextBuilder(Path.of("test")).engine(sharedEngine).build().close();
+		GraalPyResources.contextBuilder(VirtualFileSystem.newBuilder().build()).engine(sharedEngine).build().close();
+		sharedEngine.close();
+	}
 }

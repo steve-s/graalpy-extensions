@@ -48,44 +48,44 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class AnyTypeImpl extends TypeImpl implements AnyType {
 
-    public AnyTypeImpl(Value instance) {
-        super(instance);
-        String pythonFQN = Utils.getFullyQualifedName(instance);
-        if (!AnyType.FQN.equals(pythonFQN)) {
-            throw new UnsupportedOperationException("Creating AnyTypeImpl from " + pythonFQN + " Python type.");
-        }
-    }
+	public AnyTypeImpl(Value instance) {
+		super(instance);
+		String pythonFQN = Utils.getFullyQualifedName(instance);
+		if (!AnyType.FQN.equals(pythonFQN)) {
+			throw new UnsupportedOperationException("Creating AnyTypeImpl from " + pythonFQN + " Python type.");
+		}
+	}
 
-    @Override
-    public int getTypeOfAny() {
-        return getValue().getMember("type_of_any").asInt();
-    }
+	@Override
+	public int getTypeOfAny() {
+		return getValue().getMember("type_of_any").asInt();
+	}
 
-    @Override
-    public Optional<AnyType> getSourceAny() {
-        Value sourceAny = getValue().getMember("source_any");
-        String pythonFQN = Utils.getFullyQualifedName(sourceAny);
-        switch (pythonFQN) {
-            case AnyType.FQN:
-                return Optional.of(new AnyTypeImpl(sourceAny));
+	@Override
+	public Optional<AnyType> getSourceAny() {
+		Value sourceAny = getValue().getMember("source_any");
+		String pythonFQN = Utils.getFullyQualifedName(sourceAny);
+		switch (pythonFQN) {
+			case AnyType.FQN :
+				return Optional.of(new AnyTypeImpl(sourceAny));
 
-        }
-        throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-    }
+		}
+		throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
-    @Override
-    public boolean isFromError() {
-        return getValue().invokeMember("is_from_error").asBoolean();
-    }
+	@Override
+	public boolean isFromError() {
+		return getValue().invokeMember("is_from_error").asBoolean();
+	}
 
-    @Override
-    public Optional<String> getMissingImportName() {
-        return Optional.of(getValue().getMember("missing_import_name").asString());
-    }
+	@Override
+	public Optional<String> getMissingImportName() {
+		return Optional.of(getValue().getMember("missing_import_name").asString());
+	}
 
 }

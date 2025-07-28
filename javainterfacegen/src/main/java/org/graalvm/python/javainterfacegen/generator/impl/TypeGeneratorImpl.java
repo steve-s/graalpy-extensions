@@ -79,366 +79,358 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class TypeGeneratorImpl implements TypeGenerator {
 
-    private static final String TEMPLATE = """
-{{license}}
+	private static final String TEMPLATE = """
+			{{license}}
 
-{{generatedinfo}}
+			{{generatedinfo}}
 
-package {{package}};
-                                                     
-{{imports}}
+			package {{package}};
 
-{{javadoc}}
-public class {{name}} {
-                                                                                
-{{content}}
-}
-""";
-    private static final String TEMPLATE_FIELD = "{{indent}}private final Optional<{{type}}> {{name}};";
-    private static final String TEMPLATE_IS_METHOD = """
-{{indent}}public boolean is{{Name}}() {
-{{indent+1}}return {{name}}.isPresent();
-{{indent}}}
-""";
-    private static final String TEMPLATE_IS_NONE = """
-{{indent}}public boolean isNone() {
-{{indent+1}}return {{exp}};
-{{indent}}}
-""";
-    private static final String TEMPLATE_GETTER = """
-{{indent}}public Optional<{{type}}> get{{Name}}() {
-{{indent+1}}return {{name}};
-{{indent}}}
-""";
-    private static final String TEMPLATE_CONSTRUCTOR = """
-{{indent}}public {{typename}}({{type}} {{name}}) {
-{{indent+1}}this.{{name}} = Optional.of({{name}});
-{{others}}
-{{indent}}}
-""";
-    private static final String TEMPLATE_CONSTRUCTOR_NONE = """
-{{indent}}public {{typename}}() {
-{{others}}
-{{indent}}}
-""";
-    private static final String TEMPLATE_TOSTRING = """
-{{indent}}@Override                                          
-{{indent}}public String toString() {
-{{body}}
-{{indent+1}}return "None";
-{{indent}}}
-""";
-    private static final String TEMPLATE_TOSTRING_PART = """
-{{indent+1}}if(!{{name}}.isEmpty()) {
-{{indent+2}}return {{name}}.toString();
-{{indent+1}}}
-""";
-    private static final String TEMPLATE_CONSTRUCTOR_OTHER_LINE = "{{indent+1}}this.{{name}} = Optional.empty();";
+			{{imports}}
 
-    @Override
-    public String createType(Type type, GeneratorContext context, String javaPackage, String name) {
-        String template = TEMPLATE;
-        template = template.replace("{{license}}", GeneratorUtils.getLicense(context));
+			{{javadoc}}
+			public class {{name}} {
 
-        String generatedInfo = "";
-        if (context.addTimestamp()) {
-            generatedInfo = GeneratorUtils.generateTimeStamp() + '\n';
-        }
-        template = template.replace("{{generatedinfo}}", generatedInfo);
+			{{content}}
+			}
+			""";
+	private static final String TEMPLATE_FIELD = "{{indent}}private final Optional<{{type}}> {{name}};";
+	private static final String TEMPLATE_IS_METHOD = """
+			{{indent}}public boolean is{{Name}}() {
+			{{indent+1}}return {{name}}.isPresent();
+			{{indent}}}
+			""";
+	private static final String TEMPLATE_IS_NONE = """
+			{{indent}}public boolean isNone() {
+			{{indent+1}}return {{exp}};
+			{{indent}}}
+			""";
+	private static final String TEMPLATE_GETTER = """
+			{{indent}}public Optional<{{type}}> get{{Name}}() {
+			{{indent+1}}return {{name}};
+			{{indent}}}
+			""";
+	private static final String TEMPLATE_CONSTRUCTOR = """
+			{{indent}}public {{typename}}({{type}} {{name}}) {
+			{{indent+1}}this.{{name}} = Optional.of({{name}});
+			{{others}}
+			{{indent}}}
+			""";
+	private static final String TEMPLATE_CONSTRUCTOR_NONE = """
+			{{indent}}public {{typename}}() {
+			{{others}}
+			{{indent}}}
+			""";
+	private static final String TEMPLATE_TOSTRING = """
+			{{indent}}@Override
+			{{indent}}public String toString() {
+			{{body}}
+			{{indent+1}}return "None";
+			{{indent}}}
+			""";
+	private static final String TEMPLATE_TOSTRING_PART = """
+			{{indent+1}}if(!{{name}}.isEmpty()) {
+			{{indent+2}}return {{name}}.toString();
+			{{indent+1}}}
+			""";
+	private static final String TEMPLATE_CONSTRUCTOR_OTHER_LINE = "{{indent+1}}this.{{name}} = Optional.empty();";
 
-        template = template.replace("{{package}}", javaPackage);
+	@Override
+	public String createType(Type type, GeneratorContext context, String javaPackage, String name) {
+		String template = TEMPLATE;
+		template = template.replace("{{license}}", GeneratorUtils.getLicense(context));
 
-        Configuration config = context.getConfig();
+		String generatedInfo = "";
+		if (context.addTimestamp()) {
+			generatedInfo = GeneratorUtils.generateTimeStamp() + '\n';
+		}
+		template = template.replace("{{generatedinfo}}", generatedInfo);
 
-        GeneratorContext fileContext = new GeneratorContext(null, config, null, true);
-        fileContext.setJavaFQN(javaPackage + "." + name);
-//        template = template.replace("{{extends}}", "GuestValue");
+		template = template.replace("{{package}}", javaPackage);
 
-//        fileContext.addImport(config.getBaseAPIPackage(context) + ".GuestValue");
-        template = template.replace("{{javadoc}}", GeneratorUtils.createJavaDoc("Generated from Python type: " + type.toString()));
-        template = template.replace("{{name}}", name);
+		Configuration config = context.getConfig();
 
-        fileContext.increaseIndentLevel();
-        template = template.replace("{{content}}", getBody(fileContext, type, name));
-        fileContext.decreaseIndentLevel();
+		GeneratorContext fileContext = new GeneratorContext(null, config, null, true);
+		fileContext.setJavaFQN(javaPackage + "." + name);
+		// template = template.replace("{{extends}}", "GuestValue");
 
-        template = template.replace("{{imports}}", GeneratorUtils.generateImports(fileContext.getImports()));
+		// fileContext.addImport(config.getBaseAPIPackage(context) + ".GuestValue");
+		template = template.replace("{{javadoc}}",
+				GeneratorUtils.createJavaDoc("Generated from Python type: " + type.toString()));
+		template = template.replace("{{name}}", name);
 
-        try {
-            GeneratorUtils.saveFile(context, javaPackage, name, template);
-        } catch (IOException ex) {
-            Logger.getLogger(TransformerVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return template;
-    }
+		fileContext.increaseIndentLevel();
+		template = template.replace("{{content}}", getBody(fileContext, type, name));
+		fileContext.decreaseIndentLevel();
 
-    private static class BodyBuilder implements TypeVisitor<String> {
+		template = template.replace("{{imports}}", GeneratorUtils.generateImports(fileContext.getImports()));
 
-        private final String typeName;
-        private final GeneratorContext context;
-        private final Map<String, String> fields;
+		try {
+			GeneratorUtils.saveFile(context, javaPackage, name, template);
+		} catch (IOException ex) {
+			Logger.getLogger(TransformerVisitor.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		return template;
+	}
 
-        private boolean firstLevel;
-        protected boolean hasNone;
+	private static class BodyBuilder implements TypeVisitor<String> {
 
-        public BodyBuilder(GeneratorContext context, String typeName) {
-            this.context = context;
-            this.typeName = typeName;
-            this.fields = new TreeMap();
-            this.firstLevel = true;
-        }
+		private final String typeName;
+		private final GeneratorContext context;
+		private final Map<String, String> fields;
 
-        @Override
-        public String visit(AnyType anyType) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		private boolean firstLevel;
+		protected boolean hasNone;
 
-        @Override
-        public String visit(CallableType callableType) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		public BodyBuilder(GeneratorContext context, String typeName) {
+			this.context = context;
+			this.typeName = typeName;
+			this.fields = new TreeMap();
+			this.firstLevel = true;
+		}
 
-        @Override
-        public String visit(Instance instance) {
-            TypeInfo info = instance.getType();
-            String name = GeneratorUtils.convertToJavaIdentifierName(info.getName());
-            String fqn = info.getFullname();
-            fields.put(name, fqn);
-            return "";
-        }
+		@Override
+		public String visit(AnyType anyType) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public String visit(NoneType noneType) {
-            hasNone = true;
-            return "";
-        }
+		@Override
+		public String visit(CallableType callableType) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public String visit(UnionType unionType) {
-            if (!firstLevel) {
-                return "Uninon";
-            }
-            Set<String> parts = new TreeSet();
-            List<Type> items = unionType.getItems();
-            firstLevel = false;
+		@Override
+		public String visit(Instance instance) {
+			TypeInfo info = instance.getType();
+			String name = GeneratorUtils.convertToJavaIdentifierName(info.getName());
+			String fqn = info.getFullname();
+			fields.put(name, fqn);
+			return "";
+		}
 
-//            boolean wasFirstLevel = firstLevel;
-//            firstLevel = false;
-            for (int i = 0; i < items.size(); i++) {
-                Type typeItem = items.get(i);
-                typeItem.accept(this);
-            }
-//            StringBuilder sb = new StringBuilder();
-////            if (!wasFirstLevel) {
+		@Override
+		public String visit(NoneType noneType) {
+			hasNone = true;
+			return "";
+		}
+
+		@Override
+		public String visit(UnionType unionType) {
+			if (!firstLevel) {
+				return "Uninon";
+			}
+			Set<String> parts = new TreeSet();
+			List<Type> items = unionType.getItems();
+			firstLevel = false;
+
+			// boolean wasFirstLevel = firstLevel;
+			// firstLevel = false;
+			for (int i = 0; i < items.size(); i++) {
+				Type typeItem = items.get(i);
+				typeItem.accept(this);
+			}
+			// StringBuilder sb = new StringBuilder();
+			////            if (!wasFirstLevel) {
 ////                sb.append("UnionOf");
 ////            }
-//            boolean first = true;
-//            for (String part : parts) {
-//                if (first) {
-//                    first = false;
-//                } else {
-//                    sb.append("Or");
-//                }
-//                sb.append(part);
-//            }
-//            if (hasNone) {
-//                sb.append("OrNone");
-//            }
-//            if (!wasFirstLevel) {
-//                sb.append("_");
-//            } else {
-//                // remove '_' at the end
-//                int index = sb.length();
-//                while (sb.charAt(--index) == '_') {
-//                    sb.deleteCharAt(index);
-//                }
-//            }
+			// boolean first = true;
+			// for (String part : parts) {
+			// if (first) {
+			// first = false;
+			// } else {
+			// sb.append("Or");
+			// }
+			// sb.append(part);
+			// }
+			// if (hasNone) {
+			// sb.append("OrNone");
+			// }
+			// if (!wasFirstLevel) {
+			// sb.append("_");
+			// } else {
+			// // remove '_' at the end
+			// int index = sb.length();
+			// while (sb.charAt(--index) == '_') {
+			// sb.deleteCharAt(index);
+			// }
+			// }
 
-//            return sb.toString();
-            return "";
+			// return sb.toString();
+			return "";
 
-        }
+		}
 
-        @Override
-        public String visit(UninhabitedType uType) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public String visit(UninhabitedType uType) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public String visit(TupleType tupleType) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public String visit(TupleType tupleType) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public String visit(TypeAliasType typeAliasType) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public String visit(TypeAliasType typeAliasType) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public String visit(TypeVarType typeVarType) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public String visit(TypeVarType typeVarType) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public String visit(LiteralType literalType) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public String visit(LiteralType literalType) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public String visit(TypeType typeType) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public String visit(TypeType typeType) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public String visit(Overloaded overloaded) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public String visit(Overloaded overloaded) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public String visit(ParamSpecType paramSpec) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public String visit(ParamSpecType paramSpec) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public String visit(Parameters parameters) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public String visit(Parameters parameters) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public String visit(TypedDictType typedDict) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-    }
+		@Override
+		public String visit(TypedDictType typedDict) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+	}
 
-    protected String getBody(GeneratorContext context, Type type, String typeName) {
-//        BodyBuilder builder = new BodyBuilder(context, typeName);
-//        type.accept(builder);
-//        Map<String, Type> fields = builder.fields;
-        Map<String, String> fields = new TreeMap();
-        boolean hasNone = false;
-        if (type instanceof UnionType union) {
-            for (int i = 0; i < union.getItems().size(); i++) {
-                Type item = union.getItems().get(i);
-                if (item instanceof NoneType) {
-                    hasNone = true;
-                } else {
-                    String itemTypeName = TypeManager.get().resolveJavaType(context, item, false, context.getDefaultJavaType());
-                    fields.put(
-                            GeneratorUtils.convertToJavaIdentifierName(TypeNameGenerator.createName(item)),
-                            TypeManager.get().resolveJavaType(context, item, false, context.getDefaultJavaType())
-                    );
-                }
-            }
-        }
-        if (type instanceof Instance instance) {
+	protected String getBody(GeneratorContext context, Type type, String typeName) {
+		// BodyBuilder builder = new BodyBuilder(context, typeName);
+		// type.accept(builder);
+		// Map<String, Type> fields = builder.fields;
+		Map<String, String> fields = new TreeMap();
+		boolean hasNone = false;
+		if (type instanceof UnionType union) {
+			for (int i = 0; i < union.getItems().size(); i++) {
+				Type item = union.getItems().get(i);
+				if (item instanceof NoneType) {
+					hasNone = true;
+				} else {
+					String itemTypeName = TypeManager.get().resolveJavaType(context, item, false,
+							context.getDefaultJavaType());
+					fields.put(GeneratorUtils.convertToJavaIdentifierName(TypeNameGenerator.createName(item)),
+							TypeManager.get().resolveJavaType(context, item, false, context.getDefaultJavaType()));
+				}
+			}
+		}
+		if (type instanceof Instance instance) {
 
-            String itemTypeName = TypeManager.get().resolveJavaType(context, instance, false, context.getDefaultJavaType());
-            fields.put(
-                    GeneratorUtils.convertToJavaIdentifierName(TypeNameGenerator.createName(instance)),
-                    TypeManager.get().resolveJavaType(context, instance, false, context.getDefaultJavaType())
-            );
+			String itemTypeName = TypeManager.get().resolveJavaType(context, instance, false,
+					context.getDefaultJavaType());
+			fields.put(GeneratorUtils.convertToJavaIdentifierName(TypeNameGenerator.createName(instance)),
+					TypeManager.get().resolveJavaType(context, instance, false, context.getDefaultJavaType()));
 
-        }
+		}
 
-        StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 
-        context.addImport("java.util.Optional");
+		context.addImport("java.util.Optional");
 
-        // fields
-        for (Map.Entry<String, String> field : fields.entrySet()) {
-            String name = field.getKey();
-            String fqn = field.getValue();
+		// fields
+		for (Map.Entry<String, String> field : fields.entrySet()) {
+			String name = field.getKey();
+			String fqn = field.getValue();
 
-            String fieldDecl = TEMPLATE_FIELD;
-            fieldDecl = fieldDecl.replace("{{name}}", name).replace("{{type}}",
-                    TypeManager.javaPrimitiveToWrapper(fqn));
-            sb.append(fieldDecl).append("\n");
-        }
-        sb.append("\n");
+			String fieldDecl = TEMPLATE_FIELD;
+			fieldDecl = fieldDecl.replace("{{name}}", name).replace("{{type}}",
+					TypeManager.javaPrimitiveToWrapper(fqn));
+			sb.append(fieldDecl).append("\n");
+		}
+		sb.append("\n");
 
-        // constructors
-        if (hasNone) {
-            String constructor = TEMPLATE_CONSTRUCTOR_NONE;
-            StringBuilder otherFields = new StringBuilder();
-            for (String otherName : fields.keySet()) {
-                String otherFieldLine = TEMPLATE_CONSTRUCTOR_OTHER_LINE;
-                otherFieldLine = otherFieldLine.replace("{{name}}", otherName);
-                otherFields.append(otherFieldLine).append("\n");
-            }
-            otherFields.deleteCharAt(otherFields.length() - 1);
-            sb.append(TEMPLATE_CONSTRUCTOR_NONE.replace("{{typename}}", typeName)
-                    .replace("{{others}}", otherFields.toString())
-            ).append("\n");
-        }
+		// constructors
+		if (hasNone) {
+			String constructor = TEMPLATE_CONSTRUCTOR_NONE;
+			StringBuilder otherFields = new StringBuilder();
+			for (String otherName : fields.keySet()) {
+				String otherFieldLine = TEMPLATE_CONSTRUCTOR_OTHER_LINE;
+				otherFieldLine = otherFieldLine.replace("{{name}}", otherName);
+				otherFields.append(otherFieldLine).append("\n");
+			}
+			otherFields.deleteCharAt(otherFields.length() - 1);
+			sb.append(TEMPLATE_CONSTRUCTOR_NONE.replace("{{typename}}", typeName).replace("{{others}}",
+					otherFields.toString())).append("\n");
+		}
 
-        for (Map.Entry<String, String> field : fields.entrySet()) {
-            String name = field.getKey();
-            String fqn = field.getValue();
+		for (Map.Entry<String, String> field : fields.entrySet()) {
+			String name = field.getKey();
+			String fqn = field.getValue();
 
-            String constructor = TEMPLATE_CONSTRUCTOR;
-            constructor = constructor.replace("{{typename}}", typeName);
-            constructor = constructor.replace("{{type}}", fqn);
-            constructor = constructor.replace("{{name}}", name);
+			String constructor = TEMPLATE_CONSTRUCTOR;
+			constructor = constructor.replace("{{typename}}", typeName);
+			constructor = constructor.replace("{{type}}", fqn);
+			constructor = constructor.replace("{{name}}", name);
 
-            StringBuilder otherFields = new StringBuilder();
-            for (String otherName : fields.keySet()) {
-                if (!name.endsWith(otherName)) {
-                    String otherFieldLine = TEMPLATE_CONSTRUCTOR_OTHER_LINE;
-                    otherFieldLine = otherFieldLine.replace("{{name}}", otherName);
-                    otherFields.append(otherFieldLine).append("\n");
-                }
-            }
-            if (!otherFields.isEmpty()) {
-                otherFields.deleteCharAt(otherFields.length() - 1);
-            }
-            constructor = constructor.replace("{{others}}", otherFields.toString());
-            sb.append(constructor).append("\n");
-        }
+			StringBuilder otherFields = new StringBuilder();
+			for (String otherName : fields.keySet()) {
+				if (!name.endsWith(otherName)) {
+					String otherFieldLine = TEMPLATE_CONSTRUCTOR_OTHER_LINE;
+					otherFieldLine = otherFieldLine.replace("{{name}}", otherName);
+					otherFields.append(otherFieldLine).append("\n");
+				}
+			}
+			if (!otherFields.isEmpty()) {
+				otherFields.deleteCharAt(otherFields.length() - 1);
+			}
+			constructor = constructor.replace("{{others}}", otherFields.toString());
+			sb.append(constructor).append("\n");
+		}
 
-        // is methods
-        if (hasNone) {
-            StringBuilder expr = new StringBuilder();
-            boolean first = true;
-            for (String name : fields.keySet()) {
-                if (first) {
-                    first = false;
-                } else {
-                    expr.append(" && ");
-                }
-                expr.append(name).append(".isEmpty()");
-            }
-            sb.append(TEMPLATE_IS_NONE.replace("{{exp}}", expr.toString()));
-            sb.append("\n");
-        }
+		// is methods
+		if (hasNone) {
+			StringBuilder expr = new StringBuilder();
+			boolean first = true;
+			for (String name : fields.keySet()) {
+				if (first) {
+					first = false;
+				} else {
+					expr.append(" && ");
+				}
+				expr.append(name).append(".isEmpty()");
+			}
+			sb.append(TEMPLATE_IS_NONE.replace("{{exp}}", expr.toString()));
+			sb.append("\n");
+		}
 
-        for (String name : fields.keySet()) {
-            sb.append(
-                    TEMPLATE_IS_METHOD.replace("{{name}}", name).
-                            replace("{{Name}}", GeneratorUtils.uppercaseFirstLetter(name)))
-                    .append("\n");
-        }
+		for (String name : fields.keySet()) {
+			sb.append(TEMPLATE_IS_METHOD.replace("{{name}}", name).replace("{{Name}}",
+					GeneratorUtils.uppercaseFirstLetter(name))).append("\n");
+		}
 
-        // getters
-        for (Map.Entry<String, String> field : fields.entrySet()) {
-            String name = field.getKey();
-            String fqn = field.getValue();
-            sb.append(
-                    TEMPLATE_GETTER.replace("{{type}}",
-                            TypeManager.javaPrimitiveToWrapper(fqn))
-                            .replace("{{name}}", name)
-                            .replace("{{Name}}", GeneratorUtils.uppercaseFirstLetter(name))
-            ).append("\n");
-        }
+		// getters
+		for (Map.Entry<String, String> field : fields.entrySet()) {
+			String name = field.getKey();
+			String fqn = field.getValue();
+			sb.append(TEMPLATE_GETTER.replace("{{type}}", TypeManager.javaPrimitiveToWrapper(fqn))
+					.replace("{{name}}", name).replace("{{Name}}", GeneratorUtils.uppercaseFirstLetter(name)))
+					.append("\n");
+		}
 
-        // toString
-        StringBuilder toStringBody = new StringBuilder();
-        for (String name : fields.keySet()) {
-            toStringBody.append(
-                    TEMPLATE_TOSTRING_PART.replace("{{name}}", name));
-        }
-        toStringBody.deleteCharAt(toStringBody.length() - 1);
-        sb.append(TEMPLATE_TOSTRING.replace("{{body}}", toStringBody.toString()));
-        sb.append("\n");
-        return GeneratorUtils.indentTemplate(context, sb.toString());
-    }
+		// toString
+		StringBuilder toStringBody = new StringBuilder();
+		for (String name : fields.keySet()) {
+			toStringBody.append(TEMPLATE_TOSTRING_PART.replace("{{name}}", name));
+		}
+		toStringBody.deleteCharAt(toStringBody.length() - 1);
+		sb.append(TEMPLATE_TOSTRING.replace("{{body}}", toStringBody.toString()));
+		sb.append("\n");
+		return GeneratorUtils.indentTemplate(context, sb.toString());
+	}
 }

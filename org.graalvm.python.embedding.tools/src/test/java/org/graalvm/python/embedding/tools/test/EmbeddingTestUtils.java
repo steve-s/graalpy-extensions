@@ -55,73 +55,75 @@ import org.graalvm.python.embedding.tools.vfs.VFSUtils;
 import org.graalvm.python.embedding.tools.vfs.VFSUtils.Launcher;
 
 public final class EmbeddingTestUtils {
-    private EmbeddingTestUtils() {
-    }
+	private EmbeddingTestUtils() {
+	}
 
-    public static void createVenv(Path venvDir, String graalPyVersion, BuildToolLog log, String... packages) throws IOException, VFSUtils.PackagesChangedException {
-        createVenv(venvDir, graalPyVersion, log, null, null, packages);
-    }
+	public static void createVenv(Path venvDir, String graalPyVersion, BuildToolLog log, String... packages)
+			throws IOException, VFSUtils.PackagesChangedException {
+		createVenv(venvDir, graalPyVersion, log, null, null, packages);
+	}
 
-    public static void createVenv(Path venvDir, String graalPyVersion, BuildToolLog log, Path lockFile, String missingLockFileWarning, String... packages)
-                    throws IOException, VFSUtils.PackagesChangedException {
-        try {
-            info(log, "<<<<<< create test venv %s <<<<<<", venvDir);
+	public static void createVenv(Path venvDir, String graalPyVersion, BuildToolLog log, Path lockFile,
+			String missingLockFileWarning, String... packages) throws IOException, VFSUtils.PackagesChangedException {
+		try {
+			info(log, "<<<<<< create test venv %s <<<<<<", venvDir);
 
-            Launcher launcher = createLauncher(venvDir);
-            if (lockFile != null) {
-                VFSUtils.createVenv(venvDir, Arrays.asList(packages), lockFile, missingLockFileWarning, launcher, graalPyVersion, log);
-            } else {
-                VFSUtils.createVenv(venvDir, Arrays.asList(packages), launcher, graalPyVersion, log);
-            }
-        } catch (RuntimeException e) {
-            System.err.println(getClasspath());
-            throw e;
-        } finally {
-            info(log, ">>>>>> create test venv %s >>>>>>", venvDir);
-        }
-    }
+			Launcher launcher = createLauncher(venvDir);
+			if (lockFile != null) {
+				VFSUtils.createVenv(venvDir, Arrays.asList(packages), lockFile, missingLockFileWarning, launcher,
+						graalPyVersion, log);
+			} else {
+				VFSUtils.createVenv(venvDir, Arrays.asList(packages), launcher, graalPyVersion, log);
+			}
+		} catch (RuntimeException e) {
+			System.err.println(getClasspath());
+			throw e;
+		} finally {
+			info(log, ">>>>>> create test venv %s >>>>>>", venvDir);
+		}
+	}
 
-    private static void info(BuildToolLog log, String txt, Object... args) {
-        if (log.isInfoEnabled()) {
-            log.info(String.format(txt, args));
-        }
-    }
+	private static void info(BuildToolLog log, String txt, Object... args) {
+		if (log.isInfoEnabled()) {
+			log.info(String.format(txt, args));
+		}
+	}
 
-    public static Launcher createLauncher(Path venvDir) {
-        return new Launcher(venvDir.getParent().resolve(VFSUtils.LAUNCHER_NAME)) {
-            @Override
-            public Set<String> computeClassPath() {
-                return getClasspath();
-            }
-        };
-    }
+	public static Launcher createLauncher(Path venvDir) {
+		return new Launcher(venvDir.getParent().resolve(VFSUtils.LAUNCHER_NAME)) {
+			@Override
+			public Set<String> computeClassPath() {
+				return getClasspath();
+			}
+		};
+	}
 
-    public static void deleteDirOnShutdown(Path tmpdir) {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                delete(tmpdir);
-            } catch (IOException e) {
-            }
-        }));
-    }
+	public static void deleteDirOnShutdown(Path tmpdir) {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			try {
+				delete(tmpdir);
+			} catch (IOException e) {
+			}
+		}));
+	}
 
-    public static void delete(Path dir) throws IOException {
-        try (var fs = Files.walk(dir)) {
-            fs.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-        }
-    }
+	public static void delete(Path dir) throws IOException {
+		try (var fs = Files.walk(dir)) {
+			fs.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+		}
+	}
 
-    private static Set<String> getClasspath() {
-        var sb = new ArrayList<String>();
-        var modPath = System.getProperty("jdk.module.path");
-        if (modPath != null) {
-            sb.add(modPath);
-        }
-        var classPath = System.getProperty("java.class.path");
-        if (classPath != null) {
-            sb.add(classPath);
-        }
-        var cp = String.join(File.pathSeparator, sb);
-        return Set.copyOf(Arrays.stream(cp.split(File.pathSeparator)).toList());
-    }
+	private static Set<String> getClasspath() {
+		var sb = new ArrayList<String>();
+		var modPath = System.getProperty("jdk.module.path");
+		if (modPath != null) {
+			sb.add(modPath);
+		}
+		var classPath = System.getProperty("java.class.path");
+		if (classPath != null) {
+			sb.add(classPath);
+		}
+		var cp = String.join(File.pathSeparator, sb);
+		return Set.copyOf(Arrays.stream(cp.split(File.pathSeparator)).toList());
+	}
 }

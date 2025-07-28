@@ -40,85 +40,83 @@
  */
 package org.graalvm.python.javainterfacegen.mypy.types;
 
-public abstract class DefaultTypeVisitor<T> implements TypeVisitor<T>{
+public abstract class DefaultTypeVisitor<T> implements TypeVisitor<T> {
 
-    abstract protected T defaultVisit(Type type);
+	abstract protected T defaultVisit(Type type);
 
-    @Override
-    public T visit(AnyType anyType) {
-        return defaultVisit(anyType);
-    }
+	@Override
+	public T visit(AnyType anyType) {
+		return defaultVisit(anyType);
+	}
 
-    @Override
-    public T visit(CallableType callableType) {
-        return defaultVisit(callableType);
-    }
+	@Override
+	public T visit(CallableType callableType) {
+		return defaultVisit(callableType);
+	}
 
-    @Override
-    public T visit(Instance instance) {
-        return defaultVisit(instance);
-    }
+	@Override
+	public T visit(Instance instance) {
+		return defaultVisit(instance);
+	}
 
-    @Override
-    public T visit(LiteralType literalType) {
-        return defaultVisit(literalType);
-    }
+	@Override
+	public T visit(LiteralType literalType) {
+		return defaultVisit(literalType);
+	}
 
-    @Override
-    public T visit(NoneType noneType) {
-        return defaultVisit(noneType);
-    }
+	@Override
+	public T visit(NoneType noneType) {
+		return defaultVisit(noneType);
+	}
 
-    @Override
-    public T visit(Overloaded overloaded) {
-        return defaultVisit(overloaded);
-    }
+	@Override
+	public T visit(Overloaded overloaded) {
+		return defaultVisit(overloaded);
+	}
 
-    @Override
-    public T visit(ParamSpecType paramSpec) {
-        return defaultVisit(paramSpec);
-    }
+	@Override
+	public T visit(ParamSpecType paramSpec) {
+		return defaultVisit(paramSpec);
+	}
 
-    @Override
-    public T visit(Parameters parameters) {
-        return defaultVisit(parameters);
-    }
+	@Override
+	public T visit(Parameters parameters) {
+		return defaultVisit(parameters);
+	}
 
-    @Override
-    public T visit(UnionType unionType) {
-        return defaultVisit(unionType);
-    }
+	@Override
+	public T visit(UnionType unionType) {
+		return defaultVisit(unionType);
+	}
 
-    @Override
-    public T visit(UninhabitedType uType) {
-        return defaultVisit(uType);
-    }
+	@Override
+	public T visit(UninhabitedType uType) {
+		return defaultVisit(uType);
+	}
 
-    @Override
-    public T visit(TupleType tupleType) {
-        return defaultVisit(tupleType);
-    }
+	@Override
+	public T visit(TupleType tupleType) {
+		return defaultVisit(tupleType);
+	}
 
-    @Override
-    public T visit(TypeAliasType typeAliasType) {
-        return defaultVisit(typeAliasType);
-    }
+	@Override
+	public T visit(TypeAliasType typeAliasType) {
+		return defaultVisit(typeAliasType);
+	}
 
-    @Override
-    public T visit(TypeVarType typeVarType) {
-        return defaultVisit(typeVarType);
-    }
+	@Override
+	public T visit(TypeVarType typeVarType) {
+		return defaultVisit(typeVarType);
+	}
 
-    @Override
-    public T visit(TypeType typeType) {
-        return defaultVisit(typeType);
-    }
+	@Override
+	public T visit(TypeType typeType) {
+		return defaultVisit(typeType);
+	}
 
-    @Override
-    public T visit(TypedDictType typedDict) {
-        return defaultVisit(typedDict);
-    }
-
-
+	@Override
+	public T visit(TypedDictType typedDict) {
+		return defaultVisit(typedDict);
+	}
 
 }

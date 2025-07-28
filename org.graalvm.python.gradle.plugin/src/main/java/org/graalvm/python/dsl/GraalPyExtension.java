@@ -49,71 +49,75 @@ import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.Nested;
 
 public interface GraalPyExtension {
-    /**
-     * Tells whether to use the community version.
-     *
-     * @return {@code true} if the community artifacts should be used, default is false
-     */
-    Property<Boolean> getCommunity();
+	/**
+	 * Tells whether to use the community version.
+	 *
+	 * @return {@code true} if the community artifacts should be used, default is
+	 *         false
+	 */
+	Property<Boolean> getCommunity();
 
-    /**
-     * Deprecated: use {@link #getExternalDirectory()}.
-     */
-    DirectoryProperty getPythonResourcesDirectory();
+	/**
+	 * Deprecated: use {@link #getExternalDirectory()}.
+	 */
+	DirectoryProperty getPythonResourcesDirectory();
 
-    /**
-     * Optional external directory supposed to be populated with python resources, namely the
-     * virtual environment in the "venv" subdirectory. Existing files and directories other
-     * than the "venv" subdirectory will not be touched by the plugin and can be maintained manually.
-     * Mutually exclusive with {@link #getResourceDirectory()}.
-     */
-    DirectoryProperty getExternalDirectory();
+	/**
+	 * Optional external directory supposed to be populated with python resources,
+	 * namely the virtual environment in the "venv" subdirectory. Existing files and
+	 * directories other than the "venv" subdirectory will not be touched by the
+	 * plugin and can be maintained manually. Mutually exclusive with
+	 * {@link #getResourceDirectory()}.
+	 */
+	DirectoryProperty getExternalDirectory();
 
-    /**
-     * Directory within Java resources that should be used for the virtual filesystem.
-     * The virtual environment will be deployed into "venv" subdirectory.
-     * Mutually exclusive with {@link #getExternalDirectory()}.
-     */
-    Property<String> getResourceDirectory();
+	/**
+	 * Directory within Java resources that should be used for the virtual
+	 * filesystem. The virtual environment will be deployed into "venv"
+	 * subdirectory. Mutually exclusive with {@link #getExternalDirectory()}.
+	 */
+	Property<String> getResourceDirectory();
 
-    /**
-     * GraalPy lock file.
-     *
-     * If present then used as exclusive input when installing python packages
-     * for GraalPy usage instead of {@link #getPackages()}.
-     *
-     * @see #getPackages()
-     */
-    RegularFileProperty getGraalPyLockFile();
+	/**
+	 * GraalPy lock file.
+	 *
+	 * If present then used as exclusive input when installing python packages for
+	 * GraalPy usage instead of {@link #getPackages()}.
+	 *
+	 * @see #getPackages()
+	 */
+	RegularFileProperty getGraalPyLockFile();
 
-    /**
-     * Experimental property. Allows overriding the default Polyglot and GraalPy version.
-     * This is intended only for testing of new unreleased versions. It is recommended
-     * to use corresponding versions of GraalPy Gradle plugin and the polyglot runtime.
-     */
-    @Incubating
-    Property<String> getPolyglotVersion();
+	/**
+	 * Experimental property. Allows overriding the default Polyglot and GraalPy
+	 * version. This is intended only for testing of new unreleased versions. It is
+	 * recommended to use corresponding versions of GraalPy Gradle plugin and the
+	 * polyglot runtime.
+	 */
+	@Incubating
+	Property<String> getPolyglotVersion();
 
-    /**
-     * Determines third party python packages to be installed for GraalPy usage in case
-     * no GraalPy lock file is provided by {@link #getGraalPyLockFile()}.
-     *
-     * @see #getGraalPyLockFile()
-     */
-    SetProperty<String> getPackages();
+	/**
+	 * Determines third party python packages to be installed for GraalPy usage in
+	 * case no GraalPy lock file is provided by {@link #getGraalPyLockFile()}.
+	 *
+	 * @see #getGraalPyLockFile()
+	 */
+	SetProperty<String> getPackages();
 
-    /**
-     * Determines what parts of graalpy stdlib are supposed to be available for graalpy.
-     */
-    @Nested
-    PythonHomeInfo getPythonHome();
+	/**
+	 * Determines what parts of graalpy stdlib are supposed to be available for
+	 * graalpy.
+	 */
+	@Nested
+	PythonHomeInfo getPythonHome();
 
-    /**
-     * Configures the PythonHome object using provided closure. This provides support for closure
-     * based configuration, i.e.: {@code pythonHome { ... }}.
-     */
-    @SuppressWarnings("unused")
-    default void pythonHome(Action<? super PythonHomeInfo> action) {
-        action.execute(getPythonHome());
-    }
+	/**
+	 * Configures the PythonHome object using provided closure. This provides
+	 * support for closure based configuration, i.e.: {@code pythonHome { ... }}.
+	 */
+	@SuppressWarnings("unused")
+	default void pythonHome(Action<? super PythonHomeInfo> action) {
+		action.execute(getPythonHome());
+	}
 }

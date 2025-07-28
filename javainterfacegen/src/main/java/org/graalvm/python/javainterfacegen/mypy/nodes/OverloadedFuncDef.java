@@ -47,91 +47,92 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface OverloadedFuncDef extends FuncBase, SymbolNode, Statement {
 
-    public static final String FQN = "mypy.nodes.OverloadedFuncDef";
+	public static final String FQN = "mypy.nodes.OverloadedFuncDef";
 
-    static class OverloadedFuncDefImpl extends FuncBaseImpl implements OverloadedFuncDef {
+	static class OverloadedFuncDefImpl extends FuncBaseImpl implements OverloadedFuncDef {
 
-        public OverloadedFuncDefImpl(Value instance) {
-            super(instance);
-            String instanceFQN = Utils.getFullyQualifedName(instance);
-            if (!FQN.equals(instanceFQN)) {
-                throw new UnsupportedOperationException("Can not create new OverloadedFuncDef from Guest instance " + instanceFQN);
-            }
-        }
+		public OverloadedFuncDefImpl(Value instance) {
+			super(instance);
+			String instanceFQN = Utils.getFullyQualifedName(instance);
+			if (!FQN.equals(instanceFQN)) {
+				throw new UnsupportedOperationException(
+						"Can not create new OverloadedFuncDef from Guest instance " + instanceFQN);
+			}
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
 
-        @Override
-        public List<SymbolNode> items() {
-            Value items = getValue().getMember("items");
-            GuestArray<SymbolNode> result = new GuestArray<>(items, (value) -> {
-                String pythonFQN = Utils.getFullyQualifedName(value);
-                switch (pythonFQN) {
-                    case FuncDef.FQN:
-                        return new FuncDef.FuncDefImpl(value);
-                    case Decorator.FQN:
-                        return new Decorator.DecoratorImpl(value);
-                }
-                throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-            });
-            return result;
-        }
+		@Override
+		public List<SymbolNode> items() {
+			Value items = getValue().getMember("items");
+			GuestArray<SymbolNode> result = new GuestArray<>(items, (value) -> {
+				String pythonFQN = Utils.getFullyQualifedName(value);
+				switch (pythonFQN) {
+					case FuncDef.FQN :
+						return new FuncDef.FuncDefImpl(value);
+					case Decorator.FQN :
+						return new Decorator.DecoratorImpl(value);
+				}
+				throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+			});
+			return result;
+		}
 
-        @Override
-        public List<SymbolNode> unanalyzed_items() {
-            Value items = getValue().getMember("unanalyzed_items");
-            GuestArray<SymbolNode> result = new GuestArray<>(items, (value) -> {
-                String pythonFQN = Utils.getFullyQualifedName(value);
-                switch (pythonFQN) {
-                    case FuncDef.FQN:
-                        return new FuncDef.FuncDefImpl(value);
-                    case Decorator.FQN:
-                        return new Decorator.DecoratorImpl(value);
-                }
-                throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-            });
-            return result;
-        }
+		@Override
+		public List<SymbolNode> unanalyzed_items() {
+			Value items = getValue().getMember("unanalyzed_items");
+			GuestArray<SymbolNode> result = new GuestArray<>(items, (value) -> {
+				String pythonFQN = Utils.getFullyQualifedName(value);
+				switch (pythonFQN) {
+					case FuncDef.FQN :
+						return new FuncDef.FuncDefImpl(value);
+					case Decorator.FQN :
+						return new Decorator.DecoratorImpl(value);
+				}
+				throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+			});
+			return result;
+		}
 
-        @Override
-        public SymbolNode impl() {
-            Value value = getValue().getMember("impl");
-            String pythonFQN = Utils.getFullyQualifedName(value);
-            switch (pythonFQN) {
-                case FuncDef.FQN:
-                    return new FuncDef.FuncDefImpl(value);
-                case Decorator.FQN:
-                    return new Decorator.DecoratorImpl(value);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        }
+		@Override
+		public SymbolNode impl() {
+			Value value = getValue().getMember("impl");
+			String pythonFQN = Utils.getFullyQualifedName(value);
+			switch (pythonFQN) {
+				case FuncDef.FQN :
+					return new FuncDef.FuncDefImpl(value);
+				case Decorator.FQN :
+					return new Decorator.DecoratorImpl(value);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		}
 
-        @Override
-        public boolean isDynamic() {
-            return getValue().invokeMember("is_dynamic").asBoolean();
-        }
+		@Override
+		public boolean isDynamic() {
+			return getValue().invokeMember("is_dynamic").asBoolean();
+		}
 
-        @Override
-        public String name() {
-            return getValue().getMember("name").asString();
-        }
+		@Override
+		public String name() {
+			return getValue().getMember("name").asString();
+		}
 
-        @Override
-        public String fullname() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-    }
+		@Override
+		public String fullname() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+	}
 
-    boolean isDynamic();
+	boolean isDynamic();
 
-    String name();
+	String name();
 
-    List<SymbolNode> items();
+	List<SymbolNode> items();
 
-    List<SymbolNode> unanalyzed_items();
+	List<SymbolNode> unanalyzed_items();
 
-    SymbolNode impl();
+	SymbolNode impl();
 }

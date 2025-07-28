@@ -42,17 +42,17 @@ package org.graalvm.python.javainterfacegen.mypy.nodes;
 
 import org.graalvm.polyglot.Value;
 
-public interface Expression  extends Node {
+public interface Expression extends Node {
 
-    static class ExpressionImpl extends Node.NodeImpl implements Expression {
+	static class ExpressionImpl extends Node.NodeImpl implements Expression {
 
-        public ExpressionImpl(Value instance) {
-            super(instance);
-        }
+		public ExpressionImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            throw new UnsupportedOperationException("Not implemented.");
-        }
-    }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			throw new UnsupportedOperationException("Not implemented.");
+		}
+	}
 }

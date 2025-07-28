@@ -42,19 +42,19 @@ package org.graalvm.python.javainterfacegen.mypy.nodes;
 
 import org.graalvm.polyglot.Value;
 
-public interface TypeVarExpr  extends TypeVarLikeExpr {
+public interface TypeVarExpr extends TypeVarLikeExpr {
 
-    public static final String FQN = "mypy.nodes.TypeVarExpr";
+	public static final String FQN = "mypy.nodes.TypeVarExpr";
 
-    static class TypeVarExprImpl extends SymbolNode.SymbolNodeImpl implements TypeVarExpr {
+	static class TypeVarExprImpl extends SymbolNode.SymbolNodeImpl implements TypeVarExpr {
 
-        public TypeVarExprImpl(Value instance) {
-            super(instance);
-        }
+		public TypeVarExprImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
-    }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
+	}
 }

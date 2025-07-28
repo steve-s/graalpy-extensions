@@ -46,106 +46,106 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.python.GuestArray;
 import org.graalvm.python.javainterfacegen.python.Utils;
 
-
 public interface MypyFile extends SymbolNode {
 
-    public static final String FQN = "mypy.nodes.MypyFile";
+	public static final String FQN = "mypy.nodes.MypyFile";
 
-    static class MypyFileImpl extends SymbolNode.SymbolNodeImpl implements MypyFile {
+	static class MypyFileImpl extends SymbolNode.SymbolNodeImpl implements MypyFile {
 
-        private GuestArray<Statement> defs = null;
+		private GuestArray<Statement> defs = null;
 
-        public MypyFileImpl(Value instance) {
-            super(instance);
-        }
+		public MypyFileImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public String getName() {
-            Value result = getValue().getMember("name");
-            if (result != null) {
-                return result.asString();
-            }
-            System.out.println("@@@@File name is null: " + getValue().toString());
-            return null;
-        }
+		@Override
+		public String getName() {
+			Value result = getValue().getMember("name");
+			if (result != null) {
+				return result.asString();
+			}
+			System.out.println("@@@@File name is null: " + getValue().toString());
+			return null;
+		}
 
-        @Override
-        public String getPath() {
-            Value path = getValue().getMember("path");
-            if (path == null) {
-                return null;
-            }
-            return path.asString();
-        }
+		@Override
+		public String getPath() {
+			Value path = getValue().getMember("path");
+			if (path == null) {
+				return null;
+			}
+			return path.asString();
+		}
 
-        @Override
-        public String getFullname() {
-            Value fullName = getValue().getMember("fullname");
-            return fullName != null ? fullName.asString() : null;
-        }
+		@Override
+		public String getFullname() {
+			Value fullName = getValue().getMember("fullname");
+			return fullName != null ? fullName.asString() : null;
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
 
-        @Override
-        public GuestArray<Statement> getDefs() {
-            if (defs == null) {
-                Value orig = getValue().getMember("defs");
-                GuestArray<Statement> result = new GuestArray<>(orig, (value) -> {
-                    String pythonFQN = Utils.getFullyQualifedName( value);
-                    switch (pythonFQN){
-                        case FuncDef.FQN:
-                            return new FuncDef.FuncDefImpl(value);
-                        case ClassDef.FQN:
-                            return new ClassDef.ClassDefImpl(value);
-                        case ExpressionStmt.FQN:
-                            return new ExpressionStmt.ExpressionStmtImpl(value);
-                        case Import.FQN:
-                            return new Import.ImportImpl(value);
-                        case ImportFrom.FQN:
-                            return new ImportFrom.ImportFromImpl(value);
-                        case ImportAll.FQN:
-                            return new ImportAll.ImportAllImpl(value);
-                        case AssignmentStmt.FQN:
-                            return new AssignmentStmt.AssignmentStmtImpl(value);
-                        case TryStmt.FQN:
-                            return new TryStmt.TryStmtImpl(value);
-                    }
-                    throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-                });
-                defs = result;
-            }
-            return defs;
-        }
+		@Override
+		public GuestArray<Statement> getDefs() {
+			if (defs == null) {
+				Value orig = getValue().getMember("defs");
+				GuestArray<Statement> result = new GuestArray<>(orig, (value) -> {
+					String pythonFQN = Utils.getFullyQualifedName(value);
+					switch (pythonFQN) {
+						case FuncDef.FQN :
+							return new FuncDef.FuncDefImpl(value);
+						case ClassDef.FQN :
+							return new ClassDef.ClassDefImpl(value);
+						case ExpressionStmt.FQN :
+							return new ExpressionStmt.ExpressionStmtImpl(value);
+						case Import.FQN :
+							return new Import.ImportImpl(value);
+						case ImportFrom.FQN :
+							return new ImportFrom.ImportFromImpl(value);
+						case ImportAll.FQN :
+							return new ImportAll.ImportAllImpl(value);
+						case AssignmentStmt.FQN :
+							return new AssignmentStmt.AssignmentStmtImpl(value);
+						case TryStmt.FQN :
+							return new TryStmt.TryStmtImpl(value);
+					}
+					throw new UnsupportedOperationException(
+							"Unknown Python type " + pythonFQN + " to map to Java type.");
+				});
+				defs = result;
+			}
+			return defs;
+		}
 
-        @Override
-        public SymbolTable getNames() {
-            Value table = getValue().getMember("names");
+		@Override
+		public SymbolTable getNames() {
+			Value table = getValue().getMember("names");
 
-            String pythonFQN = Utils.getFullyQualifedName(table);
-            switch (pythonFQN){
-                case SymbolTable.FQN :
-                    return new SymbolTable.SymbolTableImpl(table);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        }
+			String pythonFQN = Utils.getFullyQualifedName(table);
+			switch (pythonFQN) {
+				case SymbolTable.FQN :
+					return new SymbolTable.SymbolTableImpl(table);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		}
 
-        @Override
-        public boolean isPackageInitFile() {
-            return getValue().invokeMember("is_package_init_file").asBoolean();
-        }
+		@Override
+		public boolean isPackageInitFile() {
+			return getValue().invokeMember("is_package_init_file").asBoolean();
+		}
 
-    }
+	}
 
-    String getName();
-    String getFullname();
-    String getPath();
-    List<Statement> getDefs();
+	String getName();
+	String getFullname();
+	String getPath();
+	List<Statement> getDefs();
 
-    SymbolTable getNames();
+	SymbolTable getNames();
 
-    boolean isPackageInitFile();
+	boolean isPackageInitFile();
 
 }

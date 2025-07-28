@@ -51,43 +51,43 @@ import org.graalvm.python.javainterfacegen.mypy.types.TypeVisitor;
 
 public class OverloadedImpl extends FunctionLikeImpl implements Overloaded {
 
-    public OverloadedImpl(Value instance) {
-        super(instance);
-    }
+	public OverloadedImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public Overloaded withName(String name) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Overloaded withName(String name) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public TypeInfo typeObject() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public TypeInfo typeObject() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Map<String, Value> serialize() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Map<String, Value> serialize() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Overloaded withUnpackedKwargs() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Overloaded withUnpackedKwargs() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Optional<String> name() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Optional<String> name() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public List<CallableType> getItems() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public List<CallableType> getItems() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
 }

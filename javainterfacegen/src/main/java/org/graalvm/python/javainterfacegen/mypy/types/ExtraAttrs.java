@@ -49,33 +49,35 @@ import org.graalvm.python.javainterfacegen.python.GuestValue;
 /**
  * Summary of module attributes and types.
  *
- * This is used for instances of types.ModuleType, because they can have different
- * attributes per instance, and for type narrowing with hasattr() checks.
+ * This is used for instances of types.ModuleType, because they can have
+ * different attributes per instance, and for type narrowing with hasattr()
+ * checks.
  */
 public interface ExtraAttrs extends GuestValue {
-    // Python def: ExtraAttrs(builtins.object)
+	// Python def: ExtraAttrs(builtins.object)
 
-    // Python signature: def (self: mypy.types.ExtraAttrs) -> builtins.dict[builtins.str, Any]
-    // type class of return type: mypy.types.TypeAliasType
-    public Map<String, Value> serialize();
+	// Python signature: def (self: mypy.types.ExtraAttrs) ->
+	// builtins.dict[builtins.str, Any]
+	// type class of return type: mypy.types.TypeAliasType
+	public Map<String, Value> serialize();
 
-    // getter for class field 'immutable', Python type: builtins.set[builtins.str]
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public Set<String> getImmutable();
+	// getter for class field 'immutable', Python type: builtins.set[builtins.str]
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public Set<String> getImmutable();
 
-    // Python signature: def (self: mypy.types.ExtraAttrs) -> mypy.types.ExtraAttrs
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-//    public ExtraAttrs copy();
+	// Python signature: def (self: mypy.types.ExtraAttrs) -> mypy.types.ExtraAttrs
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	// public ExtraAttrs copy();
 
-    // getter for class field 'mod_name', Python type: Union[builtins.str, None]
-    // type class: mypy.types.UnionType
-    public Optional<String> getModName();
+	// getter for class field 'mod_name', Python type: Union[builtins.str, None]
+	// type class: mypy.types.UnionType
+	public Optional<String> getModName();
 
+	// TODO unprocessed Decorator of function 'deserialize'
 
-    // TODO unprocessed Decorator of function 'deserialize'
-
-    // getter for class field 'attrs', Python type: builtins.dict[builtins.str, mypy.types.Type]
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public Map<String, Type> getAttrs();
+	// getter for class field 'attrs', Python type: builtins.dict[builtins.str,
+	// mypy.types.Type]
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public Map<String, Type> getAttrs();
 
 }

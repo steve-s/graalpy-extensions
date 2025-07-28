@@ -50,159 +50,159 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface FuncItem extends FuncBase {
 
-    public static List<Argument> getArgumentsImpl(Value instance) {
-        Value orig = instance.getMember("arguments");
-        if (orig == null) {
-            System.out.println("!!!!!!!!!!!!!No argumets");
-            return Collections.EMPTY_LIST;
-        }
-        GuestArray<Argument> result = new GuestArray<>(orig, (value) -> {
-            String pythonFQN = Utils.getFullyQualifedName(value);
-            switch (pythonFQN) {
-                case "mypy.nodes.Argument":
-                    return new Argument.ArgumentImpl(value);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        });
-        return result;
-    }
+	public static List<Argument> getArgumentsImpl(Value instance) {
+		Value orig = instance.getMember("arguments");
+		if (orig == null) {
+			System.out.println("!!!!!!!!!!!!!No argumets");
+			return Collections.EMPTY_LIST;
+		}
+		GuestArray<Argument> result = new GuestArray<>(orig, (value) -> {
+			String pythonFQN = Utils.getFullyQualifedName(value);
+			switch (pythonFQN) {
+				case "mypy.nodes.Argument" :
+					return new Argument.ArgumentImpl(value);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		});
+		return result;
+	}
 
-    public static List<TypeParam> getTypeArgs(Value instance) {
-        Value params = instance.getMember("type_args");
-        GuestArray<TypeParam> result = new GuestArray<>(params, (value) -> {
-            String pythonFQN = Utils.getFullyQualifedName(value);
-            switch (pythonFQN) {
-                case TypeParam.FQN:
-                    return new TypeParam.TypeParamImpl(value);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        });
-        return result;
-    }
+	public static List<TypeParam> getTypeArgs(Value instance) {
+		Value params = instance.getMember("type_args");
+		GuestArray<TypeParam> result = new GuestArray<>(params, (value) -> {
+			String pythonFQN = Utils.getFullyQualifedName(value);
+			switch (pythonFQN) {
+				case TypeParam.FQN :
+					return new TypeParam.TypeParamImpl(value);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		});
+		return result;
+	}
 
-    public static List<String> getArgNames(Value instance) {
-        Value names = instance.getMember("arg_names");
-        List<String> result = new ArrayList((int) names.getArraySize());
-        Value iterator = names.getIterator();
+	public static List<String> getArgNames(Value instance) {
+		Value names = instance.getMember("arg_names");
+		List<String> result = new ArrayList((int) names.getArraySize());
+		Value iterator = names.getIterator();
 
-        while (iterator.hasIteratorNextElement()) {
-            result.add(iterator.getIteratorNextElement().asString());
-        }
-        return result;
-    }
+		while (iterator.hasIteratorNextElement()) {
+			result.add(iterator.getIteratorNextElement().asString());
+		}
+		return result;
+	}
 
-    static class FuncItemImpl extends FuncBase.FuncBaseImpl implements FuncItem {
+	static class FuncItemImpl extends FuncBase.FuncBaseImpl implements FuncItem {
 
-        public FuncItemImpl(Value instance) {
-            super(instance);
-        }
+		public FuncItemImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public List<Argument> getArguments() {
-            return getArgumentsImpl(getValue());
-        }
+		@Override
+		public List<Argument> getArguments() {
+			return getArgumentsImpl(getValue());
+		}
 
-        @Override
-        public List<String> getArgNames() {
-            return FuncItem.getArgNames(getValue());
-        }
+		@Override
+		public List<String> getArgNames() {
+			return FuncItem.getArgNames(getValue());
+		}
 
-        @Override
-        public List<ArgKind> getArgKinds() {
-            Value kinds = getValue().getMember("arg_kinds");
-            List<ArgKind> result = new ArrayList((int) kinds.getArraySize());
-            Value iterator = kinds.getIterator();
+		@Override
+		public List<ArgKind> getArgKinds() {
+			Value kinds = getValue().getMember("arg_kinds");
+			List<ArgKind> result = new ArrayList((int) kinds.getArraySize());
+			Value iterator = kinds.getIterator();
 
-            while (iterator.hasIteratorNextElement()) {
-                Value kind = iterator.getIteratorNextElement();
-                result.add(ArgKind.valueOf(kind.getMember("name").asString()));
-            }
-            return result;
-        }
+			while (iterator.hasIteratorNextElement()) {
+				Value kind = iterator.getIteratorNextElement();
+				result.add(ArgKind.valueOf(kind.getMember("name").asString()));
+			}
+			return result;
+		}
 
-        @Override
-        public int getMinArgs() {
-            return getValue().getMember("min_args").asInt();
-        }
+		@Override
+		public int getMinArgs() {
+			return getValue().getMember("min_args").asInt();
+		}
 
-        @Override
-        public int getMaxPos() {
-            return getValue().getMember("max_pos").asInt();
-        }
+		@Override
+		public int getMaxPos() {
+			return getValue().getMember("max_pos").asInt();
+		}
 
-        @Override
-        public List<TypeParam> getTypeArgs() {
-            return FuncItem.getTypeArgs(getValue());
-        }
+		@Override
+		public List<TypeParam> getTypeArgs() {
+			return FuncItem.getTypeArgs(getValue());
+		}
 
-        @Override
-        public boolean isOverloaded() {
-            return getValue().getMember("is_overload").asBoolean();
-        }
+		@Override
+		public boolean isOverloaded() {
+			return getValue().getMember("is_overload").asBoolean();
+		}
 
-        @Override
-        public boolean isGenerator() {
-            return getValue().getMember("is_generator").asBoolean();
-        }
+		@Override
+		public boolean isGenerator() {
+			return getValue().getMember("is_generator").asBoolean();
+		}
 
-        @Override
-        public boolean isCoroutine() {
-            return getValue().getMember("is_coroutine").asBoolean();
-        }
+		@Override
+		public boolean isCoroutine() {
+			return getValue().getMember("is_coroutine").asBoolean();
+		}
 
-        @Override
-        public boolean isAsyncGenerator() {
-            return getValue().getMember("is_async_generator").asBoolean();
-        }
+		@Override
+		public boolean isAsyncGenerator() {
+			return getValue().getMember("is_async_generator").asBoolean();
+		}
 
-        @Override
-        public boolean isAwaitableCroutine() {
-            return getValue().getMember("is_awaitable_coroutine").asBoolean();
-        }
+		@Override
+		public boolean isAwaitableCroutine() {
+			return getValue().getMember("is_awaitable_coroutine").asBoolean();
+		}
 
-        @Override
-        public Value getExpanded() {
-            return getValue().getMember("expanded");
-        }
+		@Override
+		public Value getExpanded() {
+			return getValue().getMember("expanded");
+		}
 
-        @Override
-        public int maxFixedArgc() {
-            return getValue().invokeMember("max_fixed_argc").asInt();
-        }
+		@Override
+		public int maxFixedArgc() {
+			return getValue().invokeMember("max_fixed_argc").asInt();
+		}
 
-        @Override
-        public boolean isDynamic() {
-            return getValue().invokeMember("is_dynamic").asBoolean();
-        }
+		@Override
+		public boolean isDynamic() {
+			return getValue().invokeMember("is_dynamic").asBoolean();
+		}
 
-    }
+	}
 
-    List<Argument> getArguments();
+	List<Argument> getArguments();
 
-    List<String> getArgNames();
+	List<String> getArgNames();
 
-    List<ArgKind> getArgKinds();
+	List<ArgKind> getArgKinds();
 
-    int getMinArgs();
+	int getMinArgs();
 
-    int getMaxPos();
+	int getMaxPos();
 
-    List<TypeParam> getTypeArgs();
+	List<TypeParam> getTypeArgs();
 
-    boolean isOverloaded();
+	boolean isOverloaded();
 
-    boolean isGenerator();
+	boolean isGenerator();
 
-    boolean isCoroutine();
+	boolean isCoroutine();
 
-    boolean isAsyncGenerator();
+	boolean isAsyncGenerator();
 
-    boolean isAwaitableCroutine();
+	boolean isAwaitableCroutine();
 
-    Value getExpanded();
+	Value getExpanded();
 
-    int maxFixedArgc();
+	int maxFixedArgc();
 
-    boolean isDynamic();
+	boolean isDynamic();
 
 }

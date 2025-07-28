@@ -40,7 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.mypy.types.defaultImpl;
 
-
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.mypy.types.ParamSpecType;
 import org.graalvm.python.javainterfacegen.mypy.types.Parameters;
@@ -48,42 +47,42 @@ import org.graalvm.python.javainterfacegen.mypy.types.TypeVisitor;
 
 public class ParamSpecTypeImpl extends TypeVarLikeTypeImpl implements ParamSpecType {
 
-    public ParamSpecTypeImpl(Value instance) {
-        super(instance);
-    }
+	public ParamSpecTypeImpl(Value instance) {
+		super(instance);
+	}
 
-    public int getFlavor() {
-        return getValue().getMember("flavor").asInt();
-    }
+	public int getFlavor() {
+		return getValue().getMember("flavor").asInt();
+	}
 
-    @Override
-    public String nameWithSuffix() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public String nameWithSuffix() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Parameters getPrefix() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Parameters getPrefix() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public ParamSpecType withFlavor(int flavor) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public ParamSpecType withFlavor(int flavor) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public ParamSpecType copyModified() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public ParamSpecType copyModified() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public ParamSpecType copyModified(CopyModifiedArgs optionalArgs) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public ParamSpecType copyModified(CopyModifiedArgs optionalArgs) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
 }

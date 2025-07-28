@@ -44,6 +44,6 @@ import org.graalvm.python.javainterfacegen.mypy.types.Type;
 
 public interface TypeGenerator {
 
-    String createType(Type type, GeneratorContext context, String javaPackage, String name);
+	String createType(Type type, GeneratorContext context, String javaPackage, String name);
 
 }

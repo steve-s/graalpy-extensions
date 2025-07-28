@@ -68,79 +68,81 @@ import java.util.stream.Collectors;
 import static org.graalvm.python.embedding.tools.vfs.VFSUtils.LAUNCHER_NAME;
 
 /**
- * This task is responsible installing the dependencies which were requested by the user.
- * This is either done in generated resources folder or in external directory provided by the user
- * in {@link GraalPyExtension#getExternalDirectory()}.
+ * This task is responsible installing the dependencies which were requested by
+ * the user. This is either done in generated resources folder or in external
+ * directory provided by the user in
+ * {@link GraalPyExtension#getExternalDirectory()}.
  *
  * <p/>
  * In scope of this task:
  * <ol>
- *     <li>The GraalPy launcher is set up.</li>
- *     <li>A python venv is created.</li>
- *     <li>Python packages are installed into the venv.</li>
+ * <li>The GraalPy launcher is set up.</li>
+ * <li>A python venv is created.</li>
+ * <li>Python packages are installed into the venv.</li>
  * </ol>
  *
  */
 public abstract class AbstractPackagesTask extends DefaultTask {
 
-    @Input
-    public abstract ListProperty<String> getPackages();
+	@Input
+	public abstract ListProperty<String> getPackages();
 
-    @Internal
-    public abstract DirectoryProperty getLauncherDirectory();
+	@Internal
+	public abstract DirectoryProperty getLauncherDirectory();
 
-    @Classpath
-    public abstract ConfigurableFileCollection getLauncherClasspath();
+	@Classpath
+	public abstract ConfigurableFileCollection getLauncherClasspath();
 
-    /**
-     * The directory where the virtual filesystem should be generated.
-     */
-    @OutputDirectory
-    public abstract DirectoryProperty getOutput();
+	/**
+	 * The directory where the virtual filesystem should be generated.
+	 */
+	@OutputDirectory
+	public abstract DirectoryProperty getOutput();
 
-    @InputFiles
-    @Optional
-    @PathSensitive(PathSensitivity.RELATIVE)
-    public abstract RegularFileProperty getGraalPyLockFile();
+	@InputFiles
+	@Optional
+	@PathSensitive(PathSensitivity.RELATIVE)
+	public abstract RegularFileProperty getGraalPyLockFile();
 
-    @Internal
-    public abstract RegularFileProperty getVenvDirectory();
+	@Internal
+	public abstract RegularFileProperty getVenvDirectory();
 
-    /**
-     * Desired polyglot runtime and GraalPy version.
-     */
-    @Input
-    public abstract Property<String> getPolyglotVersion();
+	/**
+	 * Desired polyglot runtime and GraalPy version.
+	 */
+	@Input
+	public abstract Property<String> getPolyglotVersion();
 
-    protected Set<String> calculateLauncherClasspath() {
-        return getLauncherClasspath().getFiles().stream().map(File::getAbsolutePath).collect(Collectors.toUnmodifiableSet());
-    }
+	protected Set<String> calculateLauncherClasspath() {
+		return getLauncherClasspath().getFiles().stream().map(File::getAbsolutePath)
+				.collect(Collectors.toUnmodifiableSet());
+	}
 
-    protected Launcher createLauncher() {
-        return new Launcher( getLauncherPath()) {
-            public Set<String> computeClassPath() {
-                return calculateLauncherClasspath();
-            }
-        };
-    }
+	protected Launcher createLauncher() {
+		return new Launcher(getLauncherPath()) {
+			public Set<String> computeClassPath() {
+				return calculateLauncherClasspath();
+			}
+		};
+	}
 
-    @Internal
-    protected GradleLogger getLog() {
-        return GradleLogger.of(getLogger());
-    }
+	@Internal
+	protected GradleLogger getLog() {
+		return GradleLogger.of(getLogger());
+	}
 
-    private Path getLauncherPath() {
-        return computeLauncherDirectory().resolve(LAUNCHER_NAME);
-    }
+	private Path getLauncherPath() {
+		return computeLauncherDirectory().resolve(LAUNCHER_NAME);
+	}
 
-    @NotNull
-    protected Path computeLauncherDirectory() {
-        return getLauncherDirectory().get().getAsFile().toPath();
-    }
+	@NotNull
+	protected Path computeLauncherDirectory() {
+		return getLauncherDirectory().get().getAsFile().toPath();
+	}
 
-    @Internal
-    protected Path getLockFilePath() {
-        return getGraalPyLockFile().get().getAsFile().toPath();
-    }
+	@Internal
+	protected Path getLockFilePath() {
+		return getGraalPyLockFile().get().getAsFile().toPath();
+	}
 
 }

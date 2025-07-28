@@ -43,20 +43,20 @@ package org.graalvm.python.javainterfacegen.mypy.nodes;
 
 public interface NodeVisitor<T> {
 
-    T visit(Decorator decorator);
-    T visit(MypyFile file);
-    T visit(ClassDef classDef);
-    T visit(FuncDef funcDef);
-    T visit(Argument arg);
-    T visit(Var v);
-    T visit(Block block);
-    T visit(ExpressionStmt expr);
-    T visit(AssignmentStmt assignment);
-    T visit(NameExpr nameExpr);
-    T visit(OverloadedFuncDef oFnDef);
-    T visit(StrExpr strExpr);
-    T visit(TupleExpr tuple);
-    T visit(TypeAlias typeAlias);
-    T visit(TypeInfo typeInfo);
-    T visit(TypeVarExpr typeVarExpr);
+	T visit(Decorator decorator);
+	T visit(MypyFile file);
+	T visit(ClassDef classDef);
+	T visit(FuncDef funcDef);
+	T visit(Argument arg);
+	T visit(Var v);
+	T visit(Block block);
+	T visit(ExpressionStmt expr);
+	T visit(AssignmentStmt assignment);
+	T visit(NameExpr nameExpr);
+	T visit(OverloadedFuncDef oFnDef);
+	T visit(StrExpr strExpr);
+	T visit(TupleExpr tuple);
+	T visit(TypeAlias typeAlias);
+	T visit(TypeInfo typeInfo);
+	T visit(TypeVarExpr typeVarExpr);
 }

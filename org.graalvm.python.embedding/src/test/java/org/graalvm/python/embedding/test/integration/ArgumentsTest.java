@@ -40,7 +40,6 @@
  */
 package org.graalvm.python.embedding.test.integration;
 
-
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -63,160 +62,160 @@ import static org.hamcrest.Matchers.containsString;
 
 public class ArgumentsTest {
 
-    private static ByteArrayOutputStream out;
-    private static Context context;
-    private static ByteArrayOutputStream err;
+	private static ByteArrayOutputStream out;
+	private static Context context;
+	private static ByteArrayOutputStream err;
 
-    @BeforeAll
-    public static void setUpTest() {
-        out = new ByteArrayOutputStream();
-        err = new ByteArrayOutputStream();
-        Context.Builder builder = Context.newBuilder().engine(Engine.create("python"));
-        builder.allowExperimentalOptions(true);
-        builder.allowAllAccess(true);
-        builder.out(out);
-        builder.err(err);
-        context = builder.build();
-    }
+	@BeforeAll
+	public static void setUpTest() {
+		out = new ByteArrayOutputStream();
+		err = new ByteArrayOutputStream();
+		Context.Builder builder = Context.newBuilder().engine(Engine.create("python"));
+		builder.allowExperimentalOptions(true);
+		builder.allowAllAccess(true);
+		builder.out(out);
+		builder.err(err);
+		context = builder.build();
+	}
 
-    @AfterAll
-    public static void tearDown() {
-        context.close();
-        context.getEngine().close();
-    }
+	@AfterAll
+	public static void tearDown() {
+		context.close();
+		context.getEngine().close();
+	}
 
-    public interface TestPositionalArgsLong {
-        long fn(PositionalArguments args);
-    }
+	public interface TestPositionalArgsLong {
+		long fn(PositionalArguments args);
+	}
 
-    @Test
-    public void testPositionalArgsLength() {
-        String source = """
-                        def fn (*args)->int:
-                            return len(args)
-                        """;
+	@Test
+	public void testPositionalArgsLength() {
+		String source = """
+				def fn (*args)->int:
+				    return len(args)
+				""";
 
-        TestPositionalArgsLong module = context.eval(Source.create("python", source)).as(TestPositionalArgsLong.class);
-        assertEquals(1, module.fn(PositionalArguments.of(22)));
-        assertEquals(2, module.fn(PositionalArguments.of(1, null)));
-        assertEquals(2, module.fn(PositionalArguments.of(null, 2)));
-        assertEquals(5, module.fn(PositionalArguments.of(1, 2, 3, 4, 5)));
-        assertEquals(0, module.fn(PositionalArguments.of()));
+		TestPositionalArgsLong module = context.eval(Source.create("python", source)).as(TestPositionalArgsLong.class);
+		assertEquals(1, module.fn(PositionalArguments.of(22)));
+		assertEquals(2, module.fn(PositionalArguments.of(1, null)));
+		assertEquals(2, module.fn(PositionalArguments.of(null, 2)));
+		assertEquals(5, module.fn(PositionalArguments.of(1, 2, 3, 4, 5)));
+		assertEquals(0, module.fn(PositionalArguments.of()));
 
-        assertEquals(1, module.fn(PositionalArguments.from(List.of(2))));
-        assertEquals(2, module.fn(PositionalArguments.from(List.of(2, 3))));
+		assertEquals(1, module.fn(PositionalArguments.from(List.of(2))));
+		assertEquals(2, module.fn(PositionalArguments.from(List.of(2, 3))));
 
-        assertEquals(3, module.fn(PositionalArguments.of(new Object[]{2, 3, 4})));
-        assertEquals(1, module.fn(PositionalArguments.of(new Object[]{null})));
-    }
+		assertEquals(3, module.fn(PositionalArguments.of(new Object[]{2, 3, 4})));
+		assertEquals(1, module.fn(PositionalArguments.of(new Object[]{null})));
+	}
 
-    @Test
-    public void testPositionalArgsWithNoneValue() {
-        String source = """
-                        def fn (*args):
-                            result = 0;
-                            for arg in args:
-                                if arg is None:
-                                    result = result + 1;
-                            return result
-                        """;
+	@Test
+	public void testPositionalArgsWithNoneValue() {
+		String source = """
+				def fn (*args):
+				    result = 0;
+				    for arg in args:
+				        if arg is None:
+				            result = result + 1;
+				    return result
+				""";
 
-        TestPositionalArgsLong module = context.eval(Source.create("python", source)).as(TestPositionalArgsLong.class);
-        assertEquals(0, module.fn(PositionalArguments.of(22)));
-        assertEquals(1, module.fn(PositionalArguments.of(1, null)));
-        assertEquals(1, module.fn(PositionalArguments.of(null, 2)));
-        assertEquals(3, module.fn(PositionalArguments.of(null, null, null)));
-        assertEquals(1, module.fn(PositionalArguments.of(new Object[]{null})));
+		TestPositionalArgsLong module = context.eval(Source.create("python", source)).as(TestPositionalArgsLong.class);
+		assertEquals(0, module.fn(PositionalArguments.of(22)));
+		assertEquals(1, module.fn(PositionalArguments.of(1, null)));
+		assertEquals(1, module.fn(PositionalArguments.of(null, 2)));
+		assertEquals(3, module.fn(PositionalArguments.of(null, null, null)));
+		assertEquals(1, module.fn(PositionalArguments.of(new Object[]{null})));
 
-        Value none = context.eval(Source.create("python", "a = None")).getMember("a");
-        assertEquals(1, module.fn(PositionalArguments.of(none)));
-        assertEquals(3, module.fn(PositionalArguments.of(none, null, none)));
-        assertEquals(2, module.fn(PositionalArguments.of(new Object[]{none, null})));
-    }
+		Value none = context.eval(Source.create("python", "a = None")).getMember("a");
+		assertEquals(1, module.fn(PositionalArguments.of(none)));
+		assertEquals(3, module.fn(PositionalArguments.of(none, null, none)));
+		assertEquals(2, module.fn(PositionalArguments.of(new Object[]{none, null})));
+	}
 
-    public interface TestPositionalArgs01 {
-        String fn(Object a, Object b, PositionalArguments args);
-    }
+	public interface TestPositionalArgs01 {
+		String fn(Object a, Object b, PositionalArguments args);
+	}
 
-    @Test
-    public void testPositionalArgs01() {
-        String source = """
-                        def fn (a, b, *args):
-                            result = str(a) + str(b);
-                            for arg in args:
-                                result = result + str(arg);
-                            return result
-                        """;
-        TestPositionalArgs01 module = context.eval(Source.create("python", source)).as(TestPositionalArgs01.class);
-        assertEquals("12", module.fn(1, 2, PositionalArguments.of()));
-        assertEquals("123", module.fn(1, 2, PositionalArguments.of(3)));
-        assertEquals("123Ahoj", module.fn(1, 2, PositionalArguments.of(3, "Ahoj")));
-        assertEquals("123AhojTrue", module.fn(1, 2, PositionalArguments.of(3, "Ahoj", true)));
-        assertEquals("123AhojTrueNone", module.fn(1, 2, PositionalArguments.of(3, "Ahoj", true, null)));
-    }
+	@Test
+	public void testPositionalArgs01() {
+		String source = """
+				def fn (a, b, *args):
+				    result = str(a) + str(b);
+				    for arg in args:
+				        result = result + str(arg);
+				    return result
+				""";
+		TestPositionalArgs01 module = context.eval(Source.create("python", source)).as(TestPositionalArgs01.class);
+		assertEquals("12", module.fn(1, 2, PositionalArguments.of()));
+		assertEquals("123", module.fn(1, 2, PositionalArguments.of(3)));
+		assertEquals("123Ahoj", module.fn(1, 2, PositionalArguments.of(3, "Ahoj")));
+		assertEquals("123AhojTrue", module.fn(1, 2, PositionalArguments.of(3, "Ahoj", true)));
+		assertEquals("123AhojTrueNone", module.fn(1, 2, PositionalArguments.of(3, "Ahoj", true, null)));
+	}
 
-    public interface TestPositionalArgs02 {
-        String fn(Object a);
+	public interface TestPositionalArgs02 {
+		String fn(Object a);
 
-        String fn(Object a, PositionalArguments args);
+		String fn(Object a, PositionalArguments args);
 
-        String fn(PositionalArguments args);
+		String fn(PositionalArguments args);
 
-        String fn(Object a, Object b);
+		String fn(Object a, Object b);
 
-        String fn(Object a, Object b, PositionalArguments args);
-    }
+		String fn(Object a, Object b, PositionalArguments args);
+	}
 
-    @Test
-    public void testPositionalArgs02() {
-        String source = """
-                        def fn (a, b="correct", *args):
-                            result = str(a) + str(b)
-                            for arg in args:
-                                result = result + str(arg)
-                            return result
-                        """;
-        TestPositionalArgs02 module = context.eval(Source.create("python", source)).as(TestPositionalArgs02.class);
-        assertEquals("1correct", module.fn(1));
-        assertEquals("12", module.fn(1, 2));
-        assertEquals("1only one", module.fn(1, PositionalArguments.of("only one")));
-        assertEquals("1only oneand two", module.fn(1, PositionalArguments.of("only one", "and two")));
-        assertEquals("12", module.fn(1, 2, PositionalArguments.of()));
-        assertEquals("123", module.fn(1, 2, PositionalArguments.of(3)));
-        assertEquals("123Ahoj", module.fn(1, 2, PositionalArguments.of(3, "Ahoj")));
-        assertEquals("123AhojTrue", module.fn(1, 2, PositionalArguments.of(3, "Ahoj", true)));
-        assertEquals("123AhojTrueNone", module.fn(1, 2, PositionalArguments.of(3, "Ahoj", true, null)));
-    }
+	@Test
+	public void testPositionalArgs02() {
+		String source = """
+				def fn (a, b="correct", *args):
+				    result = str(a) + str(b)
+				    for arg in args:
+				        result = result + str(arg)
+				    return result
+				""";
+		TestPositionalArgs02 module = context.eval(Source.create("python", source)).as(TestPositionalArgs02.class);
+		assertEquals("1correct", module.fn(1));
+		assertEquals("12", module.fn(1, 2));
+		assertEquals("1only one", module.fn(1, PositionalArguments.of("only one")));
+		assertEquals("1only oneand two", module.fn(1, PositionalArguments.of("only one", "and two")));
+		assertEquals("12", module.fn(1, 2, PositionalArguments.of()));
+		assertEquals("123", module.fn(1, 2, PositionalArguments.of(3)));
+		assertEquals("123Ahoj", module.fn(1, 2, PositionalArguments.of(3, "Ahoj")));
+		assertEquals("123AhojTrue", module.fn(1, 2, PositionalArguments.of(3, "Ahoj", true)));
+		assertEquals("123AhojTrueNone", module.fn(1, 2, PositionalArguments.of(3, "Ahoj", true, null)));
+	}
 
-    public interface TestKeywordArgs01 {
-        String fn();
+	public interface TestKeywordArgs01 {
+		String fn();
 
-        String fn(KeywordArguments kwArgs);
-    }
+		String fn(KeywordArguments kwArgs);
+	}
 
-    @Test
-    public void testKeywordArgs01() {
-        String source = """
-                        def fn (**kwArgs):
-                            result = ''
-                            for key, value in kwArgs.items():
-                                result = result + f'[{key}:{str(value)}],'
-                            return result
-                        """;
-        TestKeywordArgs01 module = context.eval(Source.create("python", source)).as(TestKeywordArgs01.class);
-        assertEquals("", module.fn());
-        assertEquals("", module.fn(KeywordArguments.from(new HashMap<>())));
-        assertEquals("[jedna:1],", module.fn(KeywordArguments.of("jedna", 1)));
+	@Test
+	public void testKeywordArgs01() {
+		String source = """
+				def fn (**kwArgs):
+				    result = ''
+				    for key, value in kwArgs.items():
+				        result = result + f'[{key}:{str(value)}],'
+				    return result
+				""";
+		TestKeywordArgs01 module = context.eval(Source.create("python", source)).as(TestKeywordArgs01.class);
+		assertEquals("", module.fn());
+		assertEquals("", module.fn(KeywordArguments.from(new HashMap<>())));
+		assertEquals("[jedna:1],", module.fn(KeywordArguments.of("jedna", 1)));
 
-        Value none = context.eval(Source.create("python", "a = None")).getMember("a");
-        Map<String, Object> keyArgs = new HashMap<>();
-        keyArgs.put("jedna", 1);
-        keyArgs.put("true", true);
-        keyArgs.put("null", none);
+		Value none = context.eval(Source.create("python", "a = None")).getMember("a");
+		Map<String, Object> keyArgs = new HashMap<>();
+		keyArgs.put("jedna", 1);
+		keyArgs.put("true", true);
+		keyArgs.put("null", none);
 
-        String result = module.fn(KeywordArguments.from(keyArgs));
-        assertThat(result, containsString("[true:True],"));
-        assertThat(result, containsString("[jedna:1],"));
-        assertThat(result, containsString("[null:None],"));
-    }
+		String result = module.fn(KeywordArguments.from(keyArgs));
+		assertThat(result, containsString("[true:True],"));
+		assertThat(result, containsString("[jedna:1],"));
+		assertThat(result, containsString("[null:None],"));
+	}
 }

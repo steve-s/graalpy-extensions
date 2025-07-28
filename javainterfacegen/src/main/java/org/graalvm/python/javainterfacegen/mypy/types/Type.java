@@ -40,14 +40,13 @@
  */
 package org.graalvm.python.javainterfacegen.mypy.types;
 
-
 import org.graalvm.python.javainterfacegen.python.GuestValue;
 
 public interface Type extends GuestValue {
 
-    boolean canBeTrue();
-    boolean canBeFalse();
-    boolean canBeTrueDefault();
-    boolean canBeFalseDefault();
-    <T> T accept(TypeVisitor<T> visitor);
+	boolean canBeTrue();
+	boolean canBeFalse();
+	boolean canBeTrueDefault();
+	boolean canBeFalseDefault();
+	<T> T accept(TypeVisitor<T> visitor);
 }

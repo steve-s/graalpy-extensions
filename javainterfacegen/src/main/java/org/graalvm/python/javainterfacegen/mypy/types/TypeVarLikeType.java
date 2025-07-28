@@ -41,29 +41,29 @@
 package org.graalvm.python.javainterfacegen.mypy.types;
 
 public interface TypeVarLikeType extends ProperType {
-    // Python def: TypeVarLikeType(mypy.types.ProperType)
+	// Python def: TypeVarLikeType(mypy.types.ProperType)
 
-    // Python signature: def (self: mypy.types.TypeVarLikeType) -> builtins.bool
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public boolean hasDefault();
+	// Python signature: def (self: mypy.types.TypeVarLikeType) -> builtins.bool
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public boolean hasDefault();
 
-    // getter for class field 'default', Python type: mypy.types.Type
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public Type getDefaultValue();
+	// getter for class field 'default', Python type: mypy.types.Type
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public Type getDefaultValue();
 
-    // getter for class field 'name', Python type: builtins.str
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public String getName();
+	// getter for class field 'name', Python type: builtins.str
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public String getName();
 
-    // getter for class field 'fullname', Python type: builtins.str
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public String getFullname();
+	// getter for class field 'fullname', Python type: builtins.str
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public String getFullname();
 
-    // getter for class field 'id', Python type: mypy.types.TypeVarId
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public TypeVarId getId();
+	// getter for class field 'id', Python type: mypy.types.TypeVarId
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public TypeVarId getId();
 
-    // getter for class field 'upper_bound', Python type: mypy.types.Type
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public Type getUpperBound();
+	// getter for class field 'upper_bound', Python type: mypy.types.Type
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public Type getUpperBound();
 }

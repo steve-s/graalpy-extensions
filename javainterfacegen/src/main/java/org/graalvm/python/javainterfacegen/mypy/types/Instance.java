@@ -44,9 +44,9 @@ import java.util.List;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
 
 public interface Instance extends ProperType {
-    public static String FQN = "mypy.types.Instance";
+	public static String FQN = "mypy.types.Instance";
 
-    TypeInfo getType();
-    List<Type> getArgs();
+	TypeInfo getType();
+	List<Type> getArgs();
 
 }

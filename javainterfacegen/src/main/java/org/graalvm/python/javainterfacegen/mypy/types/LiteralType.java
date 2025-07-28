@@ -47,51 +47,49 @@ import org.graalvm.polyglot.Value;
  *
  * A Literal always consists of:
  *
- * 1. A native Python object corresponding to the contained inner value
- * 2. A fallback for this Literal. The fallback also corresponds to the
- *    parent type this Literal subtypes.
+ * 1. A native Python object corresponding to the contained inner value 2. A
+ * fallback for this Literal. The fallback also corresponds to the parent type
+ * this Literal subtypes.
  *
- * For example, 'Literal[42]' is represented as
- * 'LiteralType(value=42, fallback=instance_of_int)'
+ * For example, 'Literal[42]' is represented as 'LiteralType(value=42,
+ * fallback=instance_of_int)'
  *
  * As another example, `Literal[Color.RED]` (where Color is an enum) is
  * represented as `LiteralType(value="RED", fallback=instance_of_color)'.
  */
 public interface LiteralType extends ProperType {
-    // Python def: LiteralType(mypy.types.ProperType)
+	// Python def: LiteralType(mypy.types.ProperType)
 
-    public static final String FQN = "mypy.types.LiteralType";
+	public static final String FQN = "mypy.types.LiteralType";
 
-    // Python signature: def (self: mypy.types.LiteralType) -> builtins.str
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    /**
-     * Returns the string representation of the underlying type.
-     *
-     * This function is almost equivalent to running `repr(self.value)`,
-     * except it includes some additional logic to correctly handle cases
-     * where the value is a string, byte string, a unicode string, or an enum.
-     */
-    public String valueRepr();
+	// Python signature: def (self: mypy.types.LiteralType) -> builtins.str
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	/**
+	 * Returns the string representation of the underlying type.
+	 *
+	 * This function is almost equivalent to running `repr(self.value)`, except it
+	 * includes some additional logic to correctly handle cases where the value is a
+	 * string, byte string, a unicode string, or an enum.
+	 */
+	public String valueRepr();
 
-    // Python signature: def (self: mypy.types.LiteralType) -> builtins.bool
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public boolean isSingletonType();
+	// Python signature: def (self: mypy.types.LiteralType) -> builtins.bool
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public boolean isSingletonType();
 
-    // Python signature: def (self: mypy.types.LiteralType) -> builtins.bool
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public boolean isEnumLiteral();
+	// Python signature: def (self: mypy.types.LiteralType) -> builtins.bool
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public boolean isEnumLiteral();
 
-    // getter for class field 'value', Python type: Union[builtins.int, builtins.str, builtins.bool, builtins.float]
-    // type class: mypy.types.TypeAliasType
-    public Value getValueOf();
+	// getter for class field 'value', Python type: Union[builtins.int,
+	// builtins.str, builtins.bool, builtins.float]
+	// type class: mypy.types.TypeAliasType
+	public Value getValueOf();
 
-    // getter for class field 'fallback', Python type: mypy.types.Instance
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public Instance getFallback();
+	// getter for class field 'fallback', Python type: mypy.types.Instance
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public Instance getFallback();
 
-
-    // TODO unprocessed Decorator of function 'deserialize'
-
-
+	// TODO unprocessed Decorator of function 'deserialize'
 
 }

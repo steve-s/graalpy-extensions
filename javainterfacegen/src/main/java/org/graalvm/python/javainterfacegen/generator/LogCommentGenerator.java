@@ -49,65 +49,64 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
 import org.graalvm.python.javainterfacegen.mypy.nodes.OverloadedFuncDef;
 import org.graalvm.python.javainterfacegen.mypy.nodes.SymbolNode;
 
+public class LogCommentGenerator extends DefaultNodeVisitor<String> {
 
-public class LogCommentGenerator extends DefaultNodeVisitor<String>{
+	private static final String FN_TEMPLATE = "{{indent}}// Python signature for function {{name}}: {{signature}}";
+	private static final String Fn_PROPERTY_TEMPLATE = "{{indent}}// Python signature for function property {{name}}: {{signature}}";
+	private static final String OVERLOAD_FUNCTIONS_TEMPLATE = "{{indent}}// Python signatures for overloaded function {{name}}:";
+	private static final String OVERLOAD_FUNCTION_TEMPLATE = "{{indent}}//     {{signature}}";
 
-    private static final String FN_TEMPLATE = "{{indent}}// Python signature for function {{name}}: {{signature}}";
-    private static final String Fn_PROPERTY_TEMPLATE = "{{indent}}// Python signature for function property {{name}}: {{signature}}";
-    private static final String OVERLOAD_FUNCTIONS_TEMPLATE = "{{indent}}// Python signatures for overloaded function {{name}}:";
-    private static final String OVERLOAD_FUNCTION_TEMPLATE  = "{{indent}}//     {{signature}}";
+	private final GeneratorContext context;
 
-    private final GeneratorContext context;
+	public static String getLogComment(GeneratorContext context, Node node) {
+		LogCommentGenerator instance = new LogCommentGenerator(context);
+		return node.accept(instance);
+	}
 
-    public static String getLogComment(GeneratorContext context, Node node) {
-        LogCommentGenerator instance = new LogCommentGenerator(context);
-        return node.accept(instance);
-    }
+	private LogCommentGenerator(GeneratorContext context) {
+		this.context = context;
+	}
 
-    private LogCommentGenerator(GeneratorContext context) {
-        this.context = context;
-    }
+	@Override
+	protected String defaultVisit(Node node) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    protected String defaultVisit(Node node) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public String visit(FuncDef funcDef) {
+		String signature;
+		try {
+			signature = funcDef.getType().toString();
+		} catch (PolyglotException ex) {
+			signature = "TODO the type was not possible to read";
+		}
+		String comment;
+		if (context.getCurrentNode() instanceof OverloadedFuncDef) {
+			comment = OVERLOAD_FUNCTION_TEMPLATE;
+		} else {
+			comment = funcDef.isProperty()
+					? Fn_PROPERTY_TEMPLATE.replace("{{name}}", funcDef.getName())
+					: FN_TEMPLATE.replace("{{name}}", funcDef.getName());
+		}
+		comment = comment.replace("{{signature}}", signature);
+		return comment;
+	}
 
-    @Override
-    public String visit(FuncDef funcDef) {
-        String signature;
-        try {
-            signature = funcDef.getType().toString();
-        } catch (PolyglotException ex) {
-            signature = "TODO the type was not possible to read";
-        }
-        String comment;
-        if (context.getCurrentNode() instanceof OverloadedFuncDef) {
-            comment = OVERLOAD_FUNCTION_TEMPLATE;
-        } else {
-            comment = funcDef.isProperty() ?
-                    Fn_PROPERTY_TEMPLATE.replace("{{name}}", funcDef.getName()) :
-                    FN_TEMPLATE.replace("{{name}}", funcDef.getName());
-        }
-        comment = comment.replace("{{signature}}", signature);
-        return comment;
-    }
+	@Override
+	public String visit(OverloadedFuncDef oFnDef) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(OVERLOAD_FUNCTIONS_TEMPLATE.replace("{{name}}", oFnDef.name()));
+		List<SymbolNode> items = oFnDef.items();
+		for (int i = 0; i < items.size(); i++) {
+			sb.append("\n");
+			sb.append(items.get(i).accept(this));
+		}
+		return sb.toString();
+	}
 
-    @Override
-    public String visit(OverloadedFuncDef oFnDef) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(OVERLOAD_FUNCTIONS_TEMPLATE.replace("{{name}}", oFnDef.name()));
-        List<SymbolNode> items = oFnDef.items();
-        for (int i = 0; i < items.size(); i++) {
-            sb.append("\n");
-            sb.append(items.get(i).accept(this));
-        }
-        return sb.toString();
-    }
-
-    @Override
-    public String visit(Decorator decorator) {
-        return decorator.getFunc().accept(this);
-    }
+	@Override
+	public String visit(Decorator decorator) {
+		return decorator.getFunc().accept(this);
+	}
 
 }

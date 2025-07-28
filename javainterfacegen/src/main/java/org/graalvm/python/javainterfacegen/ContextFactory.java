@@ -47,17 +47,16 @@ import org.graalvm.python.embedding.VirtualFileSystem;
 
 public class ContextFactory {
 
-    // One context per application
-    private static Context context = null;
+	// One context per application
+	private static Context context = null;
 
-    public static Context getContext() {
-        if (context == null) {
-            VirtualFileSystem vfs = VirtualFileSystem.newBuilder().resourceDirectory("GRAALPY-VFS/org.graalvm.python/javainterfacegen").build();
-            context = GraalPyResources
-                .contextBuilder(vfs)
-                .engine(Engine.newBuilder("python").option("engine.WarnInterpreterOnly", "false").build())
-                .build();
-        }
-        return context;
-    }
+	public static Context getContext() {
+		if (context == null) {
+			VirtualFileSystem vfs = VirtualFileSystem.newBuilder()
+					.resourceDirectory("GRAALPY-VFS/org.graalvm.python/javainterfacegen").build();
+			context = GraalPyResources.contextBuilder(vfs)
+					.engine(Engine.newBuilder("python").option("engine.WarnInterpreterOnly", "false").build()).build();
+		}
+		return context;
+	}
 }

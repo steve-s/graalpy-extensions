@@ -68,304 +68,317 @@ import org.graalvm.python.javainterfacegen.mypy.types.Instance;
 
 public class DefaultImplementationVisitor implements NodeVisitor<String> {
 
-    private static final String TEMPLATE_FILE = """
-{{license}}
-package {{package}};
+	private static final String TEMPLATE_FILE = """
+			{{license}}
+			package {{package}};
 
-{{importblock}}
-           
-{{javadoc}}
-public class {{classname}} extends {{extends}} import {{imports}}  {
-                                                
-{{indent+1}}// generated from {{filepath}}
+			{{importblock}}
 
-{{indent+1}}public {{classname}}(Value instance) {
-{{indent+2}}super(instance);
-{{indent+1}}}
-                                                
-{{content}}
-}
-""";
+			{{javadoc}}
+			public class {{classname}} extends {{extends}} import {{imports}}  {
 
-    private static final String TEMPLATE_IMPLEMENTATION = """
-{{license}}
+			{{indent+1}}// generated from {{filepath}}
 
-{{generatedinfo}}
+			{{indent+1}}public {{classname}}(Value instance) {
+			{{indent+2}}super(instance);
+			{{indent+1}}}
 
-package {{package}};
-                                                     
-{{imports}}
+			{{content}}
+			}
+			""";
 
-public class {{implname}} extends {{extends}} implements {{implements}} {
-                                                                                
-{{content}}
-                                                     
-}
-""";
-    
-    
+	private static final String TEMPLATE_IMPLEMENTATION = """
+			{{license}}
 
-    private final Configuration configuration;
-    private GeneratorContext currentContext;
+			{{generatedinfo}}
 
-    public DefaultImplementationVisitor(Configuration configuration) {
-        this.configuration = configuration;
-    }
+			package {{package}};
 
-    @Override
-    public String visit(MypyFile mypyFile) {
+			{{imports}}
 
-        String template = TEMPLATE_FILE;
-        currentContext = new GeneratorContext(null, configuration, mypyFile);
+			public class {{implname}} extends {{extends}} implements {{implements}} {
 
-        String nameGeneratorClassName = (String) currentContext.getConfiguration().get(Configuration.P_NAME_GENERATOR);
-        NameGenerator nameGen = GeneratorFactory.createNameGenerator(nameGeneratorClassName);
+			{{content}}
 
-        template = template.replace("{{license}}", GeneratorUtils.getLicense(currentContext));
+			}
+			""";
 
-        String packageName = nameGen.packageForImplementation(mypyFile, currentContext);
-        template = template.replace("{{package}}", packageName);
+	private final Configuration configuration;
+	private GeneratorContext currentContext;
 
-        String interfaceName = nameGen.interfaceName(mypyFile, currentContext);
-        String className = nameGen.classImplementationName(mypyFile, currentContext);
-        String interfaceFQN = nameGen.packageForInterface(mypyFile, currentContext) + "." + interfaceName;
-        template = template.replace("{{classname}}", className);
+	public DefaultImplementationVisitor(Configuration configuration) {
+		this.configuration = configuration;
+	}
 
-        currentContext.setJavaFQN(packageName + "." + className);
-        template = template.replace("{{javadoc}}", GeneratorUtils.createJavaDoc("TODO handle JavaDoc"));
+	@Override
+	public String visit(MypyFile mypyFile) {
 
-        currentContext.addImport("org.graalvm.python.javainterfacegen.GuestValue");
-        currentContext.addImport("org.graalvm.polyglot.Value");
+		String template = TEMPLATE_FILE;
+		currentContext = new GeneratorContext(null, configuration, mypyFile);
 
-        template = template.replace("{{imports}}", currentContext.useJavaType(interfaceFQN));
+		String nameGeneratorClassName = (String) currentContext.getConfiguration().get(Configuration.P_NAME_GENERATOR);
+		NameGenerator nameGen = GeneratorFactory.createNameGenerator(nameGeneratorClassName);
 
-        // TODO count extended classes
-        template = template.replace("{{extends}}", currentContext.useJavaType("org.graalvm.python.javainterfacegen.GuestValueImpl"));
-        template = template.replace("{{filepath}}", currentContext.getFileFrom());
+		template = template.replace("{{license}}", GeneratorUtils.getLicense(currentContext));
 
-        template = template.replace("{{importblock}}", GeneratorUtils.importBlock(currentContext.getImports()));
+		String packageName = nameGen.packageForImplementation(mypyFile, currentContext);
+		template = template.replace("{{package}}", packageName);
 
-        StringBuilder content = new StringBuilder();
+		String interfaceName = nameGen.interfaceName(mypyFile, currentContext);
+		String className = nameGen.classImplementationName(mypyFile, currentContext);
+		String interfaceFQN = nameGen.packageForInterface(mypyFile, currentContext) + "." + interfaceName;
+		template = template.replace("{{classname}}", className);
 
-        Map<String, SymbolTableNode> symbolTable = mypyFile.getNames().getTable();
-        for (Map.Entry<String, SymbolTableNode> entry : symbolTable.entrySet()) {
-            String key = entry.getKey();
-            if (!key.startsWith("_")) {
-                SymbolTableNode tableNode = entry.getValue();
-                if (tableNode.getNode() instanceof MypyFile mypyFile2) {
-                    System.out.println("!!!!!!!!!!!!!!!! ");
-                    System.out.println("    SymbolTableNode.getFullname: " + tableNode.getFullname());
-                    System.out.println("    SymbolTableNode.value: " + tableNode.getValue().toString());
-                    System.out.println("    current traversed file: " + mypyFile.getPath());
-                    System.out.println("    want to traverse: " + mypyFile2.getPath());
-                } else {
-                    content.append(tableNode.getNode().accept(this));
-                }
-            }
-        }
+		currentContext.setJavaFQN(packageName + "." + className);
+		template = template.replace("{{javadoc}}", GeneratorUtils.createJavaDoc("TODO handle JavaDoc"));
 
-        template = template.replace("{{content}}", content.toString());
+		currentContext.addImport("org.graalvm.python.javainterfacegen.GuestValue");
+		currentContext.addImport("org.graalvm.polyglot.Value");
 
-        template = GeneratorUtils.indentTemplate(currentContext, template);
+		template = template.replace("{{imports}}", currentContext.useJavaType(interfaceFQN));
 
-        try {
-            GeneratorUtils.saveFile(currentContext, packageName, className, template);
-        } catch (IOException ex) {
-            Logger.getLogger(TransformerVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
+		// TODO count extended classes
+		template = template.replace("{{extends}}",
+				currentContext.useJavaType("org.graalvm.python.javainterfacegen.GuestValueImpl"));
+		template = template.replace("{{filepath}}", currentContext.getFileFrom());
 
-    @Override
-    public String visit(ClassDef classDef) {
-        GeneratorContext tmpContext = currentContext;
-        if (currentContext.isIgnored(classDef.getName()) && currentContext.isIgnored(classDef.getFullname())) {
-            return "";
-        }
+		template = template.replace("{{importblock}}", GeneratorUtils.importBlock(currentContext.getImports()));
 
-        currentContext = new GeneratorContext(currentContext, configuration, classDef, true);
+		StringBuilder content = new StringBuilder();
 
-        String nameGeneratorClassName = (String) currentContext.getConfiguration().get(Configuration.P_NAME_GENERATOR);
-        NameGenerator nameGen = GeneratorFactory.createNameGenerator(nameGeneratorClassName);
+		Map<String, SymbolTableNode> symbolTable = mypyFile.getNames().getTable();
+		for (Map.Entry<String, SymbolTableNode> entry : symbolTable.entrySet()) {
+			String key = entry.getKey();
+			if (!key.startsWith("_")) {
+				SymbolTableNode tableNode = entry.getValue();
+				if (tableNode.getNode() instanceof MypyFile mypyFile2) {
+					System.out.println("!!!!!!!!!!!!!!!! ");
+					System.out.println("    SymbolTableNode.getFullname: " + tableNode.getFullname());
+					System.out.println("    SymbolTableNode.value: " + tableNode.getValue().toString());
+					System.out.println("    current traversed file: " + mypyFile.getPath());
+					System.out.println("    want to traverse: " + mypyFile2.getPath());
+				} else {
+					content.append(tableNode.getNode().accept(this));
+				}
+			}
+		}
 
-        String packageName = nameGen.packageForImplementation(classDef, currentContext);
-        String implementationName = nameGen.classImplementationName(classDef, currentContext);
+		template = template.replace("{{content}}", content.toString());
 
-        String template = TEMPLATE_IMPLEMENTATION;
+		template = GeneratorUtils.indentTemplate(currentContext, template);
 
-        template = template.replace("{{license}}", GeneratorUtils.getLicense(currentContext));
-        String generatedInfo = "";
-        if (currentContext.addTimestamp()) {
-            generatedInfo = GeneratorUtils.generateTimeStamp() + '\n';
-        }
-        if (currentContext.addLocation()) {
-            generatedInfo = generatedInfo +  GeneratorUtils.generateLocation(currentContext.getFileFrom() + " class def: " + classDef.getName()) + '\n';
-        }
-        template = template.replace("{{generatedinfo}}", generatedInfo);
-        template = template.replace("{{package}}", packageName);
-        template = template.replace("{{implname}}", implementationName);
+		try {
+			GeneratorUtils.saveFile(currentContext, packageName, className, template);
+		} catch (IOException ex) {
+			Logger.getLogger(TransformerVisitor.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		return null;
+	}
 
-        String implJavaFQN = packageName + "." + implementationName;
-        currentContext.setJavaFQN(implJavaFQN);
-        TypeManager.get().registerImplementation(classDef.getFullname(), implJavaFQN);
+	@Override
+	public String visit(ClassDef classDef) {
+		GeneratorContext tmpContext = currentContext;
+		if (currentContext.isIgnored(classDef.getName()) && currentContext.isIgnored(classDef.getFullname())) {
+			return "";
+		}
 
-        // implements
-        String ifaceJavaFQN = nameGen.packageForInterface(classDef, currentContext) + "." + nameGen.interfaceName(classDef, currentContext);
-        template = template.replace("{{implements}}", currentContext.useJavaType(ifaceJavaFQN));
+		currentContext = new GeneratorContext(currentContext, configuration, classDef, true);
 
-        // extends 
-        TypeInfo typeInfo = (TypeInfo) tmpContext.getCurrentNode();
-        StringBuilder extendsExpr = new StringBuilder();
-        List<Instance> bases = typeInfo.getBases();
-        String guestValueFQN = configuration.getBaseImplementationPackage(currentContext) + ".GuestValueDefaultImpl";
-        if (!bases.isEmpty()) {
-            // I am expecting that the first extned is the latest one (first in MRO)
-            String pythonType = PythonFQNResolver.findPythonFQN(bases.get(0));
-            if ("builtins.object".equals(pythonType)) {
-                template = template.replace("{{extends}}", currentContext.useJavaType(guestValueFQN));
-            } else {
-                template = template.replace("{{extends}}", currentContext.useImplementation(pythonType, guestValueFQN));
-            }
-        } else {
-            template = template.replace("{{extends}}", currentContext.useJavaType(guestValueFQN));
-        }
+		String nameGeneratorClassName = (String) currentContext.getConfiguration().get(Configuration.P_NAME_GENERATOR);
+		NameGenerator nameGen = GeneratorFactory.createNameGenerator(nameGeneratorClassName);
 
-        // class body
-        Map<String, SymbolTableNode> symbolTable = typeInfo.getNames().getTable();
-        StringBuilder content = new StringBuilder();
-        content.append("{{indent}}// TODO provide construtor");
-        currentContext.increaseIndentLevel();
-        for (Map.Entry<String, SymbolTableNode> entry : symbolTable.entrySet()) {
-            String key = entry.getKey();
-            if (!key.startsWith("_")) {
-                SymbolTableNode tableNode = entry.getValue();
-                content.append(tableNode.getNode().accept(this));
-            }
-        }
-        template = template.replace("{{content}}", GeneratorUtils.indentTemplate(currentContext, content.toString()));
-        currentContext.decreaseIndentLevel();
-        
-        String[] imports = currentContext.getImports();
-        template = template.replace("{{imports}}", GeneratorUtils.generateImports(imports));
-//        template = template.replace("{{logcomment}}", "");
+		String packageName = nameGen.packageForImplementation(classDef, currentContext);
+		String implementationName = nameGen.classImplementationName(classDef, currentContext);
 
-        try {
-            GeneratorUtils.saveFile(currentContext, packageName, implementationName, GeneratorUtils.indentTemplate(currentContext, template));
-        } catch (IOException ex) {
-            Logger.getLogger(TransformerVisitor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-//        System.out.println(sb.toString());
-        currentContext = tmpContext;
-        return "";
-    }
+		String template = TEMPLATE_IMPLEMENTATION;
 
-    @Override
-    public String visit(FuncDef funcDef) {
-        if (currentContext.isIgnored(funcDef.getName())) {
-            return "";
-        }
-        GeneratorContext tmpContext = currentContext;
-        currentContext = new GeneratorContext(currentContext, configuration, funcDef);
+		template = template.replace("{{license}}", GeneratorUtils.getLicense(currentContext));
+		String generatedInfo = "";
+		if (currentContext.addTimestamp()) {
+			generatedInfo = GeneratorUtils.generateTimeStamp() + '\n';
+		}
+		if (currentContext.addLocation()) {
+			generatedInfo = generatedInfo + GeneratorUtils
+					.generateLocation(currentContext.getFileFrom() + " class def: " + classDef.getName()) + '\n';
+		}
+		template = template.replace("{{generatedinfo}}", generatedInfo);
+		template = template.replace("{{package}}", packageName);
+		template = template.replace("{{implname}}", implementationName);
 
-        StringBuilder sb = new StringBuilder();
+		String implJavaFQN = packageName + "." + implementationName;
+		currentContext.setJavaFQN(implJavaFQN);
+		TypeManager.get().registerImplementation(classDef.getFullname(), implJavaFQN);
 
-//        String[] fnSignatureGenerators = configuration.fnInterfaceGenerators(currentContext);
-//        for (int i = 0; i < fnSignatureGenerators.length; i++) {
-//            String fnInterfaceGenerator = fnSignatureGenerators[i];
-//            String text = GeneratorFactory.createFnPartGenerator(fnInterfaceGenerator).create(funcDef, currentContext);
-//            sb.append(text).append('\n');
-//        }
+		// implements
+		String ifaceJavaFQN = nameGen.packageForInterface(classDef, currentContext) + "."
+				+ nameGen.interfaceName(classDef, currentContext);
+		template = template.replace("{{implements}}", currentContext.useJavaType(ifaceJavaFQN));
 
-        sb.append("\n\n{{indent}}// TODO provide implemetation of function: " + funcDef.getName());
-        currentContext = tmpContext;
-        return sb.toString();
-    }
+		// extends
+		TypeInfo typeInfo = (TypeInfo) tmpContext.getCurrentNode();
+		StringBuilder extendsExpr = new StringBuilder();
+		List<Instance> bases = typeInfo.getBases();
+		String guestValueFQN = configuration.getBaseImplementationPackage(currentContext) + ".GuestValueDefaultImpl";
+		if (!bases.isEmpty()) {
+			// I am expecting that the first extned is the latest one (first in MRO)
+			String pythonType = PythonFQNResolver.findPythonFQN(bases.get(0));
+			if ("builtins.object".equals(pythonType)) {
+				template = template.replace("{{extends}}", currentContext.useJavaType(guestValueFQN));
+			} else {
+				template = template.replace("{{extends}}", currentContext.useImplementation(pythonType, guestValueFQN));
+			}
+		} else {
+			template = template.replace("{{extends}}", currentContext.useJavaType(guestValueFQN));
+		}
 
-    @Override
-    public String visit(Argument arg) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+		// class body
+		Map<String, SymbolTableNode> symbolTable = typeInfo.getNames().getTable();
+		StringBuilder content = new StringBuilder();
+		content.append("{{indent}}// TODO provide construtor");
+		currentContext.increaseIndentLevel();
+		for (Map.Entry<String, SymbolTableNode> entry : symbolTable.entrySet()) {
+			String key = entry.getKey();
+			if (!key.startsWith("_")) {
+				SymbolTableNode tableNode = entry.getValue();
+				content.append(tableNode.getNode().accept(this));
+			}
+		}
+		template = template.replace("{{content}}", GeneratorUtils.indentTemplate(currentContext, content.toString()));
+		currentContext.decreaseIndentLevel();
 
-    @Override
-    public String visit(Var v) {
-        if (currentContext.isClass()) {
-            if (currentContext.isIgnored(v.getName())) {
-                return "";
-            }
-            // TODO this should be configurable
-            boolean generateFieldGetters = true;
-            if (generateFieldGetters) {
-                StringBuilder sb = new StringBuilder();
-                String[] fnSignatureGenerators = configuration.functionGenerators(currentContext);
-                for (int i = 0; i < fnSignatureGenerators.length; i++) {
-                    String fnInterfaceGenerator = fnSignatureGenerators[i];
-                    sb.append(GeneratorFactory.createFunctionGenerator(fnInterfaceGenerator).createImplementation(v, currentContext));        
-                }
-                return sb.toString();
-            }
-            return "";
-        }
-        return "{{indent}}// TODO reflect variable '" + v.getName() + "'\n";
-    }
+		String[] imports = currentContext.getImports();
+		template = template.replace("{{imports}}", GeneratorUtils.generateImports(imports));
+		// template = template.replace("{{logcomment}}", "");
 
-    @Override
-    public String visit(Block block) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+		try {
+			GeneratorUtils.saveFile(currentContext, packageName, implementationName,
+					GeneratorUtils.indentTemplate(currentContext, template));
+		} catch (IOException ex) {
+			Logger.getLogger(TransformerVisitor.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		// System.out.println(sb.toString());
+		currentContext = tmpContext;
+		return "";
+	}
 
-    @Override
-    public String visit(ExpressionStmt expr) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+	@Override
+	public String visit(FuncDef funcDef) {
+		if (currentContext.isIgnored(funcDef.getName())) {
+			return "";
+		}
+		GeneratorContext tmpContext = currentContext;
+		currentContext = new GeneratorContext(currentContext, configuration, funcDef);
 
-    @Override
-    public String visit(AssignmentStmt assignment) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+		StringBuilder sb = new StringBuilder();
 
-    @Override
-    public String visit(NameExpr nameExpr) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+		// String[] fnSignatureGenerators =
+		// configuration.fnInterfaceGenerators(currentContext);
+		// for (int i = 0; i < fnSignatureGenerators.length; i++) {
+		// String fnInterfaceGenerator = fnSignatureGenerators[i];
+		// String text =
+		// GeneratorFactory.createFnPartGenerator(fnInterfaceGenerator).create(funcDef,
+		// currentContext);
+		// sb.append(text).append('\n');
+		// }
 
-    @Override
-    public String visit(StrExpr strExpr) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+		sb.append("\n\n{{indent}}// TODO provide implemetation of function: " + funcDef.getName());
+		currentContext = tmpContext;
+		return sb.toString();
+	}
 
-    @Override
-    public String visit(TupleExpr tuple) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+	@Override
+	public String visit(Argument arg) {
+		throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																		// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+	}
 
-    @Override
-    public String visit(TypeInfo typeInfo) {
-        String result;
-        GeneratorContext tmpContext = currentContext;
-        currentContext = new GeneratorContext(currentContext, configuration, typeInfo, false);
-        result = typeInfo.getDefn().accept(this);
-        currentContext = tmpContext;
-        return result;
-    }
+	@Override
+	public String visit(Var v) {
+		if (currentContext.isClass()) {
+			if (currentContext.isIgnored(v.getName())) {
+				return "";
+			}
+			// TODO this should be configurable
+			boolean generateFieldGetters = true;
+			if (generateFieldGetters) {
+				StringBuilder sb = new StringBuilder();
+				String[] fnSignatureGenerators = configuration.functionGenerators(currentContext);
+				for (int i = 0; i < fnSignatureGenerators.length; i++) {
+					String fnInterfaceGenerator = fnSignatureGenerators[i];
+					sb.append(GeneratorFactory.createFunctionGenerator(fnInterfaceGenerator).createImplementation(v,
+							currentContext));
+				}
+				return sb.toString();
+			}
+			return "";
+		}
+		return "{{indent}}// TODO reflect variable '" + v.getName() + "'\n";
+	}
 
-    @Override
-    public String visit(Decorator decorator) {
-        return "\n\n{{indent}}// TODO provide implemetation of decorator: " + decorator.getValue().toString();
-    }
+	@Override
+	public String visit(Block block) {
+		throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																		// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+	}
 
-    @Override
-    public String visit(OverloadedFuncDef oFnDef) {
-        return "\n\n{{indent}}// TODO provide implemetation of decorator: " + oFnDef.getFullname();
-    }
+	@Override
+	public String visit(ExpressionStmt expr) {
+		throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																		// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+	}
 
-    @Override
-    public String visit(TypeAlias typeAlias) {
-        return "\n\n{{indent}}// TODO handle visit(TypeAlias)";
-    }
+	@Override
+	public String visit(AssignmentStmt assignment) {
+		throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																		// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+	}
 
-    @Override
-    public String visit(TypeVarExpr typeVarExpr) {
-        return "\n\n{{indent}}//TODO handle TypeVarExpr " + typeVarExpr.getValue().toString();
-    }
+	@Override
+	public String visit(NameExpr nameExpr) {
+		throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																		// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+	}
+
+	@Override
+	public String visit(StrExpr strExpr) {
+		throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																		// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+	}
+
+	@Override
+	public String visit(TupleExpr tuple) {
+		throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																		// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+	}
+
+	@Override
+	public String visit(TypeInfo typeInfo) {
+		String result;
+		GeneratorContext tmpContext = currentContext;
+		currentContext = new GeneratorContext(currentContext, configuration, typeInfo, false);
+		result = typeInfo.getDefn().accept(this);
+		currentContext = tmpContext;
+		return result;
+	}
+
+	@Override
+	public String visit(Decorator decorator) {
+		return "\n\n{{indent}}// TODO provide implemetation of decorator: " + decorator.getValue().toString();
+	}
+
+	@Override
+	public String visit(OverloadedFuncDef oFnDef) {
+		return "\n\n{{indent}}// TODO provide implemetation of decorator: " + oFnDef.getFullname();
+	}
+
+	@Override
+	public String visit(TypeAlias typeAlias) {
+		return "\n\n{{indent}}// TODO handle visit(TypeAlias)";
+	}
+
+	@Override
+	public String visit(TypeVarExpr typeVarExpr) {
+		return "\n\n{{indent}}//TODO handle TypeVarExpr " + typeVarExpr.getValue().toString();
+	}
 
 }

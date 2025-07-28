@@ -51,87 +51,85 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface FuncBase extends Node {
 
-    public static ProperType getTypeImpl(FuncBase funcBase) {
-        Value type = funcBase.getValue().getMember("type");
-        String typeFQN = Utils.getFullyQualifedName(type);
-        switch(typeFQN) {
-            case CallableType.FQN:
-                return new CallableTypeImpl(type);
-            case NoneType.FQN:
-            case "NoneType":
-                return new NoneTypeImpl(type);
-        }
-        throw new UnsupportedOperationException(typeFQN + " doesn't fit");
-    }
+	public static ProperType getTypeImpl(FuncBase funcBase) {
+		Value type = funcBase.getValue().getMember("type");
+		String typeFQN = Utils.getFullyQualifedName(type);
+		switch (typeFQN) {
+			case CallableType.FQN :
+				return new CallableTypeImpl(type);
+			case NoneType.FQN :
+			case "NoneType" :
+				return new NoneTypeImpl(type);
+		}
+		throw new UnsupportedOperationException(typeFQN + " doesn't fit");
+	}
 
-    static class FuncBaseImpl extends Node.NodeImpl implements FuncBase {
+	static class FuncBaseImpl extends Node.NodeImpl implements FuncBase {
 
-        public FuncBaseImpl(Value instance) {
-            super(instance);
-        }
+		public FuncBaseImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public ProperType getType() {
-            return getTypeImpl(this);
-        }
+		@Override
+		public ProperType getType() {
+			return getTypeImpl(this);
+		}
 
-        @Override
-        public Value getUnanalyzed_type() {
-            return getValue().getMember("unanalyzed_type");
-        }
+		@Override
+		public Value getUnanalyzed_type() {
+			return getValue().getMember("unanalyzed_type");
+		}
 
-        @Override
-        public Value getInfo() {
-            return getValue().getMember("info");
-        }
+		@Override
+		public Value getInfo() {
+			return getValue().getMember("info");
+		}
 
-        @Override
-        public boolean isProperty() {
-            return getValue().getMember("is_property").asBoolean();
-        }
+		@Override
+		public boolean isProperty() {
+			return getValue().getMember("is_property").asBoolean();
+		}
 
-        @Override
-        public boolean isClass() {
-            return getValue().getMember("is_class").asBoolean();
-        }
+		@Override
+		public boolean isClass() {
+			return getValue().getMember("is_class").asBoolean();
+		}
 
-        @Override
-        public boolean isStatic() {
-            return getValue().getMember("is_static").asBoolean();
-        }
+		@Override
+		public boolean isStatic() {
+			return getValue().getMember("is_static").asBoolean();
+		}
 
-        @Override
-        public boolean isFinal() {
-            return getValue().getMember("is_final").asBoolean();
-        }
+		@Override
+		public boolean isFinal() {
+			return getValue().getMember("is_final").asBoolean();
+		}
 
-        @Override
-        public boolean isExplicitOverride() {
-            return getValue().getMember("is_explicit_override").asBoolean();
-        }
+		@Override
+		public boolean isExplicitOverride() {
+			return getValue().getMember("is_explicit_override").asBoolean();
+		}
 
-        @Override
-        public boolean isTypeCheckOnly() {
-            return getValue().getMember("is_type_check_only").asBoolean();
-        }
+		@Override
+		public boolean isTypeCheckOnly() {
+			return getValue().getMember("is_type_check_only").asBoolean();
+		}
 
-        @Override
-        public String getFullname() {
-            return getValue().getMember("fullname").asString();
-        }
+		@Override
+		public String getFullname() {
+			return getValue().getMember("fullname").asString();
+		}
 
+	}
 
-
-    }
-
-    ProperType getType();
-    Value getUnanalyzed_type();
-    Value getInfo();
-    boolean isProperty();
-    boolean isClass();
-    boolean isStatic();
-    boolean isFinal();
-    boolean isExplicitOverride();
-    boolean isTypeCheckOnly();
-    String getFullname();
+	ProperType getType();
+	Value getUnanalyzed_type();
+	Value getInfo();
+	boolean isProperty();
+	boolean isClass();
+	boolean isStatic();
+	boolean isFinal();
+	boolean isExplicitOverride();
+	boolean isTypeCheckOnly();
+	String getFullname();
 }
