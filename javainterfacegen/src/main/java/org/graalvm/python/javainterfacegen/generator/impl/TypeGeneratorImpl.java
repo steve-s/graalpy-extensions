@@ -40,15 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.GeneratorUtils;
@@ -59,7 +50,6 @@ import org.graalvm.python.javainterfacegen.generator.TypeNameGenerator;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
 import org.graalvm.python.javainterfacegen.mypy.types.AnyType;
 import org.graalvm.python.javainterfacegen.mypy.types.CallableType;
-import org.graalvm.python.javainterfacegen.mypy.types.ExtraAttrs;
 import org.graalvm.python.javainterfacegen.mypy.types.Instance;
 import org.graalvm.python.javainterfacegen.mypy.types.LiteralType;
 import org.graalvm.python.javainterfacegen.mypy.types.NoneType;
@@ -75,7 +65,15 @@ import org.graalvm.python.javainterfacegen.mypy.types.TypeVisitor;
 import org.graalvm.python.javainterfacegen.mypy.types.TypedDictType;
 import org.graalvm.python.javainterfacegen.mypy.types.UninhabitedType;
 import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
-import org.graalvm.python.javainterfacegen.python.Utils;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TypeGeneratorImpl implements TypeGenerator {
 

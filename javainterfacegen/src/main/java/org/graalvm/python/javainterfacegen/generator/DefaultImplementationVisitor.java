@@ -40,11 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Argument;
 import org.graalvm.python.javainterfacegen.mypy.nodes.AssignmentStmt;
@@ -65,6 +60,12 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeVarExpr;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Var;
 import org.graalvm.python.javainterfacegen.mypy.types.Instance;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DefaultImplementationVisitor implements NodeVisitor<String> {
 

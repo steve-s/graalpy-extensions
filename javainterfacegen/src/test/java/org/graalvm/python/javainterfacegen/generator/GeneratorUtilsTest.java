@@ -1,13 +1,12 @@
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.nio.file.Path;
-import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 public class GeneratorUtilsTest {
 

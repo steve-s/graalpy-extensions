@@ -41,9 +41,15 @@
 
 package org.graalvm.python.embedding.tools.test;
 
-import static org.graalvm.python.embedding.tools.test.EmbeddingTestUtils.createVenv;
-import static org.graalvm.python.embedding.tools.test.EmbeddingTestUtils.deleteDirOnShutdown;
-import static org.junit.jupiter.api.Assertions.*;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Engine;
+import org.graalvm.polyglot.PolyglotException;
+import org.graalvm.polyglot.Source;
+import org.graalvm.python.embedding.tools.exec.BuildToolLog;
+import org.graalvm.python.embedding.tools.vfs.VFSUtils;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,17 +58,12 @@ import java.util.ArrayList;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Engine;
-import org.graalvm.polyglot.PolyglotException;
-import org.graalvm.polyglot.Source;
-import org.graalvm.python.embedding.tools.exec.BuildToolLog;
-import org.graalvm.python.embedding.tools.vfs.VFSUtils;
-
-import com.oracle.graal.python.runtime.PythonOptions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.graalvm.python.embedding.tools.test.EmbeddingTestUtils.createVenv;
+import static org.graalvm.python.embedding.tools.test.EmbeddingTestUtils.deleteDirOnShutdown;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class MultiContextCExtTest {
 	@BeforeAll

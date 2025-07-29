@@ -40,12 +40,12 @@
  */
 package org.graalvm.python.embedding;
 
+import org.graalvm.polyglot.io.FileSystem;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-
-import org.graalvm.polyglot.io.FileSystem;
 
 /**
  * The GraalPy Virtual Filesystem accesses embedded resource files as standard

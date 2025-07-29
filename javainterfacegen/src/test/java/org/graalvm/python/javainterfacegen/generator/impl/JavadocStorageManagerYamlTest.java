@@ -1,5 +1,12 @@
 package org.graalvm.python.javainterfacegen.generator.impl;
 
+import org.graalvm.python.javainterfacegen.generator.JavadocStorageManager;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -7,13 +14,8 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import org.graalvm.python.javainterfacegen.generator.JavadocStorageManager;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 public class JavadocStorageManagerYamlTest {
 

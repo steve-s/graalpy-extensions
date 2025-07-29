@@ -40,25 +40,24 @@
  */
 package org.graalvm.python.embedding.test.integration;
 
-import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.embedding.KeywordArguments;
 import org.graalvm.python.embedding.PositionalArguments;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ArgumentsTest {
 

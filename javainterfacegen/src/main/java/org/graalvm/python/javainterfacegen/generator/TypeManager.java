@@ -80,19 +80,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
@@ -111,6 +98,20 @@ import org.graalvm.python.javainterfacegen.mypy.types.TypedDictType;
 import org.graalvm.python.javainterfacegen.mypy.types.UninhabitedType;
 import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
 import org.graalvm.python.javainterfacegen.python.Utils;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TypeManager {
 

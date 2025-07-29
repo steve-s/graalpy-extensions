@@ -1,12 +1,5 @@
 package org.graalvm.python.javainterfacegen.generator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.configuration.DefaultConfigurationLoader;
 import org.graalvm.python.javainterfacegen.mypy.types.TupleType;
@@ -16,6 +9,13 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class TypeManagerTest {
 

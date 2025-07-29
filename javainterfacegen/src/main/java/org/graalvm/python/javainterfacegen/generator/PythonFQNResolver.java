@@ -40,12 +40,10 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.util.List;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeAlias;
 import org.graalvm.python.javainterfacegen.mypy.types.AnyType;
 import org.graalvm.python.javainterfacegen.mypy.types.CallableType;
-import org.graalvm.python.javainterfacegen.mypy.types.ExtraAttrs;
 import org.graalvm.python.javainterfacegen.mypy.types.Instance;
 import org.graalvm.python.javainterfacegen.mypy.types.LiteralType;
 import org.graalvm.python.javainterfacegen.mypy.types.NoneType;
@@ -61,6 +59,8 @@ import org.graalvm.python.javainterfacegen.mypy.types.TypeVisitor;
 import org.graalvm.python.javainterfacegen.mypy.types.TypedDictType;
 import org.graalvm.python.javainterfacegen.mypy.types.UninhabitedType;
 import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
+
+import java.util.List;
 
 public class PythonFQNResolver {
 

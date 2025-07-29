@@ -40,11 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
 import org.graalvm.python.javainterfacegen.mypy.nodes.DefaultNodeVisitor;
 import org.graalvm.python.javainterfacegen.mypy.nodes.ExpressionStmt;
@@ -55,6 +50,12 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.Statement;
 import org.graalvm.python.javainterfacegen.mypy.nodes.StrExpr;
 import org.graalvm.python.javainterfacegen.mypy.nodes.SymbolTableNode;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class DocstringProvider extends DefaultNodeVisitor<Map<String, String>> {
 

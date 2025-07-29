@@ -41,6 +41,10 @@
 
 package org.graalvm.python.embedding.tools.test;
 
+import org.graalvm.python.embedding.tools.exec.BuildToolLog;
+import org.graalvm.python.embedding.tools.vfs.VFSUtils;
+import org.graalvm.python.embedding.tools.vfs.VFSUtils.Launcher;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -49,10 +53,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
-
-import org.graalvm.python.embedding.tools.exec.BuildToolLog;
-import org.graalvm.python.embedding.tools.vfs.VFSUtils;
-import org.graalvm.python.embedding.tools.vfs.VFSUtils.Launcher;
 
 public final class EmbeddingTestUtils {
 	private EmbeddingTestUtils() {

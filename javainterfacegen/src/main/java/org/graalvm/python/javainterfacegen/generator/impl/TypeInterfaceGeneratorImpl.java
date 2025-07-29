@@ -40,15 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.GeneratorUtils;
@@ -61,6 +52,15 @@ import org.graalvm.python.javainterfacegen.mypy.types.Instance;
 import org.graalvm.python.javainterfacegen.mypy.types.NoneType;
 import org.graalvm.python.javainterfacegen.mypy.types.Type;
 import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TypeInterfaceGeneratorImpl implements TypeGenerator {
 

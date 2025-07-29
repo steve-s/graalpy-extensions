@@ -40,12 +40,12 @@
  */
 package org.graalvm.python.javainterfacegen.configuration;
 
-import java.io.File;
+import org.yaml.snakeyaml.Yaml;
+
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import org.yaml.snakeyaml.Yaml;
 
 public class YamlConfigurationLoader implements ConfigurationLoader {
 

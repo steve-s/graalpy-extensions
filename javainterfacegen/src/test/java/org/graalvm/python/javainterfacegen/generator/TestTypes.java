@@ -1,15 +1,9 @@
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeAlias;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
 import org.graalvm.python.javainterfacegen.mypy.types.AnyType;
-import org.graalvm.python.javainterfacegen.mypy.types.CallableType;
 import org.graalvm.python.javainterfacegen.mypy.types.Instance;
 import org.graalvm.python.javainterfacegen.mypy.types.LiteralType;
 import org.graalvm.python.javainterfacegen.mypy.types.NoneType;
@@ -22,6 +16,12 @@ import org.graalvm.python.javainterfacegen.mypy.types.TypeVarLikeType;
 import org.graalvm.python.javainterfacegen.mypy.types.TypeVarType;
 import org.graalvm.python.javainterfacegen.mypy.types.TypeVisitor;
 import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 public class TestTypes {
 

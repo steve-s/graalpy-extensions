@@ -40,12 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
@@ -53,6 +47,13 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.DefaultNodeVisitor;
 import org.graalvm.python.javainterfacegen.mypy.nodes.MypyFile;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
 import org.graalvm.python.javainterfacegen.python.Utils;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class GeneratorContext {
 

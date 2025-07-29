@@ -41,14 +41,14 @@
 package org.graalvm.python.tasks;
 
 import org.graalvm.python.dsl.GraalPyExtension;
+import org.graalvm.python.embedding.tools.vfs.VFSUtils;
+import org.graalvm.python.embedding.tools.vfs.VFSUtils.PackagesChangedException;
 import org.gradle.api.GradleException;
-import org.gradle.api.tasks.*;
+import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.TaskAction;
 
 import java.io.IOException;
 import java.nio.file.Path;
-
-import org.graalvm.python.embedding.tools.vfs.VFSUtils;
-import org.graalvm.python.embedding.tools.vfs.VFSUtils.PackagesChangedException;
 
 /**
  * This task is responsible installing the dependencies which were requested by

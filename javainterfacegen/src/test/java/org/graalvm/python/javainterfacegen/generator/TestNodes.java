@@ -1,13 +1,9 @@
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.util.List;
-import java.util.Set;
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Block;
 import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
 import org.graalvm.python.javainterfacegen.mypy.nodes.FuncBase;
-import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
-import org.graalvm.python.javainterfacegen.mypy.nodes.FuncItem;
 import org.graalvm.python.javainterfacegen.mypy.nodes.MypyFile;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
 import org.graalvm.python.javainterfacegen.mypy.nodes.NodeVisitor;
@@ -20,6 +16,9 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.Var;
 import org.graalvm.python.javainterfacegen.mypy.types.Instance;
 import org.graalvm.python.javainterfacegen.mypy.types.ProperType;
 import org.graalvm.python.javainterfacegen.mypy.types.Type;
+
+import java.util.List;
+import java.util.Set;
 
 public class TestNodes {
 

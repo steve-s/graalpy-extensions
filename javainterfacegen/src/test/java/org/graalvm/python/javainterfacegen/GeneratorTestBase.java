@@ -1,8 +1,21 @@
 package org.graalvm.python.javainterfacegen;
 
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Value;
+import org.graalvm.python.javainterfacegen.configuration.Configuration;
+import org.graalvm.python.javainterfacegen.configuration.ConfigurationLoader;
+import org.graalvm.python.javainterfacegen.configuration.DefaultConfigurationLoader;
+import org.graalvm.python.javainterfacegen.generator.TypeManager;
+import org.graalvm.python.javainterfacegen.mypy.MypyHook;
+import org.graalvm.python.javainterfacegen.mypy.nodes.MypyFile;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -10,13 +23,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -27,25 +38,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Value;
-import org.graalvm.python.javainterfacegen.ContextFactory;
-import org.graalvm.python.javainterfacegen.Main;
-import org.graalvm.python.javainterfacegen.configuration.Configuration;
-import org.graalvm.python.javainterfacegen.configuration.ConfigurationLoader;
-import org.graalvm.python.javainterfacegen.configuration.DefaultConfigurationLoader;
-import org.graalvm.python.javainterfacegen.generator.GeneratorUtils;
-import org.graalvm.python.javainterfacegen.generator.TypeManager;
-import org.graalvm.python.javainterfacegen.generator.TypeManager;
-import org.graalvm.python.javainterfacegen.mypy.MypyHook;
-import org.graalvm.python.javainterfacegen.mypy.nodes.MypyFile;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
+
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class GeneratorTestBase {
 

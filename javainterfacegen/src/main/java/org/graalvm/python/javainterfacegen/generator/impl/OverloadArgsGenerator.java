@@ -40,9 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.GeneratorUtils;
 import org.graalvm.python.javainterfacegen.generator.PythonFQNResolver;
@@ -50,14 +47,19 @@ import org.graalvm.python.javainterfacegen.generator.TypeManager;
 import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
 import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
 import org.graalvm.python.javainterfacegen.mypy.types.ArgKind;
+import org.graalvm.python.javainterfacegen.mypy.types.CallableType;
+import org.graalvm.python.javainterfacegen.mypy.types.Type;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED;
 import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED_OPT;
 import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_OPT;
 import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_POS;
 import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_STAR;
 import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_STAR2;
-import org.graalvm.python.javainterfacegen.mypy.types.CallableType;
-import org.graalvm.python.javainterfacegen.mypy.types.Type;
 
 public class OverloadArgsGenerator {
 

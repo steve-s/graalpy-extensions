@@ -40,10 +40,11 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.util.Optional;
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.mypy.types.AnyType;
 import org.graalvm.python.javainterfacegen.mypy.types.TypeVisitor;
+
+import java.util.Optional;
 
 public class TypeConstants {
 	protected static AnyType ANY_TYPE = new AnyType() {

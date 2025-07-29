@@ -40,10 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.GeneratorFactory;
@@ -59,6 +55,11 @@ import org.graalvm.python.javainterfacegen.mypy.types.ArgKind;
 import org.graalvm.python.javainterfacegen.mypy.types.CallableType;
 import org.graalvm.python.javainterfacegen.mypy.types.Type;
 import org.graalvm.python.javainterfacegen.python.Utils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FunctionGeneratorImpl implements org.graalvm.python.javainterfacegen.generator.FunctionGenerator {
 

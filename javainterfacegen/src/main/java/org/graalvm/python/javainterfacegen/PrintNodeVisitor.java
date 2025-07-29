@@ -41,10 +41,30 @@
 
 package org.graalvm.python.javainterfacegen;
 
+import org.graalvm.python.javainterfacegen.mypy.nodes.Argument;
+import org.graalvm.python.javainterfacegen.mypy.nodes.AssignmentStmt;
+import org.graalvm.python.javainterfacegen.mypy.nodes.Block;
+import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
+import org.graalvm.python.javainterfacegen.mypy.nodes.Decorator;
+import org.graalvm.python.javainterfacegen.mypy.nodes.Expression;
+import org.graalvm.python.javainterfacegen.mypy.nodes.ExpressionStmt;
+import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
+import org.graalvm.python.javainterfacegen.mypy.nodes.MypyFile;
+import org.graalvm.python.javainterfacegen.mypy.nodes.NameExpr;
+import org.graalvm.python.javainterfacegen.mypy.nodes.NodeVisitor;
+import org.graalvm.python.javainterfacegen.mypy.nodes.OverloadedFuncDef;
+import org.graalvm.python.javainterfacegen.mypy.nodes.Statement;
+import org.graalvm.python.javainterfacegen.mypy.nodes.StrExpr;
+import org.graalvm.python.javainterfacegen.mypy.nodes.SymbolNode;
+import org.graalvm.python.javainterfacegen.mypy.nodes.TupleExpr;
+import org.graalvm.python.javainterfacegen.mypy.nodes.TypeAlias;
+import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
+import org.graalvm.python.javainterfacegen.mypy.nodes.TypeVarExpr;
+import org.graalvm.python.javainterfacegen.mypy.nodes.Var;
+import org.graalvm.python.javainterfacegen.python.GuestArray;
+
 import java.util.List;
 import java.util.Set;
-import org.graalvm.python.javainterfacegen.mypy.nodes.*;
-import org.graalvm.python.javainterfacegen.python.GuestArray;
 
 public class PrintNodeVisitor implements NodeVisitor<String> {
 

@@ -49,7 +49,12 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.*;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuildingResult;
 import org.eclipse.aether.graph.Dependency;
 import org.graalvm.python.embedding.tools.vfs.VFSUtils;
 
@@ -58,10 +63,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.graalvm.python.embedding.tools.vfs.VFSUtils.*;
+import static org.graalvm.python.embedding.tools.vfs.VFSUtils.GRAALPY_GROUP_ID;
+import static org.graalvm.python.embedding.tools.vfs.VFSUtils.LAUNCHER_NAME;
+import static org.graalvm.python.embedding.tools.vfs.VFSUtils.Launcher;
+import static org.graalvm.python.embedding.tools.vfs.VFSUtils.VFS_ROOT;
+import static org.graalvm.python.embedding.tools.vfs.VFSUtils.VFS_VENV;
 
 public abstract class AbstractGraalPyMojo extends AbstractMojo {
 

@@ -40,28 +40,12 @@
  */
 package org.graalvm.python.javainterfacegen;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.configuration.YamlConfigurationLoader;
 import org.graalvm.python.javainterfacegen.generator.BaseClassManager;
-import org.graalvm.python.javainterfacegen.generator.DefaultImplementationVisitor;
 import org.graalvm.python.javainterfacegen.generator.DocstringProvider;
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.GeneratorFactory;
@@ -70,6 +54,21 @@ import org.graalvm.python.javainterfacegen.generator.TransformerVisitor;
 import org.graalvm.python.javainterfacegen.generator.TypeManager;
 import org.graalvm.python.javainterfacegen.mypy.MypyHook;
 import org.graalvm.python.javainterfacegen.mypy.nodes.MypyFile;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Main {
 

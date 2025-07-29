@@ -1,7 +1,5 @@
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.io.File;
-
 import org.graalvm.python.javainterfacegen.GeneratorTestBase;
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.configuration.DefaultConfigurationLoader;
@@ -15,6 +13,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.File;
 
 public class TypeGeneratorImplTest extends GeneratorTestBase {
 

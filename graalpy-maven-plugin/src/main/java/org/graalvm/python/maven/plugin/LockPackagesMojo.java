@@ -44,7 +44,6 @@ package org.graalvm.python.maven.plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-
 import org.graalvm.python.embedding.tools.vfs.VFSUtils;
 
 import java.io.IOException;

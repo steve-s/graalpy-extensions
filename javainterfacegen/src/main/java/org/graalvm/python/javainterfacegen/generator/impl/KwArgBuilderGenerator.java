@@ -40,19 +40,21 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.GeneratorUtils;
 import org.graalvm.python.javainterfacegen.generator.TypeManager;
 import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
 import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
 import org.graalvm.python.javainterfacegen.mypy.types.ArgKind;
-import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED;
-import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED_OPT;
 import org.graalvm.python.javainterfacegen.mypy.types.CallableType;
 import org.graalvm.python.javainterfacegen.mypy.types.Type;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED;
+import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED_OPT;
 
 public class KwArgBuilderGenerator {
 	private static final String KW_ARGS_BUILDER_CLASS = """

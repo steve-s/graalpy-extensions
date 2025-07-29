@@ -40,6 +40,8 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
+import org.graalvm.python.javainterfacegen.configuration.Configuration;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -48,7 +50,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.graalvm.python.javainterfacegen.configuration.Configuration;
 
 public class BaseClassManager {
 

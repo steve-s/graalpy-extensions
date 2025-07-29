@@ -40,7 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.util.List;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Decorator;
 import org.graalvm.python.javainterfacegen.mypy.nodes.DefaultNodeVisitor;
@@ -48,6 +47,8 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
 import org.graalvm.python.javainterfacegen.mypy.nodes.OverloadedFuncDef;
 import org.graalvm.python.javainterfacegen.mypy.nodes.SymbolNode;
+
+import java.util.List;
 
 public class LogCommentGenerator extends DefaultNodeVisitor<String> {
 

@@ -40,12 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.graalvm.python.javainterfacegen.generator.FunctionGenerator;
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.GeneratorUtils;
@@ -63,13 +57,21 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.SymbolTableNode;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Var;
 import org.graalvm.python.javainterfacegen.mypy.types.ArgKind;
-import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED;
-import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED_OPT;
-import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_POS;
 import org.graalvm.python.javainterfacegen.mypy.types.CallableType;
 import org.graalvm.python.javainterfacegen.mypy.types.NoneType;
 import org.graalvm.python.javainterfacegen.mypy.types.Type;
 import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED;
+import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED_OPT;
+import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_POS;
 
 public class JustInterfacesGeneratorImpl implements FunctionGenerator {
 

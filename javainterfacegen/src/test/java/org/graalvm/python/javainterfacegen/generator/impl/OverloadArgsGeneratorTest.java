@@ -1,29 +1,23 @@
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import static junit.framework.TestCase.assertTrue;
-import org.graalvm.collections.Pair;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.ContextFactory;
-import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
-import org.graalvm.python.javainterfacegen.GeneratorTestBase;
 import org.graalvm.python.javainterfacegen.mypy.MypyHook;
-import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
-import org.graalvm.python.javainterfacegen.mypy.types.Type;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+
+import static junit.framework.TestCase.assertTrue;
 
 /**
  *

@@ -40,17 +40,16 @@
  */
 package org.graalvm.python.javainterfacegen.configuration;
 
-import java.io.File;
+import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
+import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
+import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
+import org.graalvm.python.javainterfacegen.mypy.nodes.MypyFile;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
-import org.graalvm.python.javainterfacegen.generator.JavadocStorageManager;
-import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
-import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
-import org.graalvm.python.javainterfacegen.mypy.nodes.MypyFile;
 
 public class Configuration {
 	/**

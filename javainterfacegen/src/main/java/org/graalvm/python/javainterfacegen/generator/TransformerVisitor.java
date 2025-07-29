@@ -40,12 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.generator.impl.KwArgBuilderGenerator;
 import org.graalvm.python.javainterfacegen.generator.impl.OverloadArgsGenerator;
@@ -72,12 +66,20 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeVarExpr;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Var;
 import org.graalvm.python.javainterfacegen.mypy.types.ArgKind;
-import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED;
-import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_POS;
 import org.graalvm.python.javainterfacegen.mypy.types.CallableType;
 import org.graalvm.python.javainterfacegen.mypy.types.Instance;
 import org.graalvm.python.javainterfacegen.mypy.types.TupleType;
 import org.graalvm.python.javainterfacegen.python.Utils;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_NAMED;
+import static org.graalvm.python.javainterfacegen.mypy.types.ArgKind.ARG_POS;
 
 public class TransformerVisitor implements NodeVisitor<String> {
 

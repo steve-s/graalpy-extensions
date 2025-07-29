@@ -40,6 +40,18 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
+import org.graalvm.python.javainterfacegen.configuration.Configuration;
+import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
+import org.graalvm.python.javainterfacegen.mypy.nodes.Decorator;
+import org.graalvm.python.javainterfacegen.mypy.nodes.DefaultNodeVisitor;
+import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
+import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
+import org.graalvm.python.javainterfacegen.mypy.nodes.NodeVisitor;
+import org.graalvm.python.javainterfacegen.mypy.nodes.SymbolTableNode;
+import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
+import org.graalvm.python.javainterfacegen.mypy.nodes.Var;
+import org.graalvm.python.javainterfacegen.mypy.types.TupleType;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -58,17 +70,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.graalvm.python.javainterfacegen.configuration.Configuration;
-import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
-import org.graalvm.python.javainterfacegen.mypy.nodes.Decorator;
-import org.graalvm.python.javainterfacegen.mypy.nodes.DefaultNodeVisitor;
-import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
-import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
-import org.graalvm.python.javainterfacegen.mypy.nodes.NodeVisitor;
-import org.graalvm.python.javainterfacegen.mypy.nodes.SymbolTableNode;
-import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
-import org.graalvm.python.javainterfacegen.mypy.nodes.Var;
-import org.graalvm.python.javainterfacegen.mypy.types.TupleType;
 
 public class GeneratorUtils {
 	private static String fileSeparator = System.getProperty("file.separator");

@@ -1,10 +1,11 @@
 package org.graalvm.python.javainterfacegen.configuration;
 
+import org.yaml.snakeyaml.Yaml;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import org.yaml.snakeyaml.Yaml;
 
 public class YamlStringConfigurationLoader implements ConfigurationLoader {
 

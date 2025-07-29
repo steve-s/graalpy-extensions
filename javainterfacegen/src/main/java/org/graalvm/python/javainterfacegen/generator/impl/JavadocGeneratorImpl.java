@@ -40,8 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.GeneratorFactory;
 import org.graalvm.python.javainterfacegen.generator.JavadocGenerator;
@@ -52,6 +50,9 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
 import org.graalvm.python.javainterfacegen.mypy.nodes.MypyFile;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Var;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 public class JavadocGeneratorImpl implements JavadocGenerator {
 

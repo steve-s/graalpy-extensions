@@ -40,18 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.JavadocStorageManager;
@@ -65,6 +53,15 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class JavadocStorageManagerYaml implements JavadocStorageManager {
 

@@ -40,6 +40,10 @@
  */
 package org.graalvm.python.embedding.tools.vfs;
 
+import org.graalvm.python.embedding.tools.exec.BuildToolLog;
+import org.graalvm.python.embedding.tools.exec.BuildToolLog.CollectOutputLog;
+import org.graalvm.python.embedding.tools.exec.GraalPyRunner;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -64,10 +68,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
-
-import org.graalvm.python.embedding.tools.exec.BuildToolLog;
-import org.graalvm.python.embedding.tools.exec.BuildToolLog.CollectOutputLog;
-import org.graalvm.python.embedding.tools.exec.GraalPyRunner;
 
 public final class VFSUtils {
 

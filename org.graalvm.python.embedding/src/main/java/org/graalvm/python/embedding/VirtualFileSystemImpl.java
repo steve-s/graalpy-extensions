@@ -40,8 +40,8 @@
  */
 package org.graalvm.python.embedding;
 
-import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
-import static org.graalvm.python.embedding.VirtualFileSystem.HostIO.NONE;
+import org.graalvm.polyglot.io.FileSystem;
+import org.graalvm.python.embedding.VirtualFileSystem.HostIO;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -96,8 +96,8 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.stream.Collectors;
 
-import org.graalvm.polyglot.io.FileSystem;
-import org.graalvm.python.embedding.VirtualFileSystem.HostIO;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static org.graalvm.python.embedding.VirtualFileSystem.HostIO.NONE;
 
 final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
 

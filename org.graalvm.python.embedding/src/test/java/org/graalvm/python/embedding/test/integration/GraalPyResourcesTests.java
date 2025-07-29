@@ -40,12 +40,12 @@
  */
 package org.graalvm.python.embedding.test.integration;
 
-import java.nio.file.Path;
-
 import org.graalvm.polyglot.Engine;
 import org.graalvm.python.embedding.GraalPyResources;
 import org.graalvm.python.embedding.VirtualFileSystem;
 import org.junit.jupiter.api.Test;
+
+import java.nio.file.Path;
 
 public class GraalPyResourcesTests {
 	@Test

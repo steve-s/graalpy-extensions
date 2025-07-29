@@ -40,9 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
 import org.graalvm.python.javainterfacegen.mypy.types.AnyType;
 import org.graalvm.python.javainterfacegen.mypy.types.CallableType;
@@ -61,6 +58,10 @@ import org.graalvm.python.javainterfacegen.mypy.types.TypeVisitor;
 import org.graalvm.python.javainterfacegen.mypy.types.TypedDictType;
 import org.graalvm.python.javainterfacegen.mypy.types.UninhabitedType;
 import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
+
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class TypeNameGenerator implements TypeVisitor<String> {
 

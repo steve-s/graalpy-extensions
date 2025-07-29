@@ -1,7 +1,5 @@
 package org.graalvm.python.javainterfacegen.generator;
 
-import static org.junit.Assert.assertTrue;
-
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.configuration.DefaultConfigurationLoader;
 import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
@@ -10,6 +8,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 public class GeneratorContextTest {
 
