@@ -50,32 +50,32 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class TypeAliasTypeImpl extends TypeImpl implements TypeAliasType {
 
-    public TypeAliasTypeImpl(Value instance) {
-        super(instance);
-    }
+	public TypeAliasTypeImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
-    @Override
-    public TypeAlias getAlias() {
-        Value value = getValue().getMember("alias");
-        if (value != null) {
-            String pythonFQN = Utils.getFullyQualifedName(value);
-            switch (pythonFQN) {
-                case TypeAlias.FQN:
-                    return new TypeAliasImpl(value);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        }
-        return null;
-    }
+	@Override
+	public TypeAlias getAlias() {
+		Value value = getValue().getMember("alias");
+		if (value != null) {
+			String pythonFQN = Utils.getFullyQualifedName(value);
+			switch (pythonFQN) {
+				case TypeAlias.FQN :
+					return new TypeAliasImpl(value);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		}
+		return null;
+	}
 
-    @Override
-    public String getTypeRef() {
-        return getValue().getMember("ref").asString();
-    }
+	@Override
+	public String getTypeRef() {
+		return getValue().getMember("ref").asString();
+	}
 
 }

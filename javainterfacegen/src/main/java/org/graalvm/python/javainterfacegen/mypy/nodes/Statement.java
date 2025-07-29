@@ -46,16 +46,16 @@ import org.graalvm.python.javainterfacegen.python.GuestValueDefaultImpl;
 
 public interface Statement extends Node {
 
-    static class StatementImpl extends Node.NodeImpl implements Statement {
+	static class StatementImpl extends Node.NodeImpl implements Statement {
 
-        public StatementImpl(Value instance) {
-            super(instance);
-        }
+		public StatementImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            throw new UnsupportedOperationException("Not implemented.");
-        }
-    }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			throw new UnsupportedOperationException("Not implemented.");
+		}
+	}
 
 }

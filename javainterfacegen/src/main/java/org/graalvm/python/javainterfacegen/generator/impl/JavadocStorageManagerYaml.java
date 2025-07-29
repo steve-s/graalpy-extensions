@@ -40,18 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.graalvm.python.javainterfacegen.configuration.Configuration;
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.JavadocStorageManager;
@@ -66,88 +54,97 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class JavadocStorageManagerYaml implements JavadocStorageManager {
 
-    private Path referenceFolder = null;
+	private Path referenceFolder = null;
 
+	private static class TrimConstructor extends Constructor {
 
-    private static class TrimConstructor extends Constructor {
+		public TrimConstructor(LoaderOptions options) {
+			super(options);
+		}
 
-        public TrimConstructor(LoaderOptions options) {
-            super(options);
-        }
+		@Override
+		protected String constructScalar(ScalarNode node) {
+			String value = (String) super.constructScalar(node);
+			return value.stripTrailing();
+		}
+	}
 
-        @Override
-        protected String constructScalar(ScalarNode node) {
-            String value = (String) super.constructScalar(node);
-            return value.stripTrailing();
-        }
-    }
+	@Override
+	public void setReferenceFolder(Path folder) {
+		this.referenceFolder = folder;
+	}
 
-    @Override
-    public void setReferenceFolder(Path folder) {
-        this.referenceFolder = folder;
-    }
+	@Override
+	public Map<String, String> load(InputStream input) {
+		LoaderOptions options = new LoaderOptions();
+		Constructor cons = new TrimConstructor(options);
+		Yaml yaml = new Yaml(cons);
+		Map<String, String> data = yaml.load(input);
+		return data;
+	}
 
-    @Override
-    public Map<String, String> load(InputStream input) {
-        LoaderOptions options = new LoaderOptions();
-        Constructor cons = new TrimConstructor(options);
-        Yaml yaml = new Yaml(cons);
-        Map<String, String> data = yaml.load(input);
-        return data;
-    }
+	@Override
+	public void save(Map<String, String> map, Writer writer) throws IOException {
+		DumperOptions options = new DumperOptions();
+		options.setIndent(4);
+		options.setPrettyFlow(true);
+		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
-    @Override
-    public void save(Map<String, String> map, Writer writer) throws IOException {
-        DumperOptions options = new DumperOptions();
-        options.setIndent(4);
-        options.setPrettyFlow(true);
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		Representer representer = new Representer(options) {
+			@Override
+			protected Node representMapping(Tag tag, Map<?, ?> mapping, DumperOptions.FlowStyle flowStyle) {
 
-        Representer representer = new Representer(options) {
-            @Override
-            protected Node representMapping(Tag tag, Map<?, ?> mapping, DumperOptions.FlowStyle flowStyle) {
+				List<NodeTuple> nodeTuples = new ArrayList<>();
 
-                List<NodeTuple> nodeTuples = new ArrayList<>();
+				for (Map.Entry<?, ?> entry : mapping.entrySet()) {
+					Node keyNode = representScalar(Tag.STR, entry.getKey().toString(), DumperOptions.ScalarStyle.PLAIN);
+					Node valueNode = representScalar(Tag.STR, entry.getValue().toString().stripTrailing() + "\n\n",
+							DumperOptions.ScalarStyle.LITERAL);
+					nodeTuples.add(new NodeTuple(keyNode, valueNode));
+				}
 
-                for (Map.Entry<?, ?> entry : mapping.entrySet()) {
-                    Node keyNode = representScalar(Tag.STR, entry.getKey().toString(), DumperOptions.ScalarStyle.PLAIN);
-                    Node valueNode = representScalar(Tag.STR, entry.getValue().toString().stripTrailing() + "\n\n", DumperOptions.ScalarStyle.LITERAL);
-                    nodeTuples.add(new NodeTuple(keyNode, valueNode));
-                }
+				return new MappingNode(tag, nodeTuples, flowStyle);
+			}
 
-                return new MappingNode(tag, nodeTuples, flowStyle);
-            }
+		};
 
-        };
+		Yaml yaml = new Yaml(representer, options);
+		yaml.dump(map, writer);
+	}
 
-        Yaml yaml = new Yaml(representer, options);
-        yaml.dump(map, writer);
-    }
+	@Override
+	public Path getStoragePath(GeneratorContext context) {
+		String javadocFolder = (String) context.getConfiguration().get(Configuration.P_JAVADOC_FOLDER);
+		String filePath = context.getFileFrom();
+		int endIndex = filePath.lastIndexOf('.');
+		if (endIndex != -1) {
+			filePath = filePath.substring(0, endIndex);
+		}
+		String relativePath = getRelativePath(filePath) + ".yaml";
+		Path pathJavadocCacheFileName = Paths.get(javadocFolder, relativePath);
+		return pathJavadocCacheFileName.normalize();
+	}
 
-    @Override
-    public Path getStoragePath(GeneratorContext context) {
-        String javadocFolder = (String) context.getConfiguration().get(Configuration.P_JAVADOC_FOLDER);
-        String filePath = context.getFileFrom();
-        int endIndex = filePath.lastIndexOf('.');
-        if (endIndex != -1) {
-            filePath = filePath.substring(0, endIndex);
-        }
-        String relativePath = getRelativePath(filePath) + ".yaml";
-        Path pathJavadocCacheFileName = Paths.get(javadocFolder, relativePath);
-        return pathJavadocCacheFileName.normalize();
-    }
-
-    private String getRelativePath(String filePath) {
-        if (referenceFolder == null) {
-            return filePath;
-        }
-        String referenceFolderPath = referenceFolder.toAbsolutePath().toString();
-        if (filePath.startsWith(referenceFolderPath)) {
-            return filePath.substring(referenceFolderPath.length());
-        }
-        return filePath;
-    }
+	private String getRelativePath(String filePath) {
+		if (referenceFolder == null) {
+			return filePath;
+		}
+		String referenceFolderPath = referenceFolder.toAbsolutePath().toString();
+		if (filePath.startsWith(referenceFolderPath)) {
+			return filePath.substring(referenceFolderPath.length());
+		}
+		return filePath;
+	}
 
 }

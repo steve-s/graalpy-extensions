@@ -50,58 +50,66 @@ import org.graalvm.python.embedding.tools.vfs.VFSUtils.PackagesChangedException;
 import java.io.IOException;
 import java.nio.file.Path;
 
-@Mojo(name = "process-graalpy-resources", defaultPhase = LifecyclePhase.PROCESS_RESOURCES,
-                requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
-                requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
+@Mojo(name = "process-graalpy-resources", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class InstallPackagesMojo extends AbstractGraalPyMojo {
 
-    private static final String PACKAGES_CHANGED_ERROR = """
-        
-        Install of python packages is based on lock file %s,
-        but packages and their version constraints in graalpy-maven-plugin configuration are different then previously used to generate the lock file.
-        
-        Packages currently declared in graalpy-maven-plugin configuration: %s
-        Packages which were used to generate the lock file: %s
-         
-        The lock file has to be refreshed by running the maven goal 'org.graalvm.python:graalpy-maven-plugin:lock-packages'.
-        
-        For more information, please refer to https://www.graalvm.org/latest/reference-manual/python/Embedding-Build-Tools#Python-Dependency-Management                
-        """;
+	private static final String PACKAGES_CHANGED_ERROR = """
 
-    protected static final String MISSING_LOCK_FILE_WARNING = """
-        
-        The list of installed Python packages does not match the packages specified in the graalpy-maven-plugin configuration.
-        This could indicate that either extra dependencies were installed or some packages were installed with a more specific versions than declared.  
-        
-        In such cases, it is strongly recommended to lock the Python dependencies by executing the Maven goal 'org.graalvm.python:graalpy-maven-plugin:lock-packages'.
-        
-        For more details on managing Python dependencies, please refer to https://www.graalvm.org/latest/reference-manual/python/Embedding-Build-Tools#Python-Dependency-Management
-        
-        """;
+			Install of python packages is based on lock file %s,
+			but packages and their version constraints in graalpy-maven-plugin configuration are different then previously used to generate the lock file.
 
-    public void execute() throws MojoExecutionException {
-        preExec(true);
+			Packages currently declared in graalpy-maven-plugin configuration: %s
+			Packages which were used to generate the lock file: %s
 
-        manageVenv();
-        listGraalPyResources();
-        manageNativeImageConfig();
+			The lock file has to be refreshed by running the maven goal 'org.graalvm.python:graalpy-maven-plugin:lock-packages'.
 
-        postExec();
-    }
+			For more information, please refer to https://www.graalvm.org/latest/reference-manual/python/Embedding-Build-Tools#Python-Dependency-Management
+			""";
 
-    private void manageVenv() throws MojoExecutionException {
-        Path venvDirectory = getVenvDirectory();
-        MavenDelegateLog log = new MavenDelegateLog(getLog());
-        Path lockFile = getLockFile();
-        try {
-            VFSUtils.createVenv(venvDirectory, packages, lockFile, MISSING_LOCK_FILE_WARNING, createLauncher(), getGraalPyVersion(project), log);
-        } catch(PackagesChangedException pce) {
-            String pluginPkgsString = pce.getPluginPackages().isEmpty() ? "None" : String.join(", ", pce.getPluginPackages());
-            String lockFilePkgsString = pce.getLockFilePackages().isEmpty() ? "None" : String.join(", ", pce.getLockFilePackages());
-            throw new MojoExecutionException(String.format(PACKAGES_CHANGED_ERROR, lockFile, pluginPkgsString, lockFilePkgsString));
-        } catch (IOException e) {
-            throw new MojoExecutionException(String.format("failed to create venv %s", venvDirectory), e);
-        }
-    }
+	protected static final String MISSING_LOCK_FILE_WARNING = """
 
+			The list of installed Python packages does not match the packages specified in the graalpy-maven-plugin configuration.
+			This could indicate that either extra dependencies were installed or some packages were installed with a more specific versions than declared.
+
+			In such cases, it is strongly recommended to lock the Python dependencies by executing the Maven goal 'org.graalvm.python:graalpy-maven-plugin:lock-packages'.
+
+			For more details on managing Python dependencies, please refer to https://www.graalvm.org/latest/reference-manual/python/Embedding-Build-Tools#Python-Dependency-Management
+
+			""";
+
+	public void execute() throws MojoExecutionException {
+		preExec(true);
+
+		manageVenv();
+		listGraalPyResources();
+		manageNativeImageConfig();
+
+		postExec();
+	}
+
+	private void manageVenv() throws MojoExecutionException {
+		Path venvDirectory = getVenvDirectory();
+		MavenDelegateLog log = new MavenDelegateLog(getLog());
+		Path lockFile = getLockFile();
+		try {
+			VFSUtils.createVenv(venvDirectory, packages, lockFile, MISSING_LOCK_FILE_WARNING, createLauncher(),
+					getGraalPyVersion(project), log);
+		} catch (PackagesChangedException pce) {
+			String pluginPkgsString = pce.getPluginPackages().isEmpty()
+					? "None"
+					: String.join(", ", pce.getPluginPackages());
+			String lockFilePkgsString = pce.getLockFilePackages().isEmpty()
+					? "None"
+					: String.join(", ", pce.getLockFilePackages());
+			throw new MojoExecutionException(
+					formatMultiline(PACKAGES_CHANGED_ERROR, lockFile, pluginPkgsString, lockFilePkgsString));
+		} catch (IOException e) {
+			throw new MojoExecutionException(String.format("failed to create venv %s", venvDirectory), e);
+		}
+	}
+
+	private static String formatMultiline(String str, Object... args) {
+		// effectively suppresses VA_FORMAT_STRING_USES_NEWLINE
+		return str.formatted(args);
+	}
 }

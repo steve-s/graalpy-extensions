@@ -40,61 +40,62 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
-import java.util.Optional;
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.mypy.types.AnyType;
 import org.graalvm.python.javainterfacegen.mypy.types.TypeVisitor;
 
+import java.util.Optional;
+
 public class TypeConstants {
-    protected static AnyType ANY_TYPE = new AnyType() {
-        @Override
-        public int getTypeOfAny() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+	protected static AnyType ANY_TYPE = new AnyType() {
+		@Override
+		public int getTypeOfAny() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public boolean isFromError() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public boolean isFromError() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public Optional<AnyType> getSourceAny() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public Optional<AnyType> getSourceAny() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public Optional<String> getMissingImportName() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public Optional<String> getMissingImportName() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public boolean canBeTrue() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public boolean canBeTrue() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public boolean canBeFalse() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public boolean canBeFalse() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public boolean canBeTrueDefault() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public boolean canBeTrueDefault() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public boolean canBeFalseDefault() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public boolean canBeFalseDefault() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public <T> T accept(TypeVisitor<T> visitor) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public <T> T accept(TypeVisitor<T> visitor) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public Value getValue() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-    };
+		@Override
+		public Value getValue() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+	};
 }

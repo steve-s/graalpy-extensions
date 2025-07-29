@@ -44,63 +44,60 @@ import java.util.ServiceLoader;
 
 public class GeneratorFactory {
 
-    private static final ServiceLoader<FunctionGenerator> loaderFnPartGenerators
-            = ServiceLoader.load(FunctionGenerator.class);
+	private static final ServiceLoader<FunctionGenerator> loaderFnPartGenerators = ServiceLoader
+			.load(FunctionGenerator.class);
 
-    public static FunctionGenerator createFunctionGenerator(String className) {
-        for (FunctionGenerator generator : loaderFnPartGenerators) {
-            if (generator.getClass().getName().equals(className)) {
-                return generator;
-            }
-        }
-        throw new IllegalArgumentException("Unknown service class: " + className);
-    }
+	public static FunctionGenerator createFunctionGenerator(String className) {
+		for (FunctionGenerator generator : loaderFnPartGenerators) {
+			if (generator.getClass().getName().equals(className)) {
+				return generator;
+			}
+		}
+		throw new IllegalArgumentException("Unknown service class: " + className);
+	}
 
-    private static final ServiceLoader<NameGenerator> nameGenerators
-            = ServiceLoader.load(NameGenerator.class);
+	private static final ServiceLoader<NameGenerator> nameGenerators = ServiceLoader.load(NameGenerator.class);
 
-    public static NameGenerator createNameGenerator(String className) {
-        for (NameGenerator generator : nameGenerators) {
-            if (generator.getClass().getName().equals(className)) {
-                return generator;
-            }
-        }
-        throw new IllegalArgumentException("Unknown service class: " + className);
-    }
+	public static NameGenerator createNameGenerator(String className) {
+		for (NameGenerator generator : nameGenerators) {
+			if (generator.getClass().getName().equals(className)) {
+				return generator;
+			}
+		}
+		throw new IllegalArgumentException("Unknown service class: " + className);
+	}
 
-    private static final ServiceLoader<JavadocGenerator> javadocGenerators
-            = ServiceLoader.load(JavadocGenerator.class);
+	private static final ServiceLoader<JavadocGenerator> javadocGenerators = ServiceLoader.load(JavadocGenerator.class);
 
-    public static JavadocGenerator createJavadocGenerator(String className) {
-        for (JavadocGenerator generator : javadocGenerators) {
-            if (generator.getClass().getName().equals(className)) {
-                return generator;
-            }
-        }
-        throw new IllegalArgumentException("Unknown service class: " + className);
-    }
+	public static JavadocGenerator createJavadocGenerator(String className) {
+		for (JavadocGenerator generator : javadocGenerators) {
+			if (generator.getClass().getName().equals(className)) {
+				return generator;
+			}
+		}
+		throw new IllegalArgumentException("Unknown service class: " + className);
+	}
 
-    private static final ServiceLoader<JavadocStorageManager> javadocStorageManagers
-            = ServiceLoader.load(JavadocStorageManager.class);
+	private static final ServiceLoader<JavadocStorageManager> javadocStorageManagers = ServiceLoader
+			.load(JavadocStorageManager.class);
 
-    public static JavadocStorageManager getJavadocStorageManager(String className) {
-        for (JavadocStorageManager manager : javadocStorageManagers) {
-            if (manager.getClass().getName().equals(className)) {
-                return manager;
-            }
-        }
-        throw new IllegalArgumentException("Unknown service class: " + className);
-    }
+	public static JavadocStorageManager getJavadocStorageManager(String className) {
+		for (JavadocStorageManager manager : javadocStorageManagers) {
+			if (manager.getClass().getName().equals(className)) {
+				return manager;
+			}
+		}
+		throw new IllegalArgumentException("Unknown service class: " + className);
+	}
 
-    private static final ServiceLoader<TypeGenerator> typeGenerators
-            = ServiceLoader.load(TypeGenerator.class);
+	private static final ServiceLoader<TypeGenerator> typeGenerators = ServiceLoader.load(TypeGenerator.class);
 
-    public static TypeGenerator createTypeGenerator(String className) {
-        for (TypeGenerator generator : typeGenerators) {
-            if (generator.getClass().getName().equals(className)) {
-                return generator;
-            }
-        }
-        throw new IllegalArgumentException("Unknown service class: " + className);
-    }
+	public static TypeGenerator createTypeGenerator(String className) {
+		for (TypeGenerator generator : typeGenerators) {
+			if (generator.getClass().getName().equals(className)) {
+				return generator;
+			}
+		}
+		throw new IllegalArgumentException("Unknown service class: " + className);
+	}
 }

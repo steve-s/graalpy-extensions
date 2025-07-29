@@ -56,110 +56,109 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface SymbolTableNode extends GuestValue {
 
-    public static final String FQN = "mypy.nodes.SymbolTableNode";
+	public static final String FQN = "mypy.nodes.SymbolTableNode";
 
-    static class SymbolTableNodeImpl extends GuestValueDefaultImpl implements SymbolTableNode {
+	static class SymbolTableNodeImpl extends GuestValueDefaultImpl implements SymbolTableNode {
 
-        public SymbolTableNodeImpl(Value instance) {
-            super(instance);
-        }
+		public SymbolTableNodeImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public int getKind() {
-            return getValue().getMember("kind").asInt();
-        }
+		@Override
+		public int getKind() {
+			return getValue().getMember("kind").asInt();
+		}
 
-        @Override
-        public SymbolNode getNode() {
-            Value node = getValue().getMember("node");
+		@Override
+		public SymbolNode getNode() {
+			Value node = getValue().getMember("node");
 
-            String pythonFQN = Utils.getFullyQualifedName(node);
-            switch (pythonFQN){
-                case Var.FQN:
-                    return new Var.VarImpl(node);
-                case TypeInfo.FQN:
-                    return new TypeInfo.TypeInfoImpl(node);
-                case MypyFile.FQN:
-                    return new MypyFile.MypyFileImpl(node);
-                case FuncDef.FQN:
-                    return new FuncDef.FuncDefImpl(node);
-                case TypeAlias.FQN:
-                    return new TypeAlias.TypeAliasImpl(node);
-                case TypeVarExpr.FQN:
-                    return new TypeVarExpr.TypeVarExprImpl(node);
-                case Decorator.FQN:
-                    return new Decorator.DecoratorImpl(node);
-                case OverloadedFuncDef.FQN:
-                    return new OverloadedFuncDef.OverloadedFuncDefImpl(node);
+			String pythonFQN = Utils.getFullyQualifedName(node);
+			switch (pythonFQN) {
+				case Var.FQN :
+					return new Var.VarImpl(node);
+				case TypeInfo.FQN :
+					return new TypeInfo.TypeInfoImpl(node);
+				case MypyFile.FQN :
+					return new MypyFile.MypyFileImpl(node);
+				case FuncDef.FQN :
+					return new FuncDef.FuncDefImpl(node);
+				case TypeAlias.FQN :
+					return new TypeAlias.TypeAliasImpl(node);
+				case TypeVarExpr.FQN :
+					return new TypeVarExpr.TypeVarExprImpl(node);
+				case Decorator.FQN :
+					return new Decorator.DecoratorImpl(node);
+				case OverloadedFuncDef.FQN :
+					return new OverloadedFuncDef.OverloadedFuncDefImpl(node);
 
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        }
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		}
 
-        @Override
-        public boolean isModulePublic() {
-            return getValue().getMember("module_public").asBoolean();
-        }
+		@Override
+		public boolean isModulePublic() {
+			return getValue().getMember("module_public").asBoolean();
+		}
 
-        @Override
-        public boolean isModuleHidden() {
-            return getValue().getMember("module_hidden").asBoolean();
-        }
+		@Override
+		public boolean isModuleHidden() {
+			return getValue().getMember("module_hidden").asBoolean();
+		}
 
-        @Override
-        public Value getCrossRef() {
-            return getValue().getMember("cross_ref");
-        }
+		@Override
+		public Value getCrossRef() {
+			return getValue().getMember("cross_ref");
+		}
 
-        @Override
-        public Value getImplicit() {
-            return getValue().getMember("implicit");
-        }
+		@Override
+		public Value getImplicit() {
+			return getValue().getMember("implicit");
+		}
 
-        @Override
-        public boolean isPluginGenerated() {
-            return getValue().getMember("plugin_generated").asBoolean();
-        }
+		@Override
+		public boolean isPluginGenerated() {
+			return getValue().getMember("plugin_generated").asBoolean();
+		}
 
-        @Override
-        public boolean noSerialize() {
-            return getValue().getMember("no_serailize").asBoolean();
-        }
+		@Override
+		public boolean noSerialize() {
+			return getValue().getMember("no_serailize").asBoolean();
+		}
 
-        @Override
-        public String getFullname() {
-            return getValue().getMember("fullname").asString();
-        }
+		@Override
+		public String getFullname() {
+			return getValue().getMember("fullname").asString();
+		}
 
-        @Override
-        public Type getType() {
-            Value type = getValue().getMember("type");
+		@Override
+		public Type getType() {
+			Value type = getValue().getMember("type");
 
-            String pythonFQN = Utils.getFullyQualifedName(type);
-            switch (pythonFQN){
-                case AnyType.FQN:
-                    return new AnyTypeImpl(type);
-                case NoneType.FQN:
-                    return new NoneTypeImpl(type);
-                case CallableType.FQN:
-                    return new CallableTypeImpl(type);
-                case Instance.FQN:
-                    return new InstanceImpl(type);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        }
+			String pythonFQN = Utils.getFullyQualifedName(type);
+			switch (pythonFQN) {
+				case AnyType.FQN :
+					return new AnyTypeImpl(type);
+				case NoneType.FQN :
+					return new NoneTypeImpl(type);
+				case CallableType.FQN :
+					return new CallableTypeImpl(type);
+				case Instance.FQN :
+					return new InstanceImpl(type);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		}
 
-    }
+	}
 
-
-    int getKind();
-    SymbolNode getNode();
-    boolean isModulePublic();
-    boolean isModuleHidden();
-    Value getCrossRef();
-    Value getImplicit();
-    boolean isPluginGenerated();
-    boolean noSerialize();
-    String getFullname();
-    Type getType();
+	int getKind();
+	SymbolNode getNode();
+	boolean isModulePublic();
+	boolean isModuleHidden();
+	Value getCrossRef();
+	Value getImplicit();
+	boolean isPluginGenerated();
+	boolean noSerialize();
+	String getFullname();
+	Type getType();
 }

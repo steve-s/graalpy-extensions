@@ -43,6 +43,6 @@ package org.graalvm.python.javainterfacegen.generator;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
 
 public interface FunctionGenerator {
-    String createSignature(Node node, GeneratorContext context);
-    String createImplementation(Node node, GeneratorContext context);
+	String createSignature(Node node, GeneratorContext context);
+	String createImplementation(Node node, GeneratorContext context);
 }

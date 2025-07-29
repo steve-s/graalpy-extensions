@@ -41,7 +41,6 @@
 package org.graalvm.python.javainterfacegen.mypy.types;
 
 public interface NoneType extends ProperType {
-    public static final String FQN = "mypy.types.NoneType";
-
+	public static final String FQN = "mypy.types.NoneType";
 
 }

@@ -40,12 +40,10 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.util.List;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeAlias;
 import org.graalvm.python.javainterfacegen.mypy.types.AnyType;
 import org.graalvm.python.javainterfacegen.mypy.types.CallableType;
-import org.graalvm.python.javainterfacegen.mypy.types.ExtraAttrs;
 import org.graalvm.python.javainterfacegen.mypy.types.Instance;
 import org.graalvm.python.javainterfacegen.mypy.types.LiteralType;
 import org.graalvm.python.javainterfacegen.mypy.types.NoneType;
@@ -62,114 +60,115 @@ import org.graalvm.python.javainterfacegen.mypy.types.TypedDictType;
 import org.graalvm.python.javainterfacegen.mypy.types.UninhabitedType;
 import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
 
+import java.util.List;
 
 public class PythonFQNResolver {
 
-    private static TypeVisitor<String> nameVisitor = new TypeVisitor<String>() {
-        @Override
-        public String visit(Instance instance) {
-            try {
-                return instance.getType().getFullname();
-            } catch (PolyglotException e) {
-                return instance.getValue().getMember("type_ref").asString();
-            }
-        }
+	private static TypeVisitor<String> nameVisitor = new TypeVisitor<String>() {
+		@Override
+		public String visit(Instance instance) {
+			try {
+				return instance.getType().getFullname();
+			} catch (PolyglotException e) {
+				return instance.getValue().getMember("type_ref").asString();
+			}
+		}
 
-        @Override
-        public String visit(CallableType callableType) {
-            return callableType.getName();
-        }
+		@Override
+		public String visit(CallableType callableType) {
+			return callableType.getName();
+		}
 
-        @Override
-        public String visit(NoneType noneType) {
-            return NoneType.FQN;
-        }
+		@Override
+		public String visit(NoneType noneType) {
+			return NoneType.FQN;
+		}
 
-        @Override
-        public String visit(AnyType anyType) {
-            return AnyType.FQN;
-        }
+		@Override
+		public String visit(AnyType anyType) {
+			return AnyType.FQN;
+		}
 
-        @Override
-        public String visit(UnionType unionType) {
-            List<Type> items = unionType.getItems();
-            if (items.size() == 2 ) {
-                if (items.get(0) instanceof NoneType) {
-                    return items.get(1).accept(this);
-                }
-                if (items.get(1) instanceof NoneType) {
-                    return items.get(0).accept(this);
-                }
-            }
-            return AnyType.FQN;
-        }
+		@Override
+		public String visit(UnionType unionType) {
+			List<Type> items = unionType.getItems();
+			if (items.size() == 2) {
+				if (items.get(0) instanceof NoneType) {
+					return items.get(1).accept(this);
+				}
+				if (items.get(1) instanceof NoneType) {
+					return items.get(0).accept(this);
+				}
+			}
+			return AnyType.FQN;
+		}
 
-        @Override
-        public String visit(TypeVarType typeVarType) {
-            // TODO if we wan to support generics somehow ...
-            return AnyType.FQN;
-        }
+		@Override
+		public String visit(TypeVarType typeVarType) {
+			// TODO if we wan to support generics somehow ...
+			return AnyType.FQN;
+		}
 
-        @Override
-        public String visit(TypeAliasType typeAliasType) {
-            TypeAlias alias = typeAliasType.getAlias();
-            if (alias != null) {
-                return alias.fullname();
-            }
-            return TypeAliasType.FQN;
-        }
+		@Override
+		public String visit(TypeAliasType typeAliasType) {
+			TypeAlias alias = typeAliasType.getAlias();
+			if (alias != null) {
+				return alias.fullname();
+			}
+			return TypeAliasType.FQN;
+		}
 
-        @Override
-        public String visit(TupleType tupleType) {
-            return TupleType.FQN;
-        }
+		@Override
+		public String visit(TupleType tupleType) {
+			return TupleType.FQN;
+		}
 
-        @Override
-        public String visit(UninhabitedType uType) {
-            return UninhabitedType.FQN;
-        }
+		@Override
+		public String visit(UninhabitedType uType) {
+			return UninhabitedType.FQN;
+		}
 
-        @Override
-        public String visit(LiteralType literalType) {
-            return visit(literalType.getFallback());
-        }
+		@Override
+		public String visit(LiteralType literalType) {
+			return visit(literalType.getFallback());
+		}
 
-        @Override
-        public String visit(TypeType typeType) {
-            return TypeType.FQN + "[" + typeType.getItem().accept(this) + "]";
-        }
+		@Override
+		public String visit(TypeType typeType) {
+			return TypeType.FQN + "[" + typeType.getItem().accept(this) + "]";
+		}
 
-        @Override
-        public String visit(Overloaded overloaded) {
-            return Overloaded.FQN;
-        }
+		@Override
+		public String visit(Overloaded overloaded) {
+			return Overloaded.FQN;
+		}
 
-        @Override
-        public String visit(ParamSpecType paramSpec) {
-            return ParamSpecType.FQN;
-        }
+		@Override
+		public String visit(ParamSpecType paramSpec) {
+			return ParamSpecType.FQN;
+		}
 
-        @Override
-        public String visit(Parameters parameters) {
-            return Parameters.FQN;
-        }
+		@Override
+		public String visit(Parameters parameters) {
+			return Parameters.FQN;
+		}
 
-        @Override
-        public String visit(TypedDictType typedDict) {
-            return TypedDictType.FQN;
-        }
+		@Override
+		public String visit(TypedDictType typedDict) {
+			return TypedDictType.FQN;
+		}
 
+	};
 
-    };
-
-    public static String findPythonFQN(Type type) {
-        return type.accept(nameVisitor);
-//        if (type instanceof Instance) {
-//            return ((Instance)type).accept(nameVisitor);
-//        }
-//        if (type instanceof CallableType) {
-//            return ((CallableType)type).accept(nameVisitor);
-//        }
-//        throw new UnsupportedOperationException("Unknown Python type " + Utils.getFullyQualifedName(type.getValue()) + " to map to Java type.");
-    }
+	public static String findPythonFQN(Type type) {
+		return type.accept(nameVisitor);
+		// if (type instanceof Instance) {
+		// return ((Instance)type).accept(nameVisitor);
+		// }
+		// if (type instanceof CallableType) {
+		// return ((CallableType)type).accept(nameVisitor);
+		// }
+		// throw new UnsupportedOperationException("Unknown Python type " +
+		// Utils.getFullyQualifedName(type.getValue()) + " to map to Java type.");
+	}
 }

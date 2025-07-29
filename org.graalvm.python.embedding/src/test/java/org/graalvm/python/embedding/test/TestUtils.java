@@ -44,5 +44,5 @@ package org.graalvm.python.embedding.test;
 import java.util.Locale;
 
 public class TestUtils {
-    public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows");
+	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows");
 }

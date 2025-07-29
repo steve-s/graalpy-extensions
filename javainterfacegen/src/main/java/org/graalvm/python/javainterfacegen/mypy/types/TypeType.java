@@ -41,20 +41,16 @@
 package org.graalvm.python.javainterfacegen.mypy.types;
 
 public interface TypeType extends ProperType {
-    // Python def: TypeType(mypy.types.ProperType)
+	// Python def: TypeType(mypy.types.ProperType)
 
-    public static final String FQN = "mypy.types.TypeType";
+	public static final String FQN = "mypy.types.TypeType";
 
-    // getter for class field 'item', Python type: mypy.types.ProperType
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public ProperType getItem();
+	// getter for class field 'item', Python type: mypy.types.ProperType
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public ProperType getItem();
 
+	// TODO unprocessed Decorator of function 'make_normalized'
 
-    // TODO unprocessed Decorator of function 'make_normalized'
-
-
-    // TODO unprocessed Decorator of function 'deserialize'
-
-
+	// TODO unprocessed Decorator of function 'deserialize'
 
 }

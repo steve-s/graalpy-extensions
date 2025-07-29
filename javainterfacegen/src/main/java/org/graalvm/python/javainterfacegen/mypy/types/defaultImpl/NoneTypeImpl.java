@@ -46,12 +46,12 @@ import org.graalvm.python.javainterfacegen.mypy.types.TypeVisitor;
 
 public class NoneTypeImpl extends TypeImpl implements NoneType {
 
-    public NoneTypeImpl(Value instance) {
-        super(instance);
-    }
+	public NoneTypeImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 }

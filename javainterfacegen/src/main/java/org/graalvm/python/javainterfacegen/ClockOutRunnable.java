@@ -42,27 +42,26 @@ package org.graalvm.python.javainterfacegen;
 
 public class ClockOutRunnable implements Runnable {
 
-    private final String message;
+	private final String message;
 
-    public ClockOutRunnable(String message) {
-        this.message = message;
-    }
+	public ClockOutRunnable(String message) {
+		this.message = message;
+	}
 
+	@Override
+	public void run() {
+		long start = System.currentTimeMillis();
+		try {
+			while (!Thread.currentThread().isInterrupted()) {
+				long elapsedTime = System.currentTimeMillis() - start;
+				System.out.print(String.format("\r%s %.1f s", message, elapsedTime / 1000.0));
+				Thread.sleep(100);
+			}
+		} catch (InterruptedException e) {
 
-    @Override
-    public void run() {
-        long start = System.currentTimeMillis();
-        try {
-            while (!Thread.currentThread().isInterrupted()) {
-                long elapsedTime = System.currentTimeMillis() - start;
-                System.out.print(String.format("\r%s %.1f s", message, elapsedTime / 1000.0));
-                Thread.sleep(100);
-            }
-        } catch (InterruptedException e) {
-
-        } finally {
-            System.out.println();
-        }
-    }
+		} finally {
+			System.out.println();
+		}
+	}
 
 }

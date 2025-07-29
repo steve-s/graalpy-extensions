@@ -47,51 +47,51 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface Block extends Statement {
 
-    public static final String FQN = "mypy.nodes.Block";
+	public static final String FQN = "mypy.nodes.Block";
 
-    static class BlockImpl extends Statement.StatementImpl implements Block {
+	static class BlockImpl extends Statement.StatementImpl implements Block {
 
+		public BlockImpl(Value instance) {
+			super(instance);
+			String instanceFQN = Utils.getFullyQualifedName(instance);
+			if (!FQN.equals(instanceFQN)) {
+				throw new UnsupportedOperationException(
+						"Can not create new BlockImpl from Guest instance " + instanceFQN);
+			}
+		}
 
-        public BlockImpl(Value instance) {
-            super(instance);
-            String instanceFQN = Utils.getFullyQualifedName(instance);
-            if (!FQN.equals(instanceFQN)) {
-                throw new UnsupportedOperationException("Can not create new BlockImpl from Guest instance " + instanceFQN);
-            }
-        }
+		@Override
+		public List<Statement> getBody() {
+			Value orig = getValue().getMember("body");
+			GuestArray<Statement> result = new GuestArray<>(orig, (value) -> {
+				String pythonFQN = Utils.getFullyQualifedName(value);
+				switch (pythonFQN) {
+					case FuncDef.FQN :
+						return new FuncDef.FuncDefImpl(value);
+					case ClassDef.FQN :
+						return new ClassDef.ClassDefImpl(value);
+					case ExpressionStmt.FQN :
+						return new ExpressionStmt.ExpressionStmtImpl(value);
+					case AssignmentStmt.FQN :
+						return new AssignmentStmt.AssignmentStmtImpl(value);
+				}
+				throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+			});
+			return result;
+		}
 
-        @Override
-        public List<Statement> getBody() {
-            Value orig = getValue().getMember("body");
-            GuestArray<Statement> result = new GuestArray<>(orig, (value) -> {
-                String pythonFQN = Utils.getFullyQualifedName(value);
-                switch (pythonFQN){
-                    case FuncDef.FQN:
-                        return new FuncDef.FuncDefImpl(value);
-                    case ClassDef.FQN:
-                        return new ClassDef.ClassDefImpl(value);
-                    case ExpressionStmt.FQN:
-                        return new ExpressionStmt.ExpressionStmtImpl(value);
-                    case AssignmentStmt.FQN:
-                        return new AssignmentStmt.AssignmentStmtImpl(value);
-                }
-                throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-            });
-            return result;
-        }
+		@Override
+		public boolean isUnreachable() {
+			return getValue().getMember("is_unreachable").asBoolean();
+		}
 
-        @Override
-        public boolean isUnreachable() {
-            return getValue().getMember("is_unreachable").asBoolean();
-        }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
+	}
 
-    }
-
-    List<Statement> getBody();
-    boolean isUnreachable();
+	List<Statement> getBody();
+	boolean isUnreachable();
 }

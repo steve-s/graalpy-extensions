@@ -44,28 +44,29 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TupleType extends ProperType {
-    public static final String FQN = "mypy.types.TupleType";
-        // Python signature: can_be_any_bool def (self: mypy.types.TupleType) -> builtins.bool
+	public static final String FQN = "mypy.types.TupleType";
+	// Python signature: can_be_any_bool def (self: mypy.types.TupleType) ->
+	// builtins.bool
 
-    // Python signature: can_be_any_bool def (self: mypy.types.TupleType) -> builtins.bool
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public boolean canBeAnyBool();
+	// Python signature: can_be_any_bool def (self: mypy.types.TupleType) ->
+	// builtins.bool
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public boolean canBeAnyBool();
 
-    // getter for class field 'implicit', Python type: builtins.bool
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public boolean implicit();
+	// getter for class field 'implicit', Python type: builtins.bool
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public boolean implicit();
 
-    // Python signature: length def (self: mypy.types.TupleType) -> builtins.int
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public int length();
+	// Python signature: length def (self: mypy.types.TupleType) -> builtins.int
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public int length();
 
+	// getter for class field 'partial_fallback', Python type: mypy.types.Instance
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public Instance getPartialFallback();
 
-    // getter for class field 'partial_fallback', Python type: mypy.types.Instance
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public Instance getPartialFallback();
-
-    // getter for class field 'items', Python type: builtins.list[mypy.types.Type]
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public List<Type> getItems();
+	// getter for class field 'items', Python type: builtins.list[mypy.types.Type]
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public List<Type> getItems();
 
 }

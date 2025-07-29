@@ -44,21 +44,22 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface TryStmt extends Statement {
-    public static final String FQN = "mypy.nodes.TryStmt";
+	public static final String FQN = "mypy.nodes.TryStmt";
 
-    static class TryStmtImpl extends Statement.StatementImpl  {
+	static class TryStmtImpl extends Statement.StatementImpl {
 
-        public TryStmtImpl(Value instance) {
-            super(instance);
-            String instanceFQN = Utils.getFullyQualifedName(instance);
-            if (!FQN.equals(instanceFQN)) {
-                throw new UnsupportedOperationException("Can not create new TryStmtImpl from Guest instance " + instanceFQN);
-            }
-        }
-    }
+		public TryStmtImpl(Value instance) {
+			super(instance);
+			String instanceFQN = Utils.getFullyQualifedName(instance);
+			if (!FQN.equals(instanceFQN)) {
+				throw new UnsupportedOperationException(
+						"Can not create new TryStmtImpl from Guest instance " + instanceFQN);
+			}
+		}
+	}
 
-//    Block getBody();
-//    List<Block> getHandlers();
-//    Block getElseBody();
-//    Block getFinallyBody();
+	// Block getBody();
+	// List<Block> getHandlers();
+	// Block getElseBody();
+	// Block getFinallyBody();
 }

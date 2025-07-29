@@ -61,48 +61,48 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class TypeTypeImpl extends TypeImpl implements TypeType {
 
-    public TypeTypeImpl(Value instance) {
-        super(instance);
-    }
+	public TypeTypeImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public ProperType getItem() {
-        Value item = getValue().getMember("item");
-        getValue().getMetaObject().invokeMember("make_normalized", getValue());
-        String pythonFQN = Utils.getFullyQualifedName(item);
-        switch (pythonFQN) {
-            case AnyType.FQN:
-                return new AnyTypeImpl(item);
-            case CallableType.FQN:
-                return new CallableTypeImpl(item);
-            case Instance.FQN:
-                return new InstanceImpl(item);
-            case LiteralType.FQN:
-                return new LiteralTypeImpl(item);
-            case NoneType.FQN:
-                return new NoneTypeImpl(item);
-            case Overloaded.FQN:
-                return new OverloadedImpl(item);
-            case ParamSpecType.FQN:
-                return new ParamSpecTypeImpl(item);
-            case TupleType.FQN:
-                return new TupleTypeImpl(item);
-            case TypeType.FQN:
-                return new TypeTypeImpl(item);
-            case TypeVarType.FQN:
-                return new TypeVarTypeImpl(item);
-            case TypedDictType.FQN:
-                return new TypeVarTypeImpl(item);
-            case UnionType.FQN:
-                return new UnionTypeImpl(item);
+	@Override
+	public ProperType getItem() {
+		Value item = getValue().getMember("item");
+		getValue().getMetaObject().invokeMember("make_normalized", getValue());
+		String pythonFQN = Utils.getFullyQualifedName(item);
+		switch (pythonFQN) {
+			case AnyType.FQN :
+				return new AnyTypeImpl(item);
+			case CallableType.FQN :
+				return new CallableTypeImpl(item);
+			case Instance.FQN :
+				return new InstanceImpl(item);
+			case LiteralType.FQN :
+				return new LiteralTypeImpl(item);
+			case NoneType.FQN :
+				return new NoneTypeImpl(item);
+			case Overloaded.FQN :
+				return new OverloadedImpl(item);
+			case ParamSpecType.FQN :
+				return new ParamSpecTypeImpl(item);
+			case TupleType.FQN :
+				return new TupleTypeImpl(item);
+			case TypeType.FQN :
+				return new TypeTypeImpl(item);
+			case TypeVarType.FQN :
+				return new TypeVarTypeImpl(item);
+			case TypedDictType.FQN :
+				return new TypeVarTypeImpl(item);
+			case UnionType.FQN :
+				return new UnionTypeImpl(item);
 
-        }
-        throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-    }
+		}
+		throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
 }

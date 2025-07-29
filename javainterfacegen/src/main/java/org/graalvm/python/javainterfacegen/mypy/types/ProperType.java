@@ -40,7 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.mypy.types;
 
-
 public interface ProperType extends Type {
 
 }

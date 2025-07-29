@@ -51,48 +51,48 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class TupleTypeImpl extends TypeImpl implements TupleType {
 
-    public TupleTypeImpl(Value instance) {
-        super(instance);
-    }
+	public TupleTypeImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
-    @Override
-    public boolean canBeAnyBool() {
-        return getValue().invokeMember("can_be_any_bool").asBoolean();
-    }
+	@Override
+	public boolean canBeAnyBool() {
+		return getValue().invokeMember("can_be_any_bool").asBoolean();
+	}
 
-    @Override
-    public boolean implicit() {
-        return getValue().getMember("implicit").asBoolean();
-    }
+	@Override
+	public boolean implicit() {
+		return getValue().getMember("implicit").asBoolean();
+	}
 
-    @Override
-    public int length() {
-        return getValue().invokeMember("length").asInt();
-    }
+	@Override
+	public int length() {
+		return getValue().invokeMember("length").asInt();
+	}
 
-    @Override
-    public Instance getPartialFallback() {
-        Value value = getValue().getMember("partial_fallback");
-        String pythonFQN = Utils.getFullyQualifedName(value);
-        if (Instance.FQN.equals(pythonFQN)) {
-            return new InstanceImpl(value);
-        }
-        throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-    }
+	@Override
+	public Instance getPartialFallback() {
+		Value value = getValue().getMember("partial_fallback");
+		String pythonFQN = Utils.getFullyQualifedName(value);
+		if (Instance.FQN.equals(pythonFQN)) {
+			return new InstanceImpl(value);
+		}
+		throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+	}
 
-    @Override
-    public List<Type> getItems() {
-        Value orig = getValue().getMember("items");
+	@Override
+	public List<Type> getItems() {
+		Value orig = getValue().getMember("items");
 
-        GuestArray<Type> result = new GuestArray<>(orig, (value) -> {
-            return TypesFactory.createType(value);
-        });
-        return result;
-    }
+		GuestArray<Type> result = new GuestArray<>(orig, (value) -> {
+			return TypesFactory.createType(value);
+		});
+		return result;
+	}
 
 }

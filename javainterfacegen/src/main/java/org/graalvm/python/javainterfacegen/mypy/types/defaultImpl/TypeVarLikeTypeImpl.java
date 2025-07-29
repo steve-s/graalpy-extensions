@@ -55,48 +55,47 @@ import org.graalvm.python.javainterfacegen.mypy.types.UninhabitedType;
 import org.graalvm.python.javainterfacegen.mypy.types.UnionType;
 import org.graalvm.python.javainterfacegen.python.Utils;
 
-
 public class TypeVarLikeTypeImpl extends TypeImpl implements TypeVarLikeType {
 
-    public TypeVarLikeTypeImpl(Value instance) {
-        super(instance);
-    }
+	public TypeVarLikeTypeImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public Type getDefaultValue() {
-        Value type = getValue().getMember("default");
-        return TypesFactory.createType(type);
-    }
+	@Override
+	public Type getDefaultValue() {
+		Value type = getValue().getMember("default");
+		return TypesFactory.createType(type);
+	}
 
-    @Override
-    public String getName() {
-        return getValue().getMember("name").asString();
-    }
+	@Override
+	public String getName() {
+		return getValue().getMember("name").asString();
+	}
 
-    @Override
-    public String getFullname() {
-        return getValue().getMember("fullname").asString();
-    }
+	@Override
+	public String getFullname() {
+		return getValue().getMember("fullname").asString();
+	}
 
-    @Override
-    public TypeVarId getId() {
-        Value type = getValue().getMember("id");
-        String pythonFQN = Utils.getFullyQualifedName(type);
-        if (TypeVarId.FQN.equals(pythonFQN)) {
-            return new TypeVarIdImpl(type);
-        }
-        throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-    }
+	@Override
+	public TypeVarId getId() {
+		Value type = getValue().getMember("id");
+		String pythonFQN = Utils.getFullyQualifedName(type);
+		if (TypeVarId.FQN.equals(pythonFQN)) {
+			return new TypeVarIdImpl(type);
+		}
+		throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+	}
 
-    @Override
-    public Type getUpperBound() {
-        Value type = getValue().getMember("default");
-        return TypesFactory.createType(type);
-    }
+	@Override
+	public Type getUpperBound() {
+		Value type = getValue().getMember("default");
+		return TypesFactory.createType(type);
+	}
 
-    @Override
-    public boolean hasDefault() {
-        return getValue().invokeMember("has_default").asBoolean();
-    }
+	@Override
+	public boolean hasDefault() {
+		return getValue().invokeMember("has_default").asBoolean();
+	}
 
 }

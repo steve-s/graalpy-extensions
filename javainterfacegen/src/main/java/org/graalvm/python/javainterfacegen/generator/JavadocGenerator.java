@@ -44,6 +44,6 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
 
 public interface JavadocGenerator {
 
-    String create(Node node, GeneratorContext context);
+	String create(Node node, GeneratorContext context);
 
 }

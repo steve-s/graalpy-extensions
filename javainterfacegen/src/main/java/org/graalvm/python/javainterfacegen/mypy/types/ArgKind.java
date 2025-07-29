@@ -48,73 +48,75 @@ import org.graalvm.python.javainterfacegen.mypy.types.defaultImpl.ArgKindItemImp
 import org.graalvm.python.javainterfacegen.python.GuestValue;
 import org.graalvm.python.javainterfacegen.python.Utils;
 
-
 public enum ArgKind {
-    ARG_POS,
-    ARG_OPT,
-    ARG_STAR,
-    ARG_NAMED,
-    ARG_STAR2,
-    ARG_NAMED_OPT;
+	ARG_POS, ARG_OPT, ARG_STAR, ARG_NAMED, ARG_STAR2, ARG_NAMED_OPT;
 
-    public interface ArgKindItem extends GuestValue {
+	public interface ArgKindItem extends GuestValue {
 
-        boolean isPositional();
+		boolean isPositional();
 
-        boolean isPositional(boolean star);
+		boolean isPositional(boolean star);
 
-        boolean isNamed();
+		boolean isNamed();
 
-        boolean isNamed(boolean star);
+		boolean isNamed(boolean star);
 
-        boolean isRequired();
+		boolean isRequired();
 
-        boolean isOptional();
+		boolean isOptional();
 
-        boolean isStar();
+		boolean isStar();
 
-    }
+	}
 
-//    public interface ArgKindItemImplementationProvider {
-//        ArgKindItem createInstance(Value value);
-//    }
+	// public interface ArgKindItemImplementationProvider {
+	// ArgKindItem createInstance(Value value);
+	// }
 
-    private ArgKindItem item;
+	private ArgKindItem item;
 
-    ArgKind() {
-        this.item = null;
-    }
+	ArgKind() {
+		this.item = null;
+	}
 
-    public ArgKindItem getItem() {
-       return item;
-    }
+	public ArgKindItem getItem() {
+		return item;
+	}
 
-    private void setItem(ArgKindItem item) {
-        this.item = item;
-    }
+	private void setItem(ArgKindItem item) {
+		this.item = item;
+	}
 
-    public static final String FQN = "mypy.nodes.ArgKind";
+	public static final String FQN = "mypy.nodes.ArgKind";
 
-    public static void initFromContext(Context context) {
-//        Optional<ArgKindItemImplementationProvider> findFirst
-//                = ServiceLoader.load(ArgKindItemImplementationProvider.class).findFirst();
-        context.eval(Utils.PYTHON, "import mypy");
-//        if (!findFirst.isEmpty()) {
-//            ArgKind.ARG_POS.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON, FQN + ArgKind.ARG_POS.name())));
-//            ArgKind.ARG_OPT.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON, FQN + ArgKind.ARG_OPT.name())));
-//            ArgKind.ARG_STAR.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON, FQN + ArgKind.ARG_STAR.name())));
-//            ArgKind.ARG_NAMED.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON, FQN + ArgKind.ARG_NAMED.name())));
-//            ArgKind.ARG_STAR2.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON, FQN + ArgKind.ARG_STAR2.name())));
-//            ArgKind.ARG_NAMED_OPT.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON, FQN + ArgKind.ARG_NAMED_OPT.name())));
-//        } else {
-            ArgKind.ARG_POS.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_POS.name())));
-            ArgKind.ARG_OPT.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_OPT.name())));
-            ArgKind.ARG_STAR.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_STAR.name())));
-            ArgKind.ARG_NAMED.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_NAMED.name())));
-            ArgKind.ARG_STAR2.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_STAR2.name())));
-            ArgKind.ARG_NAMED_OPT.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_NAMED_OPT.name())));
-//        }
-    }
-
+	public static void initFromContext(Context context) {
+		// Optional<ArgKindItemImplementationProvider> findFirst
+		// = ServiceLoader.load(ArgKindItemImplementationProvider.class).findFirst();
+		context.eval(Utils.PYTHON, "import mypy");
+		// if (!findFirst.isEmpty()) {
+		// ArgKind.ARG_POS.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON,
+		// FQN + ArgKind.ARG_POS.name())));
+		// ArgKind.ARG_OPT.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON,
+		// FQN + ArgKind.ARG_OPT.name())));
+		// ArgKind.ARG_STAR.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON,
+		// FQN + ArgKind.ARG_STAR.name())));
+		// ArgKind.ARG_NAMED.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON,
+		// FQN + ArgKind.ARG_NAMED.name())));
+		// ArgKind.ARG_STAR2.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON,
+		// FQN + ArgKind.ARG_STAR2.name())));
+		// ArgKind.ARG_NAMED_OPT.setItem(findFirst.get().createInstance(context.eval(Utils.PYTHON,
+		// FQN + ArgKind.ARG_NAMED_OPT.name())));
+		// } else {
+		ArgKind.ARG_POS.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_POS.name())));
+		ArgKind.ARG_OPT.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_OPT.name())));
+		ArgKind.ARG_STAR.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_STAR.name())));
+		ArgKind.ARG_NAMED
+				.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_NAMED.name())));
+		ArgKind.ARG_STAR2
+				.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_STAR2.name())));
+		ArgKind.ARG_NAMED_OPT
+				.setItem(new ArgKindItemImpl(context.eval(Utils.PYTHON, FQN + "." + ArgKind.ARG_NAMED_OPT.name())));
+		// }
+	}
 
 }

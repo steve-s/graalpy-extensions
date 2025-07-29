@@ -43,82 +43,81 @@ package org.graalvm.python.javainterfacegen.mypy.types;
 /**
  * Type that refers to a ParamSpec.
  *
- * A ParamSpec is a type variable that represents the parameter
- * types, names and kinds of a callable (i.e., the signature without
- * the return type).
+ * A ParamSpec is a type variable that represents the parameter types, names and
+ * kinds of a callable (i.e., the signature without the return type).
  *
- * This can be one of these forms
- *  * P (ParamSpecFlavor.BARE)
- *  * P.args (ParamSpecFlavor.ARGS)
- *  * P.kwargs (ParamSpecFLavor.KWARGS)
+ * This can be one of these forms * P (ParamSpecFlavor.BARE) * P.args
+ * (ParamSpecFlavor.ARGS) * P.kwargs (ParamSpecFLavor.KWARGS)
  *
- * The upper_bound is really used as a fallback type -- it's shared
- * with TypeVarType for simplicity. It can't be specified by the user
- * and the value is directly derived from the flavor (currently
- * always just 'object').
+ * The upper_bound is really used as a fallback type -- it's shared with
+ * TypeVarType for simplicity. It can't be specified by the user and the value
+ * is directly derived from the flavor (currently always just 'object').
  */
 public interface ParamSpecType extends TypeVarLikeType {
-    // Python def: ParamSpecType(mypy.types.TypeVarLikeType)
+	// Python def: ParamSpecType(mypy.types.TypeVarLikeType)
 
-    public static final String FQN = "mypy.types.ParamSpecType";
+	public static final String FQN = "mypy.types.ParamSpecType";
 
-    // getter for class field 'flavor', Python type: builtins.int
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public int getFlavor();
+	// getter for class field 'flavor', Python type: builtins.int
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public int getFlavor();
 
-    // Python signature: name_with_suffix def (self: mypy.types.ParamSpecType) -> builtins.str
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public String nameWithSuffix();
+	// Python signature: name_with_suffix def (self: mypy.types.ParamSpecType) ->
+	// builtins.str
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public String nameWithSuffix();
 
-    // getter for class field 'prefix', Python type: mypy.types.Parameters
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public Parameters getPrefix();
+	// getter for class field 'prefix', Python type: mypy.types.Parameters
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public Parameters getPrefix();
 
-    // Python signature: with_flavor def (self: mypy.types.ParamSpecType, flavor: builtins.int) -> mypy.types.ParamSpecType
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public ParamSpecType withFlavor(int flavor);
+	// Python signature: with_flavor def (self: mypy.types.ParamSpecType, flavor:
+	// builtins.int) -> mypy.types.ParamSpecType
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public ParamSpecType withFlavor(int flavor);
 
-    // Python signature: copy_modified def (self: mypy.types.ParamSpecType, *, id: Any =, flavor: builtins.int =, prefix: Any =, default: Any =, **kwargs: Any) -> mypy.types.ParamSpecType
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public static record CopyModifiedArgs (AnyType id, Integer flavor, AnyType prefix, AnyType defaultValue) {
-        public CopyModifiedArgs() {
-            this(null, null, null, null);
-        }
-    }
+	// Python signature: copy_modified def (self: mypy.types.ParamSpecType, *, id:
+	// Any =, flavor: builtins.int =, prefix: Any =, default: Any =, **kwargs: Any)
+	// -> mypy.types.ParamSpecType
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public static record CopyModifiedArgs(AnyType id, Integer flavor, AnyType prefix, AnyType defaultValue) {
+		public CopyModifiedArgs() {
+			this(null, null, null, null);
+		}
+	}
 
-    public static final class CopyModifiedArgsBuilder {
+	public static final class CopyModifiedArgsBuilder {
 
-        private AnyType id = null;
-        public CopyModifiedArgsBuilder id(AnyType id) {
-            this.id = id;
-            return this;
-        }
+		private AnyType id = null;
+		public CopyModifiedArgsBuilder id(AnyType id) {
+			this.id = id;
+			return this;
+		}
 
-        private Integer flavor = null;
-        public CopyModifiedArgsBuilder flavor(Integer flavor) {
-            this.flavor = flavor;
-            return this;
-        }
+		private Integer flavor = null;
+		public CopyModifiedArgsBuilder flavor(Integer flavor) {
+			this.flavor = flavor;
+			return this;
+		}
 
-        private AnyType prefix = null;
-        public CopyModifiedArgsBuilder prefix(AnyType prefix) {
-            this.prefix = prefix;
-            return this;
-        }
+		private AnyType prefix = null;
+		public CopyModifiedArgsBuilder prefix(AnyType prefix) {
+			this.prefix = prefix;
+			return this;
+		}
 
-        private AnyType defaultValue = null;
-        public CopyModifiedArgsBuilder defaultValue(AnyType defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
+		private AnyType defaultValue = null;
+		public CopyModifiedArgsBuilder defaultValue(AnyType defaultValue) {
+			this.defaultValue = defaultValue;
+			return this;
+		}
 
+		public CopyModifiedArgs build() {
+			return new CopyModifiedArgs(id, flavor, prefix, defaultValue);
+		}
+	}
 
-        public CopyModifiedArgs build() {
-            return new CopyModifiedArgs(id, flavor, prefix, defaultValue);
-        }
-    }
-
-    public ParamSpecType copyModified();
-    public ParamSpecType copyModified(CopyModifiedArgs optionalArgs);
+	public ParamSpecType copyModified();
+	public ParamSpecType copyModified(CopyModifiedArgs optionalArgs);
 
 }

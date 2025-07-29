@@ -43,8 +43,8 @@
  * Utilities for GraalPy embedding scenarios.
  *
  * <p/>
- * For an overview on how to create and configure a GraalPy context to get access to Python related
- * resources in GraalPy embedding scenarios see
+ * For an overview on how to create and configure a GraalPy context to get
+ * access to Python related resources in GraalPy embedding scenarios see
  * {@link org.graalvm.python.embedding.GraalPyResources}.
  * <p/>
  * For passing python keyword and positional arguments from java to python, see:

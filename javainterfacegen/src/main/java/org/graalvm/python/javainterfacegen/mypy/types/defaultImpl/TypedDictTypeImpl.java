@@ -48,56 +48,54 @@ import org.graalvm.python.javainterfacegen.mypy.types.Type;
 import org.graalvm.python.javainterfacegen.mypy.types.TypeVisitor;
 import org.graalvm.python.javainterfacegen.mypy.types.TypedDictType;
 
+public class TypedDictTypeImpl extends TypeImpl implements TypedDictType {
 
+	public TypedDictTypeImpl(Value instance) {
+		super(instance);
+	}
 
-public class TypedDictTypeImpl extends TypeImpl implements TypedDictType{
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
-    public TypedDictTypeImpl(Value instance) {
-        super(instance);
-    }
+	@Override
+	public Instance createAnonymousFallback() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public TypedDictType asAnonymous() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Instance createAnonymousFallback() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Set<String> getRequiredKeys() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public TypedDictType asAnonymous() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public boolean isFinal() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Set<String> getRequiredKeys() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public boolean isAnonymous() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public boolean isFinal() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Map<String, Type> getItems() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public boolean isAnonymous() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public Instance getFallback() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    @Override
-    public Map<String, Type> getItems() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Instance getFallback() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean namesAreWiderThan() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	@Override
+	public boolean namesAreWiderThan() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 }

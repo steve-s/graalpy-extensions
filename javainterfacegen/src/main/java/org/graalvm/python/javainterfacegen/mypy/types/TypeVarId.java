@@ -43,28 +43,28 @@ package org.graalvm.python.javainterfacegen.mypy.types;
 import org.graalvm.python.javainterfacegen.python.GuestValue;
 
 public interface TypeVarId extends GuestValue {
-    // Python def: TypeVarId(builtins.object)
+	// Python def: TypeVarId(builtins.object)
 
-    public static final String FQN = "mypy.types.TypeVarId";
+	public static final String FQN = "mypy.types.TypeVarId";
 
-    // getter for class field 'raw_id', Python type: builtins.int
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public int getRawId();
+	// getter for class field 'raw_id', Python type: builtins.int
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public int getRawId();
 
-    // getter for class field 'namespace', Python type: builtins.str
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public String getNamespace();
+	// getter for class field 'namespace', Python type: builtins.str
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public String getNamespace();
 
-    // Python signature: def (self: mypy.types.TypeVarId) -> builtins.bool
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public boolean isMetaVar();
+	// Python signature: def (self: mypy.types.TypeVarId) -> builtins.bool
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public boolean isMetaVar();
 
-    // getter for class field 'meta_level', Python type: builtins.int
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public int getMetaLevel();
+	// getter for class field 'meta_level', Python type: builtins.int
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public int getMetaLevel();
 
-    // getter for class field 'next_raw_id', Python type: builtins.int
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public int getNextRawId();
+	// getter for class field 'next_raw_id', Python type: builtins.int
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public int getNextRawId();
 
 }

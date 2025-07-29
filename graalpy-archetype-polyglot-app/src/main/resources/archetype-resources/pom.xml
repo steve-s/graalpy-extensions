@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>${groupId}</groupId>
@@ -8,7 +9,7 @@
   <packaging>jar</packaging>
   <name>${artifactId}</name>
 
-#set( $symbol_dollar = '$' )
+  #set( $symbol_dollar = '$' )
   <properties>
     <graalpy.version>26.0.0-SNAPSHOT</graalpy.version>
     <graalpy.edition>python-community</graalpy.edition>
@@ -30,11 +31,11 @@
       <artifactId>${symbol_dollar}{graalpy.edition}</artifactId>
       <version>${symbol_dollar}{graalpy.version}</version>
       <type>pom</type>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.graalvm.python</groupId>
       <artifactId>python-embedding</artifactId>
-        <version>${symbol_dollar}{graalpy.version}</version>
+      <version>${symbol_dollar}{graalpy.version}</version>
     </dependency>
   </dependencies>
 
@@ -57,7 +58,8 @@
                to make them available in Python. Subdirectory "src" will be also
                added to PYTHONPATH, i.e., Python scripts from that directory can
                be imported as modules in Python -->
-          <resourceDirectory>GRAALPY-VFS/${symbol_dollar}{project.groupId}/${symbol_dollar}{project.artifactId}</resourceDirectory>
+          <resourceDirectory>GRAALPY-VFS/${symbol_dollar}{project.groupId}/${symbol_dollar}{project.artifactId}
+          </resourceDirectory>
           <!-- specify python packages and their versions as if used with pip -->
           <packages>
             <package>termcolor==2.2</package>

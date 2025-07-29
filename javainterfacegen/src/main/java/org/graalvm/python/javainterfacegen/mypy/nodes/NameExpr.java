@@ -46,36 +46,37 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface NameExpr extends RefExpr {
 
-    public static final String FQN = "mypy.nodes.NameExpr";
+	public static final String FQN = "mypy.nodes.NameExpr";
 
-    static class NameExprImpl extends RefExpr.RefExprImpl implements NameExpr {
+	static class NameExprImpl extends RefExpr.RefExprImpl implements NameExpr {
 
-        public NameExprImpl(Value instance) {
-            super(instance);
-            String instanceFQN = Utils.getFullyQualifedName(instance);
-            if (!NameExpr.FQN.equals(instanceFQN)) {
-                throw new UnsupportedOperationException("Can not create new NameExprImpl from Guest instance " + instanceFQN);
-            }
-        }
+		public NameExprImpl(Value instance) {
+			super(instance);
+			String instanceFQN = Utils.getFullyQualifedName(instance);
+			if (!NameExpr.FQN.equals(instanceFQN)) {
+				throw new UnsupportedOperationException(
+						"Can not create new NameExprImpl from Guest instance " + instanceFQN);
+			}
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
 
-        @Override
-        public String getName() {
-            return getValue().getMember("name").asString();
-        }
+		@Override
+		public String getName() {
+			return getValue().getMember("name").asString();
+		}
 
-        @Override
-        public boolean isSpecialForm() {
-            return getValue().getMember("is_special_form").asBoolean();
-        }
+		@Override
+		public boolean isSpecialForm() {
+			return getValue().getMember("is_special_form").asBoolean();
+		}
 
-    }
+	}
 
-    String getName();
-    boolean isSpecialForm();
+	String getName();
+	boolean isSpecialForm();
 
 }

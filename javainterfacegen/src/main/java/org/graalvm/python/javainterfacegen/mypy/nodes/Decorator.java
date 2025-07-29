@@ -51,93 +51,94 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface Decorator extends SymbolNode, Statement {
 
-    public static final String FQN = "mypy.nodes.Decorator";
+	public static final String FQN = "mypy.nodes.Decorator";
 
-    public class DecoratorImpl extends SymbolNodeImpl implements Decorator {
+	public class DecoratorImpl extends SymbolNodeImpl implements Decorator {
 
-        public DecoratorImpl(Value instance) {
-            super(instance);
-            String instanceFQN = Utils.getFullyQualifedName(instance);
-            if (!FQN.equals(instanceFQN)) {
-                throw new UnsupportedOperationException("Can not create new DecoratorImpl from Guest instance " + instanceFQN);
-            }
-        }
+		public DecoratorImpl(Value instance) {
+			super(instance);
+			String instanceFQN = Utils.getFullyQualifedName(instance);
+			if (!FQN.equals(instanceFQN)) {
+				throw new UnsupportedOperationException(
+						"Can not create new DecoratorImpl from Guest instance " + instanceFQN);
+			}
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
 
-        @Override
-        public String getFullname() {
-            return getValue().getMember("fullname").asString();
-        }
+		@Override
+		public String getFullname() {
+			return getValue().getMember("fullname").asString();
+		}
 
-        @Override
-        public String getName() {
-            return getValue().getMember("name").asString();
-        }
+		@Override
+		public String getName() {
+			return getValue().getMember("name").asString();
+		}
 
-        @Override
-        public TypeInfo getInfo() {
-            Value typeInfo = getValue().getMember("info");
-            String pythonFQN = Utils.getFullyQualifedName(typeInfo);
-            switch (pythonFQN){
-                case TypeInfo.FQN:
-                    return new TypeInfo.TypeInfoImpl(typeInfo);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        }
+		@Override
+		public TypeInfo getInfo() {
+			Value typeInfo = getValue().getMember("info");
+			String pythonFQN = Utils.getFullyQualifedName(typeInfo);
+			switch (pythonFQN) {
+				case TypeInfo.FQN :
+					return new TypeInfo.TypeInfoImpl(typeInfo);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		}
 
-        @Override
-        public FuncDef getFunc() {
-            Value func = getValue().getMember("func");
-            String pythonFQN = Utils.getFullyQualifedName(func);
-            switch (pythonFQN){
-                case FuncDef.FQN:
-                    return new FuncDef.FuncDefImpl(func);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        }
+		@Override
+		public FuncDef getFunc() {
+			Value func = getValue().getMember("func");
+			String pythonFQN = Utils.getFullyQualifedName(func);
+			switch (pythonFQN) {
+				case FuncDef.FQN :
+					return new FuncDef.FuncDefImpl(func);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		}
 
-        @Override
-        public Var getVar() {
-            Value v = getValue().getMember("var");
-            String pythonFQN = Utils.getFullyQualifedName(v);
-            switch (pythonFQN){
-                case Var.FQN:
-                    return new Var.VarImpl(v);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        }
+		@Override
+		public Var getVar() {
+			Value v = getValue().getMember("var");
+			String pythonFQN = Utils.getFullyQualifedName(v);
+			switch (pythonFQN) {
+				case Var.FQN :
+					return new Var.VarImpl(v);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		}
 
-        @Override
-        public Type getType() {
-            Value  type = getValue().getMember("type");
-            return TypesFactory.createType(type);
-        }
+		@Override
+		public Type getType() {
+			Value type = getValue().getMember("type");
+			return TypesFactory.createType(type);
+		}
 
-        @Override
-        public List<Expression> getDocorators() {
-            Value  decorators = getValue().getMember("decorators");
-            GuestArray<Expression> result = new GuestArray<>(decorators, (value) -> {
-                String pythonFQN = Utils.getFullyQualifedName(value);
-                switch (pythonFQN){
-                    case NameExpr.FQN:
-                        return new NameExpr.NameExprImpl(value);
-                }
-                throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-            });
-            return result;
-        }
+		@Override
+		public List<Expression> getDocorators() {
+			Value decorators = getValue().getMember("decorators");
+			GuestArray<Expression> result = new GuestArray<>(decorators, (value) -> {
+				String pythonFQN = Utils.getFullyQualifedName(value);
+				switch (pythonFQN) {
+					case NameExpr.FQN :
+						return new NameExpr.NameExprImpl(value);
+				}
+				throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+			});
+			return result;
+		}
 
-    }
+	}
 
-    String getName();
-    String getFullname();
-    TypeInfo getInfo();
-    FuncDef getFunc();
-    Var getVar();
-    Type getType();
-    List<Expression> getDocorators();
+	String getName();
+	String getFullname();
+	TypeInfo getInfo();
+	FuncDef getFunc();
+	Var getVar();
+	Type getType();
+	List<Expression> getDocorators();
 }

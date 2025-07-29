@@ -43,24 +43,23 @@ package org.graalvm.python.javainterfacegen.mypy.nodes;
 
 import org.graalvm.polyglot.Value;
 
-
 public interface SymbolNode extends Node {
 
-    public static final String SymbolNode_FQN = "mypy.nodes.SymbolNode";
+	public static final String SymbolNode_FQN = "mypy.nodes.SymbolNode";
 
-    static class SymbolNodeImpl extends Node.NodeImpl implements SymbolNode {
+	static class SymbolNodeImpl extends Node.NodeImpl implements SymbolNode {
 
-        public SymbolNodeImpl(Value instance) {
-            super(instance);
-        }
+		public SymbolNodeImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public String fullname() {
-//            return getValue().invokeMember("fullname").asString();
-            return getValue().getMember("fullname").asString();
-        }
-    }
+		@Override
+		public String fullname() {
+			// return getValue().invokeMember("fullname").asString();
+			return getValue().getMember("fullname").asString();
+		}
+	}
 
-    String fullname();
+	String fullname();
 
 }

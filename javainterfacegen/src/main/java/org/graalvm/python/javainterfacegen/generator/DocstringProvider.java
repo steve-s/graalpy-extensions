@@ -40,11 +40,6 @@
  */
 package org.graalvm.python.javainterfacegen.generator;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import org.graalvm.python.javainterfacegen.mypy.nodes.ClassDef;
 import org.graalvm.python.javainterfacegen.mypy.nodes.DefaultNodeVisitor;
 import org.graalvm.python.javainterfacegen.mypy.nodes.ExpressionStmt;
@@ -56,77 +51,82 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.StrExpr;
 import org.graalvm.python.javainterfacegen.mypy.nodes.SymbolTableNode;
 import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 public class DocstringProvider extends DefaultNodeVisitor<Map<String, String>> {
 
-    @Override
-    protected Map<String, String> defaultVisit(Node node) {
-        return Collections.emptyMap();
-    }
+	@Override
+	protected Map<String, String> defaultVisit(Node node) {
+		return Collections.emptyMap();
+	}
 
-    @Override
-    public Map<String, String> visit(ClassDef classDef) {
-        Map<String, String> result = new HashMap();
-        if (classDef.getDocstring() != null) {
-            result.put(classDef.getFullname(), JavadocFormatter.removeLeadingSpaces(classDef.getDocstring()));
-        }
-        TypeInfo typeInfo = (TypeInfo)classDef.getInfo();
-        Map<String, SymbolTableNode> symbolTable = typeInfo.getNames().getTable();
-        for (Map.Entry<String, SymbolTableNode> entry : symbolTable.entrySet()) {
-            String key = entry.getKey();
-            if ("__init__".equals(key) || !key.startsWith("_")) {
-                SymbolTableNode tableNode = entry.getValue();
-                result.putAll(tableNode.getNode().accept(this));
-            }
-        }
-        return result;
-    }
+	@Override
+	public Map<String, String> visit(ClassDef classDef) {
+		Map<String, String> result = new HashMap();
+		if (classDef.getDocstring() != null) {
+			result.put(classDef.getFullname(), JavadocFormatter.removeLeadingSpaces(classDef.getDocstring()));
+		}
+		TypeInfo typeInfo = (TypeInfo) classDef.getInfo();
+		Map<String, SymbolTableNode> symbolTable = typeInfo.getNames().getTable();
+		for (Map.Entry<String, SymbolTableNode> entry : symbolTable.entrySet()) {
+			String key = entry.getKey();
+			if ("__init__".equals(key) || !key.startsWith("_")) {
+				SymbolTableNode tableNode = entry.getValue();
+				result.putAll(tableNode.getNode().accept(this));
+			}
+		}
+		return result;
+	}
 
-    @Override
-    public Map<String, String> visit(FuncDef funcDef) {
-        if (funcDef.getDocstring() != null) {
-            Map<String, String> result = new HashMap();
-            result.put(funcDef.getFullname(), JavadocFormatter.removeLeadingSpaces(funcDef.getDocstring()));
-            return result;
-        }
-        return Collections.EMPTY_MAP;
-    }
+	@Override
+	public Map<String, String> visit(FuncDef funcDef) {
+		if (funcDef.getDocstring() != null) {
+			Map<String, String> result = new HashMap();
+			result.put(funcDef.getFullname(), JavadocFormatter.removeLeadingSpaces(funcDef.getDocstring()));
+			return result;
+		}
+		return Collections.EMPTY_MAP;
+	}
 
-    @Override
-    public Map<String, String> visit(MypyFile file) {
-        Map<String, String> result = new TreeMap();
-        String fileFullName = file.getFullname();
-        List<Statement> defs = file.getDefs();
-        if (defs.isEmpty()) {
-            return Collections.EMPTY_MAP;
-        }
-        System.out.println("d%%%%%%%%%%%%%%%%%%%%%%%% " + defs.get(0).toString());
-        if (defs.get(0) instanceof ExpressionStmt expr) {
-            if (expr.getExpr() instanceof StrExpr strExpr) {
-                System.out.println(strExpr.getText());
-                result.put(file.getName(), strExpr.getText());
-            }
-        }
+	@Override
+	public Map<String, String> visit(MypyFile file) {
+		Map<String, String> result = new TreeMap();
+		String fileFullName = file.getFullname();
+		List<Statement> defs = file.getDefs();
+		if (defs.isEmpty()) {
+			return Collections.EMPTY_MAP;
+		}
+		System.out.println("d%%%%%%%%%%%%%%%%%%%%%%%% " + defs.get(0).toString());
+		if (defs.get(0) instanceof ExpressionStmt expr) {
+			if (expr.getExpr() instanceof StrExpr strExpr) {
+				System.out.println(strExpr.getText());
+				result.put(file.getName(), strExpr.getText());
+			}
+		}
 
-        Map<String, SymbolTableNode> symbolTable = file.getNames().getTable();
+		Map<String, SymbolTableNode> symbolTable = file.getNames().getTable();
 
-        for (Map.Entry<String, SymbolTableNode> entry : symbolTable.entrySet()) {
-            String key = entry.getKey();
-            if (!key.startsWith("_")) {
-                SymbolTableNode tableNode = entry.getValue();
-                if (tableNode.getFullname().startsWith(fileFullName)) {
-                    if (!(tableNode.getNode() instanceof MypyFile)) {
-                        result.putAll(tableNode.getNode().accept(this));
-                    }
-                }
-            }
-        }
-        return result;
-    }
+		for (Map.Entry<String, SymbolTableNode> entry : symbolTable.entrySet()) {
+			String key = entry.getKey();
+			if (!key.startsWith("_")) {
+				SymbolTableNode tableNode = entry.getValue();
+				if (tableNode.getFullname().startsWith(fileFullName)) {
+					if (!(tableNode.getNode() instanceof MypyFile)) {
+						result.putAll(tableNode.getNode().accept(this));
+					}
+				}
+			}
+		}
+		return result;
+	}
 
-    @Override
-    public Map<String, String> visit(TypeInfo typeInfo) {
-        return typeInfo.getDefn().accept(this);
-    }
-
+	@Override
+	public Map<String, String> visit(TypeInfo typeInfo) {
+		return typeInfo.getDefn().accept(this);
+	}
 
 }

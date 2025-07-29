@@ -61,54 +61,55 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class UnionTypeImpl extends TypeImpl implements UnionType {
 
-    public UnionTypeImpl(Value instance) {
-        super(instance);
-    }
+	public UnionTypeImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public List<Type> getItems() {
-        Value type = getValue().getMember("items");
-        GuestArray<Type> result = new GuestArray<>(type, (value) -> {
-            String pythonFQN = Utils.getFullyQualifedName(value);
-            switch (pythonFQN) {
-                case Instance.FQN:
-                    return new InstanceImpl(value);
-                case NoneType.FQN:
-                    return new NoneTypeImpl(value);
-                case AnyType.FQN:
-                    return new AnyTypeImpl(value);
-                case UnionType.FQN:
-                    return new UnionTypeImpl(value);
-                case TypeVarType.FQN:
-                    return new TypeVarTypeImpl(value);
-                case TypeAliasType.FQN:
-                    return new TypeAliasTypeImpl(value);
-                case TupleType.FQN:
-                    return new TupleTypeImpl(value);
-                case UninhabitedType.FQN:
-                    return new UninhabitedTypeImpl(value);
-                case CallableType.FQN:
-                    return new CallableTypeImpl(value);
-                case LiteralType.FQN:
-                    return new LiteralTypeImpl(value);
-                case TypeType.FQN:
-                    return new TypeTypeImpl(value);
-                case Overloaded.FQN:
-                    return new OverloadedImpl(value);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        });
-        return result;
-    }
+	@Override
+	public List<Type> getItems() {
+		Value type = getValue().getMember("items");
+		GuestArray<Type> result = new GuestArray<>(type, (value) -> {
+			String pythonFQN = Utils.getFullyQualifedName(value);
+			switch (pythonFQN) {
+				case Instance.FQN :
+					return new InstanceImpl(value);
+				case NoneType.FQN :
+					return new NoneTypeImpl(value);
+				case AnyType.FQN :
+					return new AnyTypeImpl(value);
+				case UnionType.FQN :
+					return new UnionTypeImpl(value);
+				case TypeVarType.FQN :
+					return new TypeVarTypeImpl(value);
+				case TypeAliasType.FQN :
+					return new TypeAliasTypeImpl(value);
+				case TupleType.FQN :
+					return new TupleTypeImpl(value);
+				case UninhabitedType.FQN :
+					return new UninhabitedTypeImpl(value);
+				case CallableType.FQN :
+					return new CallableTypeImpl(value);
+				case LiteralType.FQN :
+					return new LiteralTypeImpl(value);
+				case TypeType.FQN :
+					return new TypeTypeImpl(value);
+				case Overloaded.FQN :
+					return new OverloadedImpl(value);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		});
+		return result;
+	}
 
-    @Override
-    public boolean isEvaluated() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+	@Override
+	public boolean isEvaluated() {
+		throw new UnsupportedOperationException("Not supported yet."); // Generated from
+																		// nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
 }

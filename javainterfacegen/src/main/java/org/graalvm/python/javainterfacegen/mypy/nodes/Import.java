@@ -42,21 +42,21 @@ package org.graalvm.python.javainterfacegen.mypy.nodes;
 
 import org.graalvm.polyglot.Value;
 
-public interface Import  extends ImportBase {
-    public static final String FQN = "mypy.nodes.Import";
+public interface Import extends ImportBase {
+	public static final String FQN = "mypy.nodes.Import";
 
-    public class ImportImpl extends ImportBaseImpl implements Import {
+	public class ImportImpl extends ImportBaseImpl implements Import {
 
-        public ImportImpl(Value instance) {
-            super(instance);
-        }
+		public ImportImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public Value getIds() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public Value getIds() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-    }
+	}
 
-    Value getIds();
+	Value getIds();
 }

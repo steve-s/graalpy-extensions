@@ -42,8 +42,8 @@ package org.graalvm.python.javainterfacegen.mypy.types;
 
 public interface UninhabitedType extends ProperType {
 
-    public static final String FQN = "mypy.types.UninhabitedType";
+	public static final String FQN = "mypy.types.UninhabitedType";
 
-    boolean isAmbiguous();
+	boolean isAmbiguous();
 
 }

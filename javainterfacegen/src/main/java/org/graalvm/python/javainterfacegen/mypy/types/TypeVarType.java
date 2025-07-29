@@ -43,14 +43,14 @@ package org.graalvm.python.javainterfacegen.mypy.types;
 import java.util.List;
 
 public interface TypeVarType extends TypeVarLikeType {
-    public static final String FQN = "mypy.types.TypeVarType";
-    // Python def: TypeVarType(mypy.types.TypeVarLikeType)
+	public static final String FQN = "mypy.types.TypeVarType";
+	// Python def: TypeVarType(mypy.types.TypeVarLikeType)
 
-    // getter for class field 'variance', Python type: builtins.int
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public int getVariance();
+	// getter for class field 'variance', Python type: builtins.int
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public int getVariance();
 
-    // getter for class field 'values', Python type: builtins.list[mypy.types.Type]
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public List<Type> getValues();
+	// getter for class field 'values', Python type: builtins.list[mypy.types.Type]
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public List<Type> getValues();
 }

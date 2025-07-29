@@ -1,45 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-      <groupId>org.graalvm.python</groupId>
-      <artifactId>graalpy-extensions</artifactId>
-      <version>${revision}</version>
+    <groupId>org.graalvm.python</groupId>
+    <artifactId>graalpy-extensions</artifactId>
+    <version>${revision}</version>
   </parent>
 
   <name>GraalPy embedding utilities</name>
   <artifactId>python-embedding</artifactId>
   <description>GraalPy, a high-performance embeddable Python 3 runtime for Java.
-      This artifact provides convenience APIs to embed GraalPy into Java applications.
-      Use this dependency if you install additional Python packages with the Maven
-      or Gradle plugins for GraalPy.</description>
+    This artifact provides convenience APIs to embed GraalPy into Java applications.
+    Use this dependency if you install additional Python packages with the Maven
+    or Gradle plugins for GraalPy.
+  </description>
   <packaging>jar</packaging>
 
   <dependencies>
     <dependency>
-        <groupId>org.graalvm.polyglot</groupId>
-        <artifactId>polyglot</artifactId>
-        <version>${project.polyglot.version}</version>
+      <groupId>org.graalvm.polyglot</groupId>
+      <artifactId>polyglot</artifactId>
+      <version>${project.polyglot.version}</version>
     </dependency>
     <dependency>
-        <groupId>org.graalvm.python</groupId>
-        <artifactId>${project.python.artifact}</artifactId>
-        <version>${project.polyglot.version}</version>
-        <type>pom</type>
+      <groupId>org.graalvm.python</groupId>
+      <artifactId>${project.python.artifact}</artifactId>
+      <version>${project.polyglot.version}</version>
+      <type>pom</type>
     </dependency>
     <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter</artifactId>
-        <version>${project.junit.version}</version>
-        <scope>test</scope>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${project.junit.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>org.hamcrest</groupId>
-        <artifactId>hamcrest</artifactId>
-        <version>${project.hamcrest.version}</version>
-        <scope>test</scope>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>${project.hamcrest.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <profiles>
@@ -47,59 +48,58 @@
       <id>isolate</id>
       <dependencies>
         <dependency>
-            <groupId>org.graalvm.polyglot</groupId>
-            <artifactId>python-isolate</artifactId>
-            <version>${project.polyglot.version}</version>
-            <scope>runtime</scope>
+          <groupId>org.graalvm.polyglot</groupId>
+          <artifactId>python-isolate</artifactId>
+          <version>${project.polyglot.version}</version>
+          <scope>runtime</scope>
           <type>pom</type>
         </dependency>
       </dependencies>
     </profile>
-      <profile>
-          <!-- Runs the tests with module-path for those artifacts that are modules, other artifacts,
-          like 3rd party libs, that are not modules are still passed on class-path. -->
-          <id>test.modules</id>
-          <build>
-              <plugins>
-                  <plugin>
-                      <groupId>org.apache.maven.plugins</groupId>
-                      <artifactId>maven-surefire-plugin</artifactId>
-                      <configuration>
-                          <argLine>
-                              --add-opens org.graalvm.truffle/com.oracle.truffle.polyglot=org.graalvm.python.embedding
-                          </argLine>
-                          <useModulePath>true</useModulePath>
-                      </configuration>
-                  </plugin>
-              </plugins>
-          </build>
-      </profile>
-      <profile>
-          <!-- Like profile test.modules, but also doesn't add any 'add-opens' directives,
-          so this profile can run only integration subset of the unit tests -->
-          <id>test.modules.integration</id>
-          <build>
-              <plugins>
-                  <plugin>
-                      <groupId>org.apache.maven.plugins</groupId>
-                      <artifactId>maven-surefire-plugin</artifactId>
-                      <configuration>
-                          <useModulePath>true</useModulePath>
-                      </configuration>
-                  </plugin>
-              </plugins>
-          </build>
-      </profile>
+    <profile>
+      <!-- graalpy.embedding on module-path, tests on class-path, + add-opens for internal tests -->
+      <id>test.modules</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <argLine>
+                --add-opens org.graalvm.truffle/com.oracle.truffle.polyglot=org.graalvm.python.embedding
+              </argLine>
+              <useModulePath>true</useModulePath>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <!-- graalpy.embedding on module-path, tests on class-path -->
+      <id>test.modules.integration</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <useModulePath>true</useModulePath>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <build>
     <plugins>
       <plugin>
+        <!-- graalpy.embedding and tests on class-path -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
-            <useModulePath>false</useModulePath>
-          </configuration>
+        <configuration>
+          <useModulePath>false</useModulePath>
+        </configuration>
       </plugin>
     </plugins>
   </build>

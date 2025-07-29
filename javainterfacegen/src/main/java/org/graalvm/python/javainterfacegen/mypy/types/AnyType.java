@@ -42,11 +42,10 @@ package org.graalvm.python.javainterfacegen.mypy.types;
 
 import java.util.Optional;
 
-
 public interface AnyType extends ProperType {
-    public static final String FQN = "mypy.types.AnyType";
-    int getTypeOfAny();
-    public boolean isFromError();
-    public Optional<AnyType> getSourceAny();
-    public Optional<String> getMissingImportName();
+	public static final String FQN = "mypy.types.AnyType";
+	int getTypeOfAny();
+	public boolean isFromError();
+	public Optional<AnyType> getSourceAny();
+	public Optional<String> getMissingImportName();
 }

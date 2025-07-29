@@ -41,7 +41,8 @@
 package org.graalvm.python.javainterfacegen.generator.impl;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.GeneratorFactory;
 import org.graalvm.python.javainterfacegen.generator.JavadocGenerator;
@@ -55,103 +56,99 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.Var;
 
 public class JavadocGeneratorImpl implements JavadocGenerator {
 
-    private static class FQNProvider extends DefaultNodeVisitor<String> {
+	private static class FQNProvider extends DefaultNodeVisitor<String> {
 
-        @Override
-        protected String defaultVisit(Node node) {
-            return "";
-        }
+		@Override
+		protected String defaultVisit(Node node) {
+			return "";
+		}
 
-        @Override
-        public String visit(MypyFile file) {
-            return file.getName();
-        }
+		@Override
+		public String visit(MypyFile file) {
+			return file.getName();
+		}
 
-        @Override
-        public String visit(ClassDef classDef) {
-            return classDef.getFullname();
-        }
+		@Override
+		public String visit(ClassDef classDef) {
+			return classDef.getFullname();
+		}
 
-        @Override
-        public String visit(FuncDef funcDef) {
-            return funcDef.getFullname();
-        }
+		@Override
+		public String visit(FuncDef funcDef) {
+			return funcDef.getFullname();
+		}
 
-        @Override
-        public String visit(Var v) {
-            return v.fullname();
-        }
+		@Override
+		public String visit(Var v) {
+			return v.fullname();
+		}
 
+	}
 
-    }
+	@Override
+	public String create(Node node, GeneratorContext context) {
+		String fqn = node.accept(new FQNProvider());
 
-    @Override
-    public String create(Node node, GeneratorContext context) {
-        String fqn = node.accept(new FQNProvider());
+		String managerClass = context.getConfig().getJavadocStorageManager(context);
+		JavadocStorageManager manager = GeneratorFactory.getJavadocStorageManager(managerClass);
+		try (FileInputStream input = new FileInputStream(manager.getStoragePath(context).toFile())) {
+			return format(manager.load(input).get(fqn));
+		} catch (IOException ex) {
+			// no javadoc for the file?
+		}
 
-        String managerClass =  context.getConfig().getJavadocStorageManager(context);
-        JavadocStorageManager manager = GeneratorFactory.getJavadocStorageManager(managerClass);
-        FileInputStream input;
-        try {
-            input = new FileInputStream(manager.getStoragePath(context).toFile());
-            return format(manager.load(input).get(fqn));
-        } catch (FileNotFoundException ex) {
-            // no javadoc for the file?
-        }
+		return null;
+	}
 
-        return null;
-    }
+	public String format(String text) {
+		if (text == null || text.isEmpty()) {
+			return "";
+		}
+		String[] lines = text.split("\n");
+		StringBuilder sb = new StringBuilder();
+		boolean inCodeBlock = false;
+		int whiteSpaceCount = 0;
+		int possibleCodeBlockEnd = -1;
+		for (String line : lines) {
+			int lineLen = line.length();
+			String stripLine = line.stripLeading();
+			if (stripLine.startsWith(">")) {
+				if (!inCodeBlock) {
+					inCodeBlock = true;
+					whiteSpaceCount = lineLen - stripLine.length();
+					sb.append("<pre>\n");
+				}
+			}
+			if (inCodeBlock && !line.trim().isEmpty()) {
+				if (whiteSpaceCount < lineLen && !line.substring(0, whiteSpaceCount).isBlank()) {
+					inCodeBlock = false;
+					sb.insert(possibleCodeBlockEnd, "</pre>\n");
+				} else {
+					possibleCodeBlockEnd = sb.length() + lineLen + 1;
+				}
+			}
+			if (!inCodeBlock) {
+				if (line.isBlank()) {
+					sb.append("<p>\n");
+				} else {
+					if (stripLine.startsWith("-")) {
+						for (int i = 0; i < lineLen - stripLine.length(); i++) {
+							sb.append("&nbsp;");
+						}
+						sb.append(line).append("<br/>\n");
+					} else {
+						sb.append(line).append("\n");
+					}
+				}
+			} else {
+				sb.append(line).append("\n");
+			}
 
-
-    public String format(String text) {
-        if (text == null || text.isEmpty()) {
-            return "";
-        }
-        String[] lines = text.split("\n");
-        StringBuilder sb = new StringBuilder();
-        boolean inCodeBlock = false;
-        int whiteSpaceCount = 0;
-        int possibleCodeBlockEnd = -1;
-        for (String line : lines) {
-            int lineLen = line.length();
-            String stripLine = line.stripLeading();
-            if (stripLine.startsWith(">")) {
-                if (!inCodeBlock) {
-                    inCodeBlock = true;
-                    whiteSpaceCount = lineLen - stripLine.length();
-                    sb.append("<pre>\n");
-                }
-            }
-            if (inCodeBlock && !line.trim().isEmpty()) {
-                if (whiteSpaceCount < lineLen && !line.substring(0, whiteSpaceCount).isBlank()) {
-                    inCodeBlock = false;
-                    sb.insert(possibleCodeBlockEnd, "</pre>\n");
-                } else {
-                    possibleCodeBlockEnd = sb.length() + lineLen + 1;
-                }
-            }
-            if (!inCodeBlock) {
-                if(line.isBlank()) {
-                    sb.append("<p>\n");
-                } else {
-                    if (stripLine.startsWith("-")) {
-                        for(int i = 0; i < lineLen - stripLine.length(); i++) {
-                            sb.append("&nbsp;");
-                        }
-                        sb.append(line).append("<br/>\n");
-                    } else {
-                        sb.append(line).append("\n");
-                    }
-                }
-            } else {
-                sb.append(line).append("\n");
-            }
-
-        }
-        if (inCodeBlock) {
-            sb.append("\n</pre>");
-        }
-        return sb.toString();
-    }
+		}
+		if (inCodeBlock) {
+			sb.append("\n</pre>");
+		}
+		return sb.toString();
+	}
 
 }

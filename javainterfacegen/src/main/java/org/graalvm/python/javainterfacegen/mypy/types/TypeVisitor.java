@@ -40,22 +40,21 @@
  */
 package org.graalvm.python.javainterfacegen.mypy.types;
 
-
 public interface TypeVisitor<T> {
 
-    T visit(AnyType anyType);
-    T visit(CallableType callableType);
-    T visit(Instance instance);
-    T visit(LiteralType literalType);
-    T visit(NoneType noneType);
-    T visit(Overloaded overloaded);
-    T visit(ParamSpecType paramSpec);
-    T visit(Parameters parameters);
-    T visit(UnionType unionType);
-    T visit(UninhabitedType uType);
-    T visit(TupleType tupleType);
-    T visit(TypeAliasType typeAliasType);
-    T visit(TypeVarType typeVarType);
-    T visit(TypeType typeType);
-    T visit(TypedDictType typedDict);
+	T visit(AnyType anyType);
+	T visit(CallableType callableType);
+	T visit(Instance instance);
+	T visit(LiteralType literalType);
+	T visit(NoneType noneType);
+	T visit(Overloaded overloaded);
+	T visit(ParamSpecType paramSpec);
+	T visit(Parameters parameters);
+	T visit(UnionType unionType);
+	T visit(UninhabitedType uType);
+	T visit(TupleType tupleType);
+	T visit(TypeAliasType typeAliasType);
+	T visit(TypeVarType typeVarType);
+	T visit(TypeType typeType);
+	T visit(TypedDictType typedDict);
 }

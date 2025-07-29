@@ -44,34 +44,32 @@ import java.util.List;
 import org.graalvm.polyglot.Value;
 
 public interface ImportFrom extends ImportBase {
-    public static final String FQN = "mypy.nodes.ImportFrom";
+	public static final String FQN = "mypy.nodes.ImportFrom";
 
-    public class ImportFromImpl extends ImportBaseImpl implements ImportFrom {
+	public class ImportFromImpl extends ImportBaseImpl implements ImportFrom {
 
-        public ImportFromImpl(Value instance) {
-            super(instance);
-        }
+		public ImportFromImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public String id() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public String id() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public List<String[]> names() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public List<String[]> names() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public long relative() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public long relative() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-
-
-    }
-    String id();
-    List<String[]> names();
-    long relative();
+	}
+	String id();
+	List<String[]> names();
+	long relative();
 
 }

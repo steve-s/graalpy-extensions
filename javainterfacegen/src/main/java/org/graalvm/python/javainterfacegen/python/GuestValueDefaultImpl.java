@@ -44,30 +44,31 @@ import org.graalvm.polyglot.Value;
 
 public class GuestValueDefaultImpl implements GuestValue {
 
-    private final Value value;
+	private final Value value;
 
-    public GuestValueDefaultImpl(Value value) {
-        this.value = value;
-    }
+	public GuestValueDefaultImpl(Value value) {
+		this.value = value;
+	}
 
-    @Override
-    public Value getValue() {
-        return value;
-    }
+	@Override
+	public Value getValue() {
+		return value;
+	}
 
-    @Override
-    public String toString() {
-        return value.toString();
-    }
+	@Override
+	public String toString() {
+		return value.toString();
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        return value.invokeMember("__eq__", obj instanceof GuestValue ? ((GuestValue)obj).getValue() : obj).asBoolean();
-    }
+	@Override
+	public boolean equals(Object obj) {
+		return value.invokeMember("__eq__", obj instanceof GuestValue ? ((GuestValue) obj).getValue() : obj)
+				.asBoolean();
+	}
 
-    @Override
-    public int hashCode() {
-        return value.hashCode();
-    }
+	@Override
+	public int hashCode() {
+		return value.hashCode();
+	}
 
 }

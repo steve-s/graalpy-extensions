@@ -49,43 +49,43 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class LiteralTypeImpl extends TypeImpl implements LiteralType {
 
-    public LiteralTypeImpl(Value instance) {
-        super(instance);
-    }
+	public LiteralTypeImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public String valueRepr() {
-        return getValue().invokeMember("value_repr").asString();
-    }
+	@Override
+	public String valueRepr() {
+		return getValue().invokeMember("value_repr").asString();
+	}
 
-    @Override
-    public boolean isSingletonType() {
-        return getValue().invokeMember("is_singleton_type").asBoolean();
-    }
+	@Override
+	public boolean isSingletonType() {
+		return getValue().invokeMember("is_singleton_type").asBoolean();
+	}
 
-    @Override
-    public boolean isEnumLiteral() {
-        return getValue().invokeMember("is_enum_literal").asBoolean();
-    }
+	@Override
+	public boolean isEnumLiteral() {
+		return getValue().invokeMember("is_enum_literal").asBoolean();
+	}
 
-    @Override
-    public Instance getFallback() {
-        Value type = getValue().getMember("fallback");
-        String pythonFQN = Utils.getFullyQualifedName(type);
-        if (Instance.FQN.equals(pythonFQN)) {
-            return new InstanceImpl(type);
-        }
-        throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-    }
+	@Override
+	public Instance getFallback() {
+		Value type = getValue().getMember("fallback");
+		String pythonFQN = Utils.getFullyQualifedName(type);
+		if (Instance.FQN.equals(pythonFQN)) {
+			return new InstanceImpl(type);
+		}
+		throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+	}
 
-    @Override
-    public Value getValueOf() {
-        return getValue().getMember("value");
-    }
+	@Override
+	public Value getValueOf() {
+		return getValue().getMember("value");
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
 }

@@ -43,41 +43,40 @@ package org.graalvm.python.javainterfacegen.mypy.nodes;
 import org.graalvm.polyglot.Value;
 import org.graalvm.python.javainterfacegen.python.Utils;
 
-
 public interface ExpressionStmt extends Statement {
 
-    public static final String FQN = "mypy.nodes.ExpressionStmt";
+	public static final String FQN = "mypy.nodes.ExpressionStmt";
 
-    static class ExpressionStmtImpl extends Statement.StatementImpl implements ExpressionStmt {
+	static class ExpressionStmtImpl extends Statement.StatementImpl implements ExpressionStmt {
 
+		public ExpressionStmtImpl(Value instance) {
+			super(instance);
+			String instanceFQN = Utils.getFullyQualifedName(instance);
+			if (!FQN.equals(instanceFQN)) {
+				throw new UnsupportedOperationException(
+						"Can not create new ExpressionStmtImpl from Guest instance " + instanceFQN);
+			}
+		}
 
-        public ExpressionStmtImpl(Value instance) {
-            super(instance);
-            String instanceFQN = Utils.getFullyQualifedName(instance);
-            if (!FQN.equals(instanceFQN)) {
-                throw new UnsupportedOperationException("Can not create new ExpressionStmtImpl from Guest instance " + instanceFQN);
-            }
-        }
+		@Override
+		public Expression getExpr() {
+			Value orig = getValue().getMember("expr");
 
-        @Override
-        public Expression getExpr() {
-            Value orig = getValue().getMember("expr");
+			String pythonFQN = Utils.getFullyQualifedName(orig);
+			switch (pythonFQN) {
+				case StrExpr.FQN :
+					return new StrExpr.StrExprImpl(orig);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
 
-            String pythonFQN = Utils.getFullyQualifedName(orig);
-            switch (pythonFQN){
-                case StrExpr.FQN:
-                    return new StrExpr.StrExprImpl(orig);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		}
 
-        }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
+	}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
-    }
-
-    Expression getExpr();
+	Expression getExpr();
 
 }

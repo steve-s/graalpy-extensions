@@ -45,11 +45,10 @@ import org.graalvm.polyglot.Value;
 
 public interface FunctionLike extends ProperType {
 
-
-    Value getFallback();
-    boolean isTypeObj();
-    List<CallableType> items();
-    FunctionLike withName(String name);
-    String getName();
+	Value getFallback();
+	boolean isTypeObj();
+	List<CallableType> items();
+	FunctionLike withName(String name);
+	String getName();
 
 }

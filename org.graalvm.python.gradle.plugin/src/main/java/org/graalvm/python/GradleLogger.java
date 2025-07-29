@@ -44,83 +44,83 @@ import org.graalvm.python.embedding.tools.exec.BuildToolLog;
 import org.gradle.api.logging.Logger;
 
 public class GradleLogger implements BuildToolLog {
-    private Logger logger;
+	private Logger logger;
 
-    private GradleLogger(Logger logger) {
-        this.logger = logger;
-    }
+	private GradleLogger(Logger logger) {
+		this.logger = logger;
+	}
 
-    @Override
-    public void subProcessOut(String out) {
-        logger.info(out.toString());
-    }
+	@Override
+	public void subProcessOut(String out) {
+		logger.info(out.toString());
+	}
 
-    @Override
-    public void subProcessErr(String err) {
-        logger.warn(err.toString());
-    }
+	@Override
+	public void subProcessErr(String err) {
+		logger.warn(err.toString());
+	}
 
-    @Override
-    public void lifecycle(String txt) {
-        logger.lifecycle(txt);
-    }
+	@Override
+	public void lifecycle(String txt) {
+		logger.lifecycle(txt);
+	}
 
-    @Override
-    public void info(String txt) {
-        logger.info(txt.toString());
-    }
+	@Override
+	public void info(String txt) {
+		logger.info(txt.toString());
+	}
 
-    @Override
-    public void warning(String txt, Throwable t) {
-        logger.warn(txt, t);
-    }
+	@Override
+	public void warning(String txt, Throwable t) {
+		logger.warn(txt, t);
+	}
 
-    @Override
-    public void warning(String txt) {
-        logger.warn(txt);
-    }
+	@Override
+	public void warning(String txt) {
+		logger.warn(txt);
+	}
 
-    @Override
-    public void error(String txt) {
-        logger.error(txt);
-    }
+	@Override
+	public void error(String txt) {
+		logger.error(txt);
+	}
 
-    @Override
-    public void debug(String txt) {
-        logger.debug(txt);
-    }
+	@Override
+	public void debug(String txt) {
+		logger.debug(txt);
+	}
 
-    @Override
-    public boolean isDebugEnabled() {
-        return logger.isDebugEnabled();
-    }
+	@Override
+	public boolean isDebugEnabled() {
+		return logger.isDebugEnabled();
+	}
 
-    @Override
-    public boolean isWarningEnabled() {
-        return logger.isWarnEnabled();
-    }
+	@Override
+	public boolean isWarningEnabled() {
+		return logger.isWarnEnabled();
+	}
 
-    @Override
-    public boolean isErrorEnabled() {
-        return logger.isErrorEnabled();
-    }
+	@Override
+	public boolean isErrorEnabled() {
+		return logger.isErrorEnabled();
+	}
 
-    @Override
-    public boolean isInfoEnabled() {
-        return logger.isInfoEnabled();
-    }
+	@Override
+	public boolean isInfoEnabled() {
+		return logger.isInfoEnabled();
+	}
 
-    @Override
-    public boolean isLifecycleEnabled() {
-        return logger.isLifecycleEnabled();
-    }
+	@Override
+	public boolean isLifecycleEnabled() {
+		return logger.isLifecycleEnabled();
+	}
 
-    @Override
-    public boolean isSubprocessOutEnabled() {
-        return logger.isInfoEnabled();
-    }
+	@Override
+	public boolean isSubprocessOutEnabled() {
+		return logger.isInfoEnabled();
+	}
 
-    public static GradleLogger of(Logger logger) {
-        return new GradleLogger(logger);
-    }
+	public static GradleLogger of(Logger logger) {
+		return new GradleLogger(logger);
+	}
 }

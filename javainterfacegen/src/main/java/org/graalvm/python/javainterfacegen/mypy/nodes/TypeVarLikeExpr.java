@@ -42,7 +42,4 @@ package org.graalvm.python.javainterfacegen.mypy.nodes;
 
 public interface TypeVarLikeExpr extends SymbolNode, Expression {
 
-
-
-
 }

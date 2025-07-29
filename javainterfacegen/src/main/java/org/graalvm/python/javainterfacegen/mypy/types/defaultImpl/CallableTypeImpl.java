@@ -70,146 +70,146 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class CallableTypeImpl extends FunctionLikeImpl implements CallableType {
 
-    public CallableTypeImpl(Value instance) {
-        super(instance);
-    }
+	public CallableTypeImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public List<Type> getArgTypes() {
-        // TODO factoryMethod for this.
-        Value argTypes = getValue().getMember("arg_types");
-        GuestArray<Type> result = new GuestArray<>(argTypes, (value) -> {
-            String pythonFQN = Utils.getFullyQualifedName(value);
-            switch (pythonFQN) {
-                case CallableType.FQN:
-                    return new CallableTypeImpl(value);
-                case Instance.FQN:
-                    return new InstanceImpl(value);
-                case NoneType.FQN:
-                    return new NoneTypeImpl(value);
-                case AnyType.FQN:
-                    return new AnyTypeImpl(value);
-                case UnionType.FQN:
-                    return new UnionTypeImpl(value);
-                case TypeVarType.FQN:
-                    return new TypeVarTypeImpl(value);
-                case TypeAliasType.FQN:
-                    return new TypeAliasTypeImpl(value);
-                case TupleType.FQN:
-                    return new TupleTypeImpl(value);
-                case UninhabitedType.FQN:
-                    return new UninhabitedTypeImpl(value);
-                case LiteralType.FQN:
-                    return new LiteralTypeImpl(value);
-                case TypeType.FQN:
-                    return new TypeTypeImpl(value);
-                case Overloaded.FQN:
-                    return new OverloadedImpl(value);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        });
-        return result;
-    }
+	@Override
+	public List<Type> getArgTypes() {
+		// TODO factoryMethod for this.
+		Value argTypes = getValue().getMember("arg_types");
+		GuestArray<Type> result = new GuestArray<>(argTypes, (value) -> {
+			String pythonFQN = Utils.getFullyQualifedName(value);
+			switch (pythonFQN) {
+				case CallableType.FQN :
+					return new CallableTypeImpl(value);
+				case Instance.FQN :
+					return new InstanceImpl(value);
+				case NoneType.FQN :
+					return new NoneTypeImpl(value);
+				case AnyType.FQN :
+					return new AnyTypeImpl(value);
+				case UnionType.FQN :
+					return new UnionTypeImpl(value);
+				case TypeVarType.FQN :
+					return new TypeVarTypeImpl(value);
+				case TypeAliasType.FQN :
+					return new TypeAliasTypeImpl(value);
+				case TupleType.FQN :
+					return new TupleTypeImpl(value);
+				case UninhabitedType.FQN :
+					return new UninhabitedTypeImpl(value);
+				case LiteralType.FQN :
+					return new LiteralTypeImpl(value);
+				case TypeType.FQN :
+					return new TypeTypeImpl(value);
+				case Overloaded.FQN :
+					return new OverloadedImpl(value);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		});
+		return result;
+	}
 
-    @Override
-    public Type getRetType() {
-        Value retType = getValue().getMember("ret_type");
-        return TypesFactory.createType(retType);
-    }
+	@Override
+	public Type getRetType() {
+		Value retType = getValue().getMember("ret_type");
+		return TypesFactory.createType(retType);
+	}
 
-    @Override
-    public void setRetType(Type type) {
-        getValue().putMember("ret_type", type.getValue());
-    }
+	@Override
+	public void setRetType(Type type) {
+		getValue().putMember("ret_type", type.getValue());
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
-    @Override
-    public List<String> getArgNames() {
-        Value names = getValue().getMember("arg_names");
-        List<String> result = new ArrayList((int) names.getArraySize());
-        Value iterator = names.getIterator();
+	@Override
+	public List<String> getArgNames() {
+		Value names = getValue().getMember("arg_names");
+		List<String> result = new ArrayList((int) names.getArraySize());
+		Value iterator = names.getIterator();
 
-        while (iterator.hasIteratorNextElement()) {
-            result.add(iterator.getIteratorNextElement().asString());
-        }
-        return result;
-    }
+		while (iterator.hasIteratorNextElement()) {
+			result.add(iterator.getIteratorNextElement().asString());
+		}
+		return result;
+	}
 
-    @Override
-    public List<ArgKind> getArgKinds() {
-        Value kinds = getValue().getMember("arg_kinds");
-        List<ArgKind> result = new ArrayList((int) kinds.getArraySize());
-        Value iterator = kinds.getIterator();
+	@Override
+	public List<ArgKind> getArgKinds() {
+		Value kinds = getValue().getMember("arg_kinds");
+		List<ArgKind> result = new ArrayList((int) kinds.getArraySize());
+		Value iterator = kinds.getIterator();
 
-        while (iterator.hasIteratorNextElement()) {
-            Value kind = iterator.getIteratorNextElement();
-            result.add(ArgKind.valueOf(kind.getMember("name").asString()));
-        }
-        return result;
-    }
+		while (iterator.hasIteratorNextElement()) {
+			Value kind = iterator.getIteratorNextElement();
+			result.add(ArgKind.valueOf(kind.getMember("name").asString()));
+		}
+		return result;
+	}
 
-    @Override
-    public CallableType withNormalizedVarArgs() {
-        return new CallableTypeImpl(getValue().invokeMember("with_normalized_var_args"));
-    }
+	@Override
+	public CallableType withNormalizedVarArgs() {
+		return new CallableTypeImpl(getValue().invokeMember("with_normalized_var_args"));
+	}
 
-    @Override
-    public int getMinArgs() {
-        return getValue().getMember("min_args").asInt();
-    }
+	@Override
+	public int getMinArgs() {
+		return getValue().getMember("min_args").asInt();
+	}
 
-    @Override
-    public SymbolNode getDefinition() {
-        Value value = getValue().getMember("definition");
-        String pythonFQN = Utils.getFullyQualifedName(value);
-        switch (pythonFQN) {
-            case FuncDef.FQN:
-                return new FuncDef.FuncDefImpl(value);
-            case Decorator.FQN:
-                return new Decorator.DecoratorImpl(value);
-            case NoneType.FQN:
-                return null;
-        }
-        throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+	@Override
+	public SymbolNode getDefinition() {
+		Value value = getValue().getMember("definition");
+		String pythonFQN = Utils.getFullyQualifedName(value);
+		switch (pythonFQN) {
+			case FuncDef.FQN :
+				return new FuncDef.FuncDefImpl(value);
+			case Decorator.FQN :
+				return new Decorator.DecoratorImpl(value);
+			case NoneType.FQN :
+				return null;
+		}
+		throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
 
-    }
+	}
 
-    @Override
-    public List<TypeVarLikeType> getVariables() {
-        Value items = getValue().getMember("variables");
-        GuestArray<TypeVarLikeType> result = new GuestArray<>(items, (value) -> {
-            String pythonFQN = Utils.getFullyQualifedName(value);
-            switch (pythonFQN) {
-                case ParamSpecType.FQN:
-                    return new ParamSpecTypeImpl(value);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        });
-        return result;
-    }
+	@Override
+	public List<TypeVarLikeType> getVariables() {
+		Value items = getValue().getMember("variables");
+		GuestArray<TypeVarLikeType> result = new GuestArray<>(items, (value) -> {
+			String pythonFQN = Utils.getFullyQualifedName(value);
+			switch (pythonFQN) {
+				case ParamSpecType.FQN :
+					return new ParamSpecTypeImpl(value);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		});
+		return result;
+	}
 
-    @Override
-    public int maxPossiblePositionalArgs() {
-        return getValue().invokeMember("max_possible_positional_args").asInt();
-    }
+	@Override
+	public int maxPossiblePositionalArgs() {
+		return getValue().invokeMember("max_possible_positional_args").asInt();
+	}
 
-    @Override
-    public List<FormalArgument> getFormalArguments(boolean includeStarArgs) {
-        return getValue().invokeMember("formal_arguments", includeStarArgs).as(FormalArgument.LIST_OF_FormalArgument);
-    }
+	@Override
+	public List<FormalArgument> getFormalArguments(boolean includeStarArgs) {
+		return getValue().invokeMember("formal_arguments", includeStarArgs).as(FormalArgument.LIST_OF_FormalArgument);
+	}
 
-    @Override
-    public FormalArgument argumentByName(String name) {
-        return getValue().invokeMember("argument_by_name", name).as(FormalArgument.class);
-    }
+	@Override
+	public FormalArgument argumentByName(String name) {
+		return getValue().invokeMember("argument_by_name", name).as(FormalArgument.class);
+	}
 
-    @Override
-    public FormalArgument argumentByPosition(int position) {
-        return getValue().invokeMember("argument_by_position", position).as(FormalArgument.class);
-    }
+	@Override
+	public FormalArgument argumentByPosition(int position) {
+		return getValue().invokeMember("argument_by_position", position).as(FormalArgument.class);
+	}
 
 }

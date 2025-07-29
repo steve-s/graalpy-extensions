@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <!-- We do not consider this package a stable public API,
+             so exposing implementation is less of a concern -->
+        <Bug code="EI" />
+        <Bug pattern="EI_EXPOSE_REP" />
+        <Class name="~org\.graalvm\.python\.embedding\.tools.*"/>
+    </Match>
+    <Match>
+        <Class name="~org\.graalvm\.python\.javainterfacegen.*"/>
+    </Match>
+</FindBugsFilter>

@@ -62,42 +62,42 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class TypesFactory {
 
-    public static Type createType(Value valeu) {
-        String typeFQN = Utils.getFullyQualifedName(valeu);
-        switch (typeFQN) {
-            case CallableType.FQN:
-                return new CallableTypeImpl(valeu);
-            case Instance.FQN:
-                return new InstanceImpl(valeu);
-            case NoneType.FQN:
-            case "NoneType":
-                return new NoneTypeImpl(valeu);
-            case AnyType.FQN:
-                return new AnyTypeImpl(valeu);
-            case UnionType.FQN:
-                return new UnionTypeImpl(valeu);
-            case TypeVarType.FQN:
-                return new TypeVarTypeImpl(valeu);
-            case TypeAliasType.FQN:
-                return new TypeAliasTypeImpl(valeu);
-            case TupleType.FQN:
-                return new TupleTypeImpl(valeu);
-            case UninhabitedType.FQN:
-                return new UninhabitedTypeImpl(valeu);
-            case LiteralType.FQN:
-                return new LiteralTypeImpl(valeu);
-            case TypeType.FQN:
-                return new TypeTypeImpl(valeu);
-            case Overloaded.FQN:
-                return new OverloadedImpl(valeu);
-            case Parameters.FQN:
-                return new ParametersImpl(valeu);
-            case ParamSpecType.FQN:
-                return new ParamSpecTypeImpl(valeu);
-            case TypedDictType.FQN:
-                return new TypedDictTypeImpl(valeu);
-        }
-        throw new UnsupportedOperationException("Unknown Python type " + typeFQN + " to map to Java type.");
-    }
+	public static Type createType(Value valeu) {
+		String typeFQN = Utils.getFullyQualifedName(valeu);
+		switch (typeFQN) {
+			case CallableType.FQN :
+				return new CallableTypeImpl(valeu);
+			case Instance.FQN :
+				return new InstanceImpl(valeu);
+			case NoneType.FQN :
+			case "NoneType" :
+				return new NoneTypeImpl(valeu);
+			case AnyType.FQN :
+				return new AnyTypeImpl(valeu);
+			case UnionType.FQN :
+				return new UnionTypeImpl(valeu);
+			case TypeVarType.FQN :
+				return new TypeVarTypeImpl(valeu);
+			case TypeAliasType.FQN :
+				return new TypeAliasTypeImpl(valeu);
+			case TupleType.FQN :
+				return new TupleTypeImpl(valeu);
+			case UninhabitedType.FQN :
+				return new UninhabitedTypeImpl(valeu);
+			case LiteralType.FQN :
+				return new LiteralTypeImpl(valeu);
+			case TypeType.FQN :
+				return new TypeTypeImpl(valeu);
+			case Overloaded.FQN :
+				return new OverloadedImpl(valeu);
+			case Parameters.FQN :
+				return new ParametersImpl(valeu);
+			case ParamSpecType.FQN :
+				return new ParamSpecTypeImpl(valeu);
+			case TypedDictType.FQN :
+				return new TypedDictTypeImpl(valeu);
+		}
+		throw new UnsupportedOperationException("Unknown Python type " + typeFQN + " to map to Java type.");
+	}
 
 }

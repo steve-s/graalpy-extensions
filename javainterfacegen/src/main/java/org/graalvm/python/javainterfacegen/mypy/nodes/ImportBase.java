@@ -47,50 +47,51 @@ import org.graalvm.polyglot.Value;
  * Base class for all import statements.
  */
 public interface ImportBase extends Statement {
-    // Python def: ImportBase(mypy.nodes.Statement)
+	// Python def: ImportBase(mypy.nodes.Statement)
 
-    public static final String FQN = "mypy.nodes.ImportBase";
+	public static final String FQN = "mypy.nodes.ImportBase";
 
-    public class ImportBaseImpl extends StatementImpl implements ImportBase {
+	public class ImportBaseImpl extends StatementImpl implements ImportBase {
 
-        public ImportBaseImpl(Value instance) {
-            super(instance);
-        }
+		public ImportBaseImpl(Value instance) {
+			super(instance);
+		}
 
-        @Override
-        public boolean isTopLevel() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public boolean isTopLevel() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public List<AssignmentStmt> getAssignments() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public List<AssignmentStmt> getAssignments() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public boolean isUnreachable() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public boolean isUnreachable() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-        @Override
-        public boolean isMypyOnly() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+		@Override
+		public boolean isMypyOnly() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
 
-    }
-    // getter for class field 'is_top_level', Python type: builtins.bool
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public boolean isTopLevel();
+	}
+	// getter for class field 'is_top_level', Python type: builtins.bool
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public boolean isTopLevel();
 
-    // getter for class field 'assignments', Python type: builtins.list[mypy.nodes.AssignmentStmt]
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public List<AssignmentStmt> getAssignments();
+	// getter for class field 'assignments', Python type:
+	// builtins.list[mypy.nodes.AssignmentStmt]
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public List<AssignmentStmt> getAssignments();
 
-    // getter for class field 'is_unreachable', Python type: builtins.bool
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public boolean isUnreachable();
+	// getter for class field 'is_unreachable', Python type: builtins.bool
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public boolean isUnreachable();
 
-    // getter for class field 'is_mypy_only', Python type: builtins.bool
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public boolean isMypyOnly();
+	// getter for class field 'is_mypy_only', Python type: builtins.bool
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public boolean isMypyOnly();
 }

@@ -44,6 +44,6 @@ import java.util.Map;
 
 public interface ConfigurationLoader {
 
-    // TODO should be parametter of this method InputStream?????
-    Map<String, Object> loadConfiguration() throws Exception;
+	// TODO should be parametter of this method InputStream?????
+	Map<String, Object> loadConfiguration() throws Exception;
 }

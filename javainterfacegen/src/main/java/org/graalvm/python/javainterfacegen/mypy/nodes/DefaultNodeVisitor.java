@@ -40,89 +40,88 @@
  */
 package org.graalvm.python.javainterfacegen.mypy.nodes;
 
-public abstract class DefaultNodeVisitor<T> implements NodeVisitor<T>{
+public abstract class DefaultNodeVisitor<T> implements NodeVisitor<T> {
 
-    abstract protected T defaultVisit(Node node);
+	abstract protected T defaultVisit(Node node);
 
-    @Override
-    public T visit(Decorator decorator) {
-        return defaultVisit(decorator);
-    }
+	@Override
+	public T visit(Decorator decorator) {
+		return defaultVisit(decorator);
+	}
 
-    @Override
-    public T visit(MypyFile file) {
-        return defaultVisit(file);
-    }
+	@Override
+	public T visit(MypyFile file) {
+		return defaultVisit(file);
+	}
 
-    @Override
-    public T visit(ClassDef classDef) {
-        return defaultVisit(classDef);
-    }
+	@Override
+	public T visit(ClassDef classDef) {
+		return defaultVisit(classDef);
+	}
 
-    @Override
-    public T visit(FuncDef funcDef) {
-        return defaultVisit(funcDef);
-    }
+	@Override
+	public T visit(FuncDef funcDef) {
+		return defaultVisit(funcDef);
+	}
 
-    @Override
-    public T visit(Argument arg) {
-        return defaultVisit(arg);
-    }
+	@Override
+	public T visit(Argument arg) {
+		return defaultVisit(arg);
+	}
 
-    @Override
-    public T visit(Var v) {
-        return defaultVisit(v);
-    }
+	@Override
+	public T visit(Var v) {
+		return defaultVisit(v);
+	}
 
-    @Override
-    public T visit(Block block) {
-        return defaultVisit(block);
-    }
+	@Override
+	public T visit(Block block) {
+		return defaultVisit(block);
+	}
 
-    @Override
-    public T visit(ExpressionStmt expr) {
-        return defaultVisit(expr);
-    }
+	@Override
+	public T visit(ExpressionStmt expr) {
+		return defaultVisit(expr);
+	}
 
-    @Override
-    public T visit(AssignmentStmt assignment) {
-        return defaultVisit(assignment);
-    }
+	@Override
+	public T visit(AssignmentStmt assignment) {
+		return defaultVisit(assignment);
+	}
 
-    @Override
-    public T visit(NameExpr nameExpr) {
-        return defaultVisit(nameExpr);
-    }
+	@Override
+	public T visit(NameExpr nameExpr) {
+		return defaultVisit(nameExpr);
+	}
 
-    @Override
-    public T visit(OverloadedFuncDef oFnDef) {
-        return defaultVisit(oFnDef);
-    }
+	@Override
+	public T visit(OverloadedFuncDef oFnDef) {
+		return defaultVisit(oFnDef);
+	}
 
-    @Override
-    public T visit(StrExpr strExpr) {
-        return defaultVisit(strExpr);
-    }
+	@Override
+	public T visit(StrExpr strExpr) {
+		return defaultVisit(strExpr);
+	}
 
-    @Override
-    public T visit(TupleExpr tuple) {
-        return defaultVisit(tuple);
-    }
+	@Override
+	public T visit(TupleExpr tuple) {
+		return defaultVisit(tuple);
+	}
 
-    @Override
-    public T visit(TypeAlias typeAlias) {
-        return defaultVisit(typeAlias);
-    }
+	@Override
+	public T visit(TypeAlias typeAlias) {
+		return defaultVisit(typeAlias);
+	}
 
-    @Override
-    public T visit(TypeInfo typeInfo) {
-        return defaultVisit(typeInfo);
-    }
+	@Override
+	public T visit(TypeInfo typeInfo) {
+		return defaultVisit(typeInfo);
+	}
 
-    @Override
-    public T visit(TypeVarExpr typeVarExpr) {
-        return defaultVisit(typeVarExpr);
-    }
-
+	@Override
+	public T visit(TypeVarExpr typeVarExpr) {
+		return defaultVisit(typeVarExpr);
+	}
 
 }

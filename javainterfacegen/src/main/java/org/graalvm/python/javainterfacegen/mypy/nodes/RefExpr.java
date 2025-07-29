@@ -46,74 +46,73 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public interface RefExpr extends Expression {
 
-    public static final String FQN = "mypy.nodes.RefExpr";
+	public static final String FQN = "mypy.nodes.RefExpr";
 
-    static class RefExprImpl extends Expression.ExpressionImpl implements RefExpr {
+	static class RefExprImpl extends Expression.ExpressionImpl implements RefExpr {
 
+		public RefExprImpl(Value instance) {
+			super(instance);
+		}
 
-        public RefExprImpl(Value instance) {
-            super(instance);
-        }
+		@Override
+		public Integer getKind() {
+			Value value = getValue().getMember("kind");
+			if (value != null) {
+				return value.asInt();
+			}
+			return null;
+		}
 
-        @Override
-        public Integer getKind() {
-            Value value = getValue().getMember("kind");
-            if (value != null) {
-                return value.asInt();
-            }
-            return null;
-        }
+		@Override
+		public SymbolNode getNode() {
+			Value orig = getValue().getMember("node");
 
-        @Override
-        public SymbolNode getNode() {
-            Value orig = getValue().getMember("node");
+			String pythonFQN = Utils.getFullyQualifedName(orig);
+			switch (pythonFQN) {
+				case Var.FQN :
+					return new Var.VarImpl(orig);
+			}
+			throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+		}
 
-            String pythonFQN = Utils.getFullyQualifedName(orig);
-            switch (pythonFQN){
-                case Var.FQN:
-                    return new Var.VarImpl(orig);
-            }
-            throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-        }
+		@Override
+		public String getFullName() {
+			return getValue().getMember("_fullname").asString();
+		}
 
-        @Override
-        public String getFullName() {
-            return getValue().getMember("_fullname").asString();
-        }
+		@Override
+		public boolean isNewDef() {
+			return getValue().getMember("is_new_def").asBoolean();
+		}
 
-        @Override
-        public boolean isNewDef() {
-            return getValue().getMember("is_new_def").asBoolean();
-        }
+		@Override
+		public boolean isInferredDef() {
+			return getValue().getMember("is_inferred_def").asBoolean();
+		}
 
-        @Override
-        public boolean isInferredDef() {
-            return getValue().getMember("is_inferred_def").asBoolean();
-        }
+		@Override
+		public boolean isAliasRvalue() {
+			return getValue().getMember("is_alias_rvalue").asBoolean();
+		}
 
-        @Override
-        public boolean isAliasRvalue() {
-            return getValue().getMember("is_alias_rvalue").asBoolean();
-        }
+		@Override
+		public Value getTypeGuard() {
+			return getValue().getMember("type_guard");
+		}
 
-        @Override
-        public Value getTypeGuard() {
-            return getValue().getMember("type_guard");
-        }
+		@Override
+		public Value getTypeIs() {
+			return getValue().getMember("type_is");
+		}
+	}
 
-        @Override
-        public Value getTypeIs() {
-            return getValue().getMember("type_is");
-        }
-    }
-
-    Integer getKind();
-    SymbolNode getNode();
-    String getFullName();
-    boolean isNewDef();
-    boolean isInferredDef();
-    boolean isAliasRvalue();
-    Value getTypeGuard();
-    Value getTypeIs();
+	Integer getKind();
+	SymbolNode getNode();
+	String getFullName();
+	boolean isNewDef();
+	boolean isInferredDef();
+	boolean isAliasRvalue();
+	Value getTypeGuard();
+	Value getTypeIs();
 
 }

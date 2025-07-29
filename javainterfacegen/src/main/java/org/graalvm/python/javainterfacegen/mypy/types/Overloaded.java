@@ -49,48 +49,47 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.TypeInfo;
 /**
  * Overloaded function type T1, ... Tn, where each Ti is CallableType.
  *
- * The variant to call is chosen based on static argument
- * types. Overloaded function types can only be defined in stub
- * files, and thus there is no explicit runtime dispatch
- * implementation.
+ * The variant to call is chosen based on static argument types. Overloaded
+ * function types can only be defined in stub files, and thus there is no
+ * explicit runtime dispatch implementation.
  */
 public interface Overloaded extends FunctionLike {
-    // Python def: Overloaded(mypy.types.FunctionLike)
+	// Python def: Overloaded(mypy.types.FunctionLike)
 
-    public static final String FQN = "mypy.types.Overloaded";
+	public static final String FQN = "mypy.types.Overloaded";
 
-    // Python signature: def (self: mypy.types.Overloaded, name: builtins.str) -> mypy.types.Overloaded
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public Overloaded withName(String name);
+	// Python signature: def (self: mypy.types.Overloaded, name: builtins.str) ->
+	// mypy.types.Overloaded
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public Overloaded withName(String name);
 
-    // Python signature: def (self: mypy.types.Overloaded) -> builtins.bool
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public boolean isTypeObj();
+	// Python signature: def (self: mypy.types.Overloaded) -> builtins.bool
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public boolean isTypeObj();
 
-    // Python signature: def (self: mypy.types.Overloaded) -> mypy.nodes.TypeInfo
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public TypeInfo typeObject();
+	// Python signature: def (self: mypy.types.Overloaded) -> mypy.nodes.TypeInfo
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public TypeInfo typeObject();
 
-    // Python signature: def (self: mypy.types.Overloaded) -> builtins.dict[builtins.str, Any]
-    // type class of return type: mypy.types.TypeAliasType
-    public Map<String, Value> serialize();
+	// Python signature: def (self: mypy.types.Overloaded) ->
+	// builtins.dict[builtins.str, Any]
+	// type class of return type: mypy.types.TypeAliasType
+	public Map<String, Value> serialize();
 
-    // Python signature: def (self: mypy.types.Overloaded) -> mypy.types.Overloaded
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public Overloaded withUnpackedKwargs();
+	// Python signature: def (self: mypy.types.Overloaded) -> mypy.types.Overloaded
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public Overloaded withUnpackedKwargs();
 
-    // Python signature: def (self: mypy.types.Overloaded) -> Union[builtins.str, None]
-    // type class of return type: mypy.types.UnionType
-    public Optional<String> name();
+	// Python signature: def (self: mypy.types.Overloaded) -> Union[builtins.str,
+	// None]
+	// type class of return type: mypy.types.UnionType
+	public Optional<String> name();
 
+	// Python property signature: def (self: mypy.types.Overloaded) ->
+	// builtins.list[mypy.types.CallableType]
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	public List<CallableType> getItems();
 
-    // Python property signature: def (self: mypy.types.Overloaded) -> builtins.list[mypy.types.CallableType]
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    public List<CallableType> getItems();
-
-
-    // TODO unprocessed Decorator of function 'deserialize'
-
-
+	// TODO unprocessed Decorator of function 'deserialize'
 
 }

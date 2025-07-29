@@ -55,105 +55,110 @@ import org.graalvm.polyglot.Value;
 
 import java.util.Set;
 
-
 /**
  * Type of TypedDict object {'k1': v1, ..., 'kn': vn}.
  *
  * A TypedDict object is a dictionary with specific string (literal) keys. Each
- * key has a value with a distinct type that depends on the key. TypedDict objects
- * are normal dict objects at runtime.
+ * key has a value with a distinct type that depends on the key. TypedDict
+ * objects are normal dict objects at runtime.
  *
  * A TypedDictType can be either named or anonymous. If it's anonymous, its
- * fallback will be typing_extensions._TypedDict (Instance). _TypedDict is a subclass
- * of Mapping[str, object] and defines all non-mapping dict methods that TypedDict
- * supports. Some dict methods are unsafe and not supported. _TypedDict isn't defined
- * at runtime.
+ * fallback will be typing_extensions._TypedDict (Instance). _TypedDict is a
+ * subclass of Mapping[str, object] and defines all non-mapping dict methods
+ * that TypedDict supports. Some dict methods are unsafe and not supported.
+ * _TypedDict isn't defined at runtime.
  *
  * If a TypedDict is named, its fallback will be an Instance of the named type
- * (ex: "Point") whose TypeInfo has a typeddict_type that is anonymous. This
- * is similar to how named tuples work.
+ * (ex: "Point") whose TypeInfo has a typeddict_type that is anonymous. This is
+ * similar to how named tuples work.
  *
  * TODO: The fallback structure is perhaps overly complicated.
  */
 public interface TypedDictType extends ProperType {
 
-    static final String FQN =  "mypy.types.TypedDictType";
-    // Python def: TypedDictType(mypy.types.ProperType)
+	static final String FQN = "mypy.types.TypedDictType";
+	// Python def: TypedDictType(mypy.types.ProperType)
 
-    // Python signature: create_anonymous_fallback def (self: mypy.types.TypedDictType) -> mypy.types.Instance
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    // TODO provide javadoc for
-    //     key: mypy.types.TypedDictType.create_anonymous_fallback
-    //     file: ./target/javadoc-cache/types.py_javadoc.yaml.
-    public Instance createAnonymousFallback();
+	// Python signature: create_anonymous_fallback def (self:
+	// mypy.types.TypedDictType) -> mypy.types.Instance
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	// TODO provide javadoc for
+	// key: mypy.types.TypedDictType.create_anonymous_fallback
+	// file: ./target/javadoc-cache/types.py_javadoc.yaml.
+	public Instance createAnonymousFallback();
 
+	// Python signature: as_anonymous def (self: mypy.types.TypedDictType) ->
+	// mypy.types.TypedDictType
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	// TODO provide javadoc for
+	// key: mypy.types.TypedDictType.as_anonymous
+	// file: ./target/javadoc-cache/types.py_javadoc.yaml.
+	public TypedDictType asAnonymous();
 
+	// getter for class field 'required_keys', Python type:
+	// builtins.set[builtins.str]
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	// TODO provide javadoc for
+	// key: mypy.types.TypedDictType.required_keys
+	// file: ./target/javadoc-cache/types.py_javadoc.yaml.
+	public Set<String> getRequiredKeys();
 
-    // Python signature: as_anonymous def (self: mypy.types.TypedDictType) -> mypy.types.TypedDictType
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    // TODO provide javadoc for
-    //     key: mypy.types.TypedDictType.as_anonymous
-    //     file: ./target/javadoc-cache/types.py_javadoc.yaml.
-    public TypedDictType asAnonymous();
+	// Python signature: zipall def (self: mypy.types.TypedDictType, right:
+	// mypy.types.TypedDictType) -> typing.Iterable[tuple[builtins.str,
+	// Union[mypy.types.Type, None], Union[mypy.types.Type, None]]]
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	// TODO provide javadoc for
+	// key: mypy.types.TypedDictType.zipall
+	// file: ./target/javadoc-cache/types.py_javadoc.yaml.
+	// public Value zipall();
 
-    // getter for class field 'required_keys', Python type: builtins.set[builtins.str]
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    // TODO provide javadoc for
-    //     key: mypy.types.TypedDictType.required_keys
-    //     file: ./target/javadoc-cache/types.py_javadoc.yaml.
-    public Set<String> getRequiredKeys();
+	// Python signature: accept def [T] (self: mypy.types.TypedDictType, visitor:
+	// mypy.type_visitor.TypeVisitor[T`-1]) -> T`-1
+	// type class of return type: mypy.types.TypeVarType
+	// TODO provide javadoc for
+	// key: mypy.types.TypedDictType.accept
+	// file: ./target/javadoc-cache/types.py_javadoc.yaml.
+	// public <T> T accept(TypeVisitor<T> visitor);
 
-    // Python signature: zipall def (self: mypy.types.TypedDictType, right: mypy.types.TypedDictType) -> typing.Iterable[tuple[builtins.str, Union[mypy.types.Type, None], Union[mypy.types.Type, None]]]
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    // TODO provide javadoc for
-    //     key: mypy.types.TypedDictType.zipall
-    //     file: ./target/javadoc-cache/types.py_javadoc.yaml.
-//    public Value zipall();
+	// Python property signature: def (self: mypy.types.TypedDictType) ->
+	// builtins.bool
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	// TODO provide javadoc for
+	// key: mypy.types.TypedDictType.is_final
+	// file: ./target/javadoc-cache/types.py_javadoc.yaml.
+	public boolean isFinal();
 
-    // Python signature: accept def [T] (self: mypy.types.TypedDictType, visitor: mypy.type_visitor.TypeVisitor[T`-1]) -> T`-1
-    // type class of return type: mypy.types.TypeVarType
-    // TODO provide javadoc for
-    //     key: mypy.types.TypedDictType.accept
-    //     file: ./target/javadoc-cache/types.py_javadoc.yaml.
-//    public <T> T accept(TypeVisitor<T> visitor);
+	// Python signature: is_anonymous def (self: mypy.types.TypedDictType) ->
+	// builtins.bool
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	// TODO provide javadoc for
+	// key: mypy.types.TypedDictType.is_anonymous
+	// file: ./target/javadoc-cache/types.py_javadoc.yaml.
+	public boolean isAnonymous();
 
-    // Python property signature: def (self: mypy.types.TypedDictType) -> builtins.bool
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    // TODO provide javadoc for
-    //     key: mypy.types.TypedDictType.is_final
-    //     file: ./target/javadoc-cache/types.py_javadoc.yaml.
-    public boolean isFinal();
+	// getter for class field 'items', Python type: builtins.dict[builtins.str,
+	// mypy.types.Type]
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	// TODO provide javadoc for
+	// key: mypy.types.TypedDictType.items
+	// file: ./target/javadoc-cache/types.py_javadoc.yaml.
+	public Map<String, Type> getItems();
 
-    // Python signature: is_anonymous def (self: mypy.types.TypedDictType) -> builtins.bool
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    // TODO provide javadoc for
-    //     key: mypy.types.TypedDictType.is_anonymous
-    //     file: ./target/javadoc-cache/types.py_javadoc.yaml.
-    public boolean isAnonymous();
+	// getter for class field 'fallback', Python type: mypy.types.Instance
+	// type class: mypy.types.Instance -> mypy.nodes.TypeInfo
+	// TODO provide javadoc for
+	// key: mypy.types.TypedDictType.fallback
+	// file: ./target/javadoc-cache/types.py_javadoc.yaml.
+	public Instance getFallback();
 
-    // getter for class field 'items', Python type: builtins.dict[builtins.str, mypy.types.Type]
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    // TODO provide javadoc for
-    //     key: mypy.types.TypedDictType.items
-    //     file: ./target/javadoc-cache/types.py_javadoc.yaml.
-    public Map<String, Type> getItems();
+	// Python signature: names_are_wider_than def (self: mypy.types.TypedDictType,
+	// other: mypy.types.TypedDictType) -> builtins.bool
+	// type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
+	// TODO provide javadoc for
+	// key: mypy.types.TypedDictType.names_are_wider_than
+	// file: ./target/javadoc-cache/types.py_javadoc.yaml.
+	public boolean namesAreWiderThan();
 
-    // getter for class field 'fallback', Python type: mypy.types.Instance
-    // type class: mypy.types.Instance -> mypy.nodes.TypeInfo
-    // TODO provide javadoc for
-    //     key: mypy.types.TypedDictType.fallback
-    //     file: ./target/javadoc-cache/types.py_javadoc.yaml.
-    public Instance getFallback();
-
-    // Python signature: names_are_wider_than def (self: mypy.types.TypedDictType, other: mypy.types.TypedDictType) -> builtins.bool
-    // type class of return type: mypy.types.Instance -> mypy.nodes.TypeInfo
-    // TODO provide javadoc for
-    //     key: mypy.types.TypedDictType.names_are_wider_than
-    //     file: ./target/javadoc-cache/types.py_javadoc.yaml.
-    public boolean namesAreWiderThan();
-
-
-    // TODO unprocessed Decorator of function 'deserialize'
-
+	// TODO unprocessed Decorator of function 'deserialize'
 
 }

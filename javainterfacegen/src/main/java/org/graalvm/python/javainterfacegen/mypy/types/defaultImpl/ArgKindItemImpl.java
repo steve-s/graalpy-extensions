@@ -46,43 +46,43 @@ import org.graalvm.python.javainterfacegen.python.GuestValueDefaultImpl;
 
 public class ArgKindItemImpl extends GuestValueDefaultImpl implements ArgKindItem {
 
-    public ArgKindItemImpl(Value instance) {
-        super(instance);
-    }
+	public ArgKindItemImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public boolean isPositional() {
-        return getValue().invokeMember("is_positional").asBoolean();
-    }
+	@Override
+	public boolean isPositional() {
+		return getValue().invokeMember("is_positional").asBoolean();
+	}
 
-    @Override
-    public boolean isPositional(boolean star) {
-        return getValue().invokeMember("is_positional", star).asBoolean();
-    }
+	@Override
+	public boolean isPositional(boolean star) {
+		return getValue().invokeMember("is_positional", star).asBoolean();
+	}
 
-    @Override
-    public boolean isNamed() {
-        return getValue().invokeMember("is_named").asBoolean();
-    }
+	@Override
+	public boolean isNamed() {
+		return getValue().invokeMember("is_named").asBoolean();
+	}
 
-    @Override
-    public boolean isNamed(boolean star) {
-        return getValue().invokeMember("is_named", star).asBoolean();
-    }
+	@Override
+	public boolean isNamed(boolean star) {
+		return getValue().invokeMember("is_named", star).asBoolean();
+	}
 
-    @Override
-    public boolean isRequired() {
-        return getValue().invokeMember("is_required").asBoolean();
-    }
+	@Override
+	public boolean isRequired() {
+		return getValue().invokeMember("is_required").asBoolean();
+	}
 
-    @Override
-    public boolean isOptional() {
-        return getValue().invokeMember("is_optional").asBoolean();
-    }
+	@Override
+	public boolean isOptional() {
+		return getValue().invokeMember("is_optional").asBoolean();
+	}
 
-    @Override
-    public boolean isStar() {
-        return getValue().invokeMember("is_star").asBoolean();
-    }
+	@Override
+	public boolean isStar() {
+		return getValue().invokeMember("is_star").asBoolean();
+	}
 
 }

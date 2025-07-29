@@ -53,45 +53,45 @@ import org.graalvm.python.javainterfacegen.python.Utils;
 
 public class InstanceImpl extends TypeImpl implements Instance {
 
-    public InstanceImpl(Value instance) {
-        super(instance);
-    }
+	public InstanceImpl(Value instance) {
+		super(instance);
+	}
 
-    @Override
-    public TypeInfo getType() {
-        Value type = getValue().getMember("type");
-        String pythonFQN = Utils.getFullyQualifedName(type);
-        switch (pythonFQN) {
-            case TypeInfo.FQN:
-                return new TypeInfo.TypeInfoImpl(type);
-            case FakeInfo.FFQN:
-                return new FakeInfo.FakeInfoImpl(type);
-        }
-        throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
-    }
+	@Override
+	public TypeInfo getType() {
+		Value type = getValue().getMember("type");
+		String pythonFQN = Utils.getFullyQualifedName(type);
+		switch (pythonFQN) {
+			case TypeInfo.FQN :
+				return new TypeInfo.TypeInfoImpl(type);
+			case FakeInfo.FFQN :
+				return new FakeInfo.FakeInfoImpl(type);
+		}
+		throw new UnsupportedOperationException("Unknown Python type " + pythonFQN + " to map to Java type.");
+	}
 
-    @Override
-    public <T> T accept(TypeVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+	@Override
+	public <T> T accept(TypeVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 
-    @Override
-    public String toString() {
-        try {
-            return super.toString();
-        } catch (PolyglotException e) {
-            return getValue().getMember("type_ref").toString();
-        }
-    }
+	@Override
+	public String toString() {
+		try {
+			return super.toString();
+		} catch (PolyglotException e) {
+			return getValue().getMember("type_ref").toString();
+		}
+	}
 
-    @Override
-    public List<Type> getArgs() {
-        Value orig = getValue().getMember("args");
+	@Override
+	public List<Type> getArgs() {
+		Value orig = getValue().getMember("args");
 
-        GuestArray<Type> result = new GuestArray<>(orig, (value) -> {
-            return TypesFactory.createType(value);
-        });
-        return result;
-    }
+		GuestArray<Type> result = new GuestArray<>(orig, (value) -> {
+			return TypesFactory.createType(value);
+		});
+		return result;
+	}
 
 }

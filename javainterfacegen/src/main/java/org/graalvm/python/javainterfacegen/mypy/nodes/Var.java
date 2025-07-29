@@ -75,210 +75,211 @@ import org.graalvm.python.javainterfacegen.mypy.types.defaultImpl.UnionTypeImpl;
 
 public interface Var extends SymbolNode {
 
-    public static final String FQN = "mypy.nodes.Var";
+	public static final String FQN = "mypy.nodes.Var";
 
-    static class VarImpl extends SymbolNode.SymbolNodeImpl implements Var {
+	static class VarImpl extends SymbolNode.SymbolNodeImpl implements Var {
 
-        public VarImpl(Value instance) {
-            super(instance);
-            String instanceFQN = Utils.getFullyQualifedName(instance);
-            if (!Var.FQN.equals(instanceFQN)) {
-                throw new UnsupportedOperationException("Can not create new VarImpl from Guest instance " + instanceFQN);
-            }
-        }
+		public VarImpl(Value instance) {
+			super(instance);
+			String instanceFQN = Utils.getFullyQualifedName(instance);
+			if (!Var.FQN.equals(instanceFQN)) {
+				throw new UnsupportedOperationException(
+						"Can not create new VarImpl from Guest instance " + instanceFQN);
+			}
+		}
 
-        @Override
-        public String getName() {
-            if (getValue().hasMember("name")) {
-                return getValue().getMember("name").asString();
-            }
-            return null;
-        }
+		@Override
+		public String getName() {
+			if (getValue().hasMember("name")) {
+				return getValue().getMember("name").asString();
+			}
+			return null;
+		}
 
-        @Override
-        public String getFullname() {
-            if (getValue().hasMember("fullname")) {
-                return getValue().getMember("fullname").asString();
-            }
-            return null;
-        }
+		@Override
+		public String getFullname() {
+			if (getValue().hasMember("fullname")) {
+				return getValue().getMember("fullname").asString();
+			}
+			return null;
+		}
 
-        @Override
-        public Value getInfo() {
-            if (getValue().hasMember("info")) {
-                return getValue().getMember("info");
-            }
-            return null;
-        }
+		@Override
+		public Value getInfo() {
+			if (getValue().hasMember("info")) {
+				return getValue().getMember("info");
+			}
+			return null;
+		}
 
-        @Override
-        public Type getType() {
+		@Override
+		public Type getType() {
 
-            if (getValue().hasMember("type")) {
-                Value type = getValue().getMember("type");
-                return TypesFactory.createType(type);
-            }
-            return null;
-        }
+			if (getValue().hasMember("type")) {
+				Value type = getValue().getMember("type");
+				return TypesFactory.createType(type);
+			}
+			return null;
+		}
 
-        @Override
-        public <T> T accept(NodeVisitor<T> visitor) {
-            return visitor.visit(this);
-        }
+		@Override
+		public <T> T accept(NodeVisitor<T> visitor) {
+			return visitor.visit(this);
+		}
 
-        @Override
-        public Value getFinalValue() {
-            return getValue().getMember("final_value");
-        }
+		@Override
+		public Value getFinalValue() {
+			return getValue().getMember("final_value");
+		}
 
-        @Override
-        public boolean isSelf() {
-            return getValue().getMember("is_self").asBoolean();
-        }
+		@Override
+		public boolean isSelf() {
+			return getValue().getMember("is_self").asBoolean();
+		}
 
-        @Override
-        public boolean isCls() {
-            return getValue().getMember("is_cls").asBoolean();
-        }
+		@Override
+		public boolean isCls() {
+			return getValue().getMember("is_cls").asBoolean();
+		}
 
-        @Override
-        public boolean isReady() {
-            return getValue().getMember("is_ready").asBoolean();
-        }
+		@Override
+		public boolean isReady() {
+			return getValue().getMember("is_ready").asBoolean();
+		}
 
-        @Override
-        public boolean isInferred() {
-            return getValue().getMember("is_inferred").asBoolean();
-        }
+		@Override
+		public boolean isInferred() {
+			return getValue().getMember("is_inferred").asBoolean();
+		}
 
-        @Override
-        public boolean isInitializedInClass() {
-            return getValue().getMember("is_initialized_in_class").asBoolean();
-        }
+		@Override
+		public boolean isInitializedInClass() {
+			return getValue().getMember("is_initialized_in_class").asBoolean();
+		}
 
-        @Override
-        public boolean isStaticMethod() {
-            return getValue().getMember("is_staticmethod").asBoolean();
-        }
+		@Override
+		public boolean isStaticMethod() {
+			return getValue().getMember("is_staticmethod").asBoolean();
+		}
 
-        @Override
-        public boolean isClassMethod() {
-            return getValue().getMember("is_classmethod").asBoolean();
-        }
+		@Override
+		public boolean isClassMethod() {
+			return getValue().getMember("is_classmethod").asBoolean();
+		}
 
-        @Override
-        public boolean isProperty() {
-            return getValue().getMember("is_property").asBoolean();
-        }
+		@Override
+		public boolean isProperty() {
+			return getValue().getMember("is_property").asBoolean();
+		}
 
-        @Override
-        public boolean isSettableProperty() {
-            return getValue().getMember("is_settable_property").asBoolean();
-        }
+		@Override
+		public boolean isSettableProperty() {
+			return getValue().getMember("is_settable_property").asBoolean();
+		}
 
-        @Override
-        public boolean isClassVar() {
-            return getValue().getMember("is_classvar").asBoolean();
-        }
+		@Override
+		public boolean isClassVar() {
+			return getValue().getMember("is_classvar").asBoolean();
+		}
 
-        @Override
-        public boolean isAbstractVar() {
-            return getValue().getMember("is_abstract_var").asBoolean();
-        }
+		@Override
+		public boolean isAbstractVar() {
+			return getValue().getMember("is_abstract_var").asBoolean();
+		}
 
-        @Override
-        public boolean isFinal() {
-            return getValue().getMember("is_final").asBoolean();
-        }
+		@Override
+		public boolean isFinal() {
+			return getValue().getMember("is_final").asBoolean();
+		}
 
-        @Override
-        public boolean isFinalUnsetInClass() {
-            return getValue().getMember("final_unset_in_class").asBoolean();
-        }
+		@Override
+		public boolean isFinalUnsetInClass() {
+			return getValue().getMember("final_unset_in_class").asBoolean();
+		}
 
-        @Override
-        public boolean isFinalSetInInit() {
-            return getValue().getMember("final_set_in_init").asBoolean();
-        }
+		@Override
+		public boolean isFinalSetInInit() {
+			return getValue().getMember("final_set_in_init").asBoolean();
+		}
 
-        @Override
-        public boolean isSuppressedImport() {
-            return getValue().getMember("is_suppressed_import").asBoolean();
-        }
+		@Override
+		public boolean isSuppressedImport() {
+			return getValue().getMember("is_suppressed_import").asBoolean();
+		}
 
-        @Override
-        public boolean isExplicitSelfType() {
-            return getValue().getMember("explicit_self_type").asBoolean();
-        }
+		@Override
+		public boolean isExplicitSelfType() {
+			return getValue().getMember("explicit_self_type").asBoolean();
+		}
 
-        @Override
-        public boolean isFromModuleGetAttr() {
-            return getValue().getMember("from_module_getattr").asBoolean();
-        }
+		@Override
+		public boolean isFromModuleGetAttr() {
+			return getValue().getMember("from_module_getattr").asBoolean();
+		}
 
-        @Override
-        public boolean hasExplicitValue() {
-            return getValue().getMember("has_explicit_value").asBoolean();
-        }
+		@Override
+		public boolean hasExplicitValue() {
+			return getValue().getMember("has_explicit_value").asBoolean();
+		}
 
-        @Override
-        public boolean allowIncompatibleOverride() {
-            return getValue().getMember("allow_incompatible_override").asBoolean();
-        }
+		@Override
+		public boolean allowIncompatibleOverride() {
+			return getValue().getMember("allow_incompatible_override").asBoolean();
+		}
 
-        @Override
-        public boolean isInvalidPartialType() {
-            return getValue().getMember("invalid_partial_type").asBoolean();
-        }
-    }
+		@Override
+		public boolean isInvalidPartialType() {
+			return getValue().getMember("invalid_partial_type").asBoolean();
+		}
+	}
 
-    String getName();
+	String getName();
 
-    String getFullname();
+	String getFullname();
 
-    Value getInfo();
+	Value getInfo();
 
-    Type getType();
+	Type getType();
 
-    Value getFinalValue();
+	Value getFinalValue();
 
-    boolean isSelf();
+	boolean isSelf();
 
-    boolean isCls();
+	boolean isCls();
 
-    boolean isReady();
+	boolean isReady();
 
-    boolean isInferred();
+	boolean isInferred();
 
-    boolean isInitializedInClass();
+	boolean isInitializedInClass();
 
-    boolean isStaticMethod();
+	boolean isStaticMethod();
 
-    boolean isClassMethod();
+	boolean isClassMethod();
 
-    boolean isProperty();
+	boolean isProperty();
 
-    boolean isSettableProperty();
+	boolean isSettableProperty();
 
-    boolean isClassVar();
+	boolean isClassVar();
 
-    boolean isAbstractVar();
+	boolean isAbstractVar();
 
-    boolean isFinal();
+	boolean isFinal();
 
-    boolean isFinalUnsetInClass();
+	boolean isFinalUnsetInClass();
 
-    boolean isFinalSetInInit();
+	boolean isFinalSetInInit();
 
-    boolean isSuppressedImport();
+	boolean isSuppressedImport();
 
-    boolean isExplicitSelfType();
+	boolean isExplicitSelfType();
 
-    boolean isFromModuleGetAttr();
+	boolean isFromModuleGetAttr();
 
-    boolean hasExplicitValue();
+	boolean hasExplicitValue();
 
-    boolean allowIncompatibleOverride();
+	boolean allowIncompatibleOverride();
 
-    boolean isInvalidPartialType();
+	boolean isInvalidPartialType();
 }

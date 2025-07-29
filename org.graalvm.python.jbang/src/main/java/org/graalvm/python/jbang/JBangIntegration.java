@@ -67,245 +67,253 @@ import static org.graalvm.python.embedding.tools.vfs.VFSUtils.VFS_ROOT;
 import static org.graalvm.python.embedding.tools.vfs.VFSUtils.VFS_VENV;
 
 public class JBangIntegration {
-    private static final String PIP = "//PIP";
-    private static final String PIP_DROP = "//PIP_DROP";
-    private static final String RESOURCES_DIRECTORY = "//PYTHON_RESOURCES_DIRECTORY";
-    private static final String PYTHON_LANGUAGE = "python-language";
-    private static final String PYTHON_RESOURCES = "python-resources";
-    private static final String PYTHON_LAUNCHER = "python-launcher";
-    private static final String GRAALPY_GROUP = String.join(File.separator, "org", "graalvm", "python");
-    private static final boolean IS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
-    private static final String LAUNCHER = IS_WINDOWS ? "graalpy.exe" : "graalpy.sh";
+	private static final String PIP = "//PIP";
+	private static final String PIP_DROP = "//PIP_DROP";
+	private static final String RESOURCES_DIRECTORY = "//PYTHON_RESOURCES_DIRECTORY";
+	private static final String PYTHON_LANGUAGE = "python-language";
+	private static final String PYTHON_RESOURCES = "python-resources";
+	private static final String PYTHON_LAUNCHER = "python-launcher";
+	private static final String GRAALPY_GROUP = String.join(File.separator, "org", "graalvm", "python");
+	private static final boolean IS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
+	private static final String LAUNCHER = IS_WINDOWS ? "graalpy.exe" : "graalpy.sh";
 
-    private static final BuildToolLog BUILD_TOOL_LOG = new BuildToolLog() {
-        private static final boolean debugEnabled = Boolean.getBoolean("org.graalvm.python.jbang.log.debug");
+	private static final BuildToolLog BUILD_TOOL_LOG = new BuildToolLog() {
+		private static final boolean debugEnabled = Boolean.getBoolean("org.graalvm.python.jbang.log.debug");
 
-        @Override
-        public void subProcessOut(String out) {
-            System.out.println(out);
-        }
+		@Override
+		public void subProcessOut(String out) {
+			System.out.println(out);
+		}
 
-        @Override
-        public void subProcessErr(String err) {
-            System.err.println(err);
-        }
+		@Override
+		public void subProcessErr(String err) {
+			System.err.println(err);
+		}
 
-        @Override
-        public void info(String s) {
-            System.out.println(s);
-        }
+		@Override
+		public void info(String s) {
+			System.out.println(s);
+		}
 
-        @Override
-        public void warning(String s) {
-            System.out.println(s);
-        }
+		@Override
+		public void warning(String s) {
+			System.out.println(s);
+		}
 
-        @Override
-        public void warning(String s, Throwable t) {
-            System.out.println(s);
-        }
+		@Override
+		public void warning(String s, Throwable t) {
+			System.out.println(s);
+		}
 
-        @Override
-        public void error(String s) {
-            System.err.println(s);
-        }
+		@Override
+		public void error(String s) {
+			System.err.println(s);
+		}
 
-        @Override
-        public void debug(String s) {
-            System.out.println(s);
-        }
+		@Override
+		public void debug(String s) {
+			System.out.println(s);
+		}
 
-        @Override
-        public boolean isWarningEnabled() {
-            return true;
-        }
+		@Override
+		public boolean isWarningEnabled() {
+			return true;
+		}
 
-        @Override
-        public boolean isInfoEnabled() {
-            return true;
-        }
+		@Override
+		public boolean isInfoEnabled() {
+			return true;
+		}
 
-        @Override
-        public boolean isErrorEnabled() {
-            return true;
-        }
+		@Override
+		public boolean isErrorEnabled() {
+			return true;
+		}
 
-        @Override
-        public boolean isDebugEnabled() {
-            return debugEnabled;
-        }
+		@Override
+		public boolean isDebugEnabled() {
+			return debugEnabled;
+		}
 
-        @Override
-        public boolean isSubprocessOutEnabled() {
-            return true;
-        }
-    };
+		@Override
+		public boolean isSubprocessOutEnabled() {
+			return true;
+		}
+	};
 
-    private static final String JBANG_COORDINATES = "org.graalvm.python:jbang:jar";
+	private static final String JBANG_COORDINATES = "org.graalvm.python:jbang:jar";
 
-    /**
-     *
-     * @param temporaryJar temporary JAR file path
-     * @param pomFile location of pom.xml representing the projects dependencies
-     * @param repositories list of the used repositories
-     * @param dependencies list of GAV to Path of artifact/classpath dependencies
-     * @param comments comments from the source file
-     * @param nativeImage true if --native been requested
-     * @return Map<String, Object> map of returns; special keys are "native-image" which is a and
-     *         "files" to return native-image to be run and list of files to get written to the
-     *         output directory.
-     *
-     */
-    public static Map<String, Object> postBuild(Path temporaryJar,
-                    Path pomFile,
-                    List<Map.Entry<String, String>> repositories,
-                    List<Map.Entry<String, Path>> dependencies,
-                    List<String> comments,
-                    boolean nativeImage) throws IOException {
+	/**
+	 *
+	 * @param temporaryJar
+	 *            temporary JAR file path
+	 * @param pomFile
+	 *            location of pom.xml representing the projects dependencies
+	 * @param repositories
+	 *            list of the used repositories
+	 * @param dependencies
+	 *            list of GAV to Path of artifact/classpath dependencies
+	 * @param comments
+	 *            comments from the source file
+	 * @param nativeImage
+	 *            true if --native been requested
+	 * @return Map<String, Object> map of returns; special keys are "native-image"
+	 *         which is a and "files" to return native-image to be run and list of
+	 *         files to get written to the output directory.
+	 *
+	 */
+	public static Map<String, Object> postBuild(Path temporaryJar, Path pomFile,
+			List<Map.Entry<String, String>> repositories, List<Map.Entry<String, Path>> dependencies,
+			List<String> comments, boolean nativeImage) throws IOException {
 
-        Path resourcesDirectory = null;
-        List<String> pkgs = new ArrayList<>();
-        boolean seenResourceDir = false;
-        for (String comment : comments) {
-            if (comment.startsWith(RESOURCES_DIRECTORY)) {
-                if (seenResourceDir) {
-                    throw new IllegalStateException("only one " + RESOURCES_DIRECTORY + " comment is allowed");
-                }
-                seenResourceDir = true;
-                String path = comment.substring(RESOURCES_DIRECTORY.length()).trim();
-                if (!path.isEmpty()) {
-                    resourcesDirectory = Path.of(path);
-                }
-            } else if (comment.startsWith(PIP)) {
-                pkgs.addAll(Arrays.stream(comment.substring(PIP.length()).trim().split(" ")).filter(s -> !s.trim().isEmpty()).collect(Collectors.toList()));
-            }
-        }
-        if (!pkgs.isEmpty()) {
-            log("python packages: " + pkgs);
-        }
+		Path resourcesDirectory = null;
+		List<String> pkgs = new ArrayList<>();
+		boolean seenResourceDir = false;
+		for (String comment : comments) {
+			if (comment.startsWith(RESOURCES_DIRECTORY)) {
+				if (seenResourceDir) {
+					throw new IllegalStateException("only one " + RESOURCES_DIRECTORY + " comment is allowed");
+				}
+				seenResourceDir = true;
+				String path = comment.substring(RESOURCES_DIRECTORY.length()).trim();
+				if (!path.isEmpty()) {
+					resourcesDirectory = Path.of(path);
+				}
+			} else if (comment.startsWith(PIP)) {
+				pkgs.addAll(Arrays.stream(comment.substring(PIP.length()).trim().split(" "))
+						.filter(s -> !s.trim().isEmpty()).collect(Collectors.toList()));
+			}
+		}
+		if (!pkgs.isEmpty()) {
+			log("python packages: " + pkgs);
+		}
 
-        Path vfs = null;
-        Path venv;
-        if (resourcesDirectory == null) {
-            vfs = temporaryJar.resolve(VFS_ROOT);
-            Files.createDirectories(vfs);
-            venv = vfs.resolve(VFS_VENV);
-        } else {
-            log("python resources directory: " + resourcesDirectory);
-            venv = resourcesDirectory.resolve(VFS_VENV);
-        }
+		Path vfs = null;
+		Path venv;
+		if (resourcesDirectory == null) {
+			vfs = temporaryJar.resolve(VFS_ROOT);
+			Files.createDirectories(vfs);
+			venv = vfs.resolve(VFS_VENV);
+		} else {
+			log("python resources directory: " + resourcesDirectory);
+			venv = resourcesDirectory.resolve(VFS_VENV);
+		}
 
-        if (resourcesDirectory != null || !pkgs.isEmpty()) {
-            handleVenv(venv, dependencies, pkgs, comments, resourcesDirectory == null);
-        }
+		if (resourcesDirectory != null || !pkgs.isEmpty()) {
+			handleVenv(venv, dependencies, pkgs, comments, resourcesDirectory == null);
+		}
 
-        if (nativeImage) {
-            // include python stdlib in image
-            try {
-                VFSUtils.writeNativeImageConfig(temporaryJar.resolve("META-INF"), "org.graalvm.polyglot.jbang");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+		if (nativeImage) {
+			// include python stdlib in image
+			try {
+				VFSUtils.writeNativeImageConfig(temporaryJar.resolve("META-INF"), "org.graalvm.polyglot.jbang");
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 
-        if (vfs != null) {
-            try {
-                VFSUtils.generateVFSFilesList(vfs);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return new HashMap<>();
-    }
+		if (vfs != null) {
+			try {
+				VFSUtils.generateVFSFilesList(vfs);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return new HashMap<>();
+	}
 
-    private static Path getLauncherPath(String projectPath) {
-        return Paths.get(projectPath, LAUNCHER).toAbsolutePath();
-    }
+	private static Path getLauncherPath(String projectPath) {
+		return Paths.get(projectPath, LAUNCHER).toAbsolutePath();
+	}
 
-    private static void handleVenv(Path venv, List<Map.Entry<String, Path>> dependencies, List<String> pkgs, List<String> comments, boolean dropPip) throws IOException {
-        String graalPyVersion = dependencies.stream().filter((e) -> e.getKey().startsWith(JBANG_COORDINATES)).map(e -> e.getKey().substring(JBANG_COORDINATES.length() + 1)).findFirst().orElseGet(
-                        null);
-        if (graalPyVersion == null) {
-            // perhaps already checked by jbang
-            throw new IllegalStateException("could not resolve GraalPy version from provided dependencies");
-        }
-        Path venvParent = venv.getParent();
-        if (venvParent == null) {
-            // perhaps already checked by jbang
-            throw new IllegalStateException("could not resolve parent for venv path: " + venv);
-        }
-        Launcher launcher = new Launcher(getLauncherPath(venvParent.toString())) {
-            @Override
-            public Set<String> computeClassPath() {
-                return calculateClasspath(dependencies);
-            }
-        };
-        VFSUtils.createVenv(venv, pkgs, launcher, graalPyVersion, BUILD_TOOL_LOG);
+	private static void handleVenv(Path venv, List<Map.Entry<String, Path>> dependencies, List<String> pkgs,
+			List<String> comments, boolean dropPip) throws IOException {
+		String graalPyVersion = dependencies.stream().filter((e) -> e.getKey().startsWith(JBANG_COORDINATES))
+				.map(e -> e.getKey().substring(JBANG_COORDINATES.length() + 1)).findFirst().orElseGet(null);
+		if (graalPyVersion == null) {
+			// perhaps already checked by jbang
+			throw new IllegalStateException("could not resolve GraalPy version from provided dependencies");
+		}
+		Path venvParent = venv.getParent();
+		if (venvParent == null) {
+			// perhaps already checked by jbang
+			throw new IllegalStateException("could not resolve parent for venv path: " + venv);
+		}
+		Launcher launcher = new Launcher(getLauncherPath(venvParent.toString())) {
+			@Override
+			public Set<String> computeClassPath() {
+				return calculateClasspath(dependencies);
+			}
+		};
+		VFSUtils.createVenv(venv, pkgs, launcher, graalPyVersion, BUILD_TOOL_LOG);
 
-        if (dropPip) {
-            try {
-                Stream<Path> filter = Files.list(venv.resolve("lib")).filter(p -> p.getFileName().toString().startsWith("python3"));
-                // on windows, there doesn't have to be python3xxxx folder.
-                Optional<Path> libFolderOptional = filter.findFirst();
-                Path libFolder = libFolderOptional.orElse(venv.resolve("lib"));
-                if (libFolder != null) {
-                    var dropFolders = new ArrayList<String>();
-                    dropFolders.add("pip");
-                    dropFolders.add("setuptools");
-                    for (String comment : comments) {
-                        if (comment.startsWith(PIP_DROP)) {
-                            dropFolders.add(comment.substring(PIP_DROP.length()).trim());
-                        }
-                    }
-                    for (var s : dropFolders) {
-                        var folder = libFolder.resolve("site-packages").resolve(s);
-                        if (Files.exists(folder)) {
-                            try (var f = Files.walk(folder)) {
-                                f.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-                            }
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
+		if (dropPip) {
+			try {
+				Stream<Path> filter = Files.list(venv.resolve("lib"))
+						.filter(p -> p.getFileName().toString().startsWith("python3"));
+				// on windows, there doesn't have to be python3xxxx folder.
+				Optional<Path> libFolderOptional = filter.findFirst();
+				Path libFolder = libFolderOptional.orElse(venv.resolve("lib"));
+				if (libFolder != null) {
+					var dropFolders = new ArrayList<String>();
+					dropFolders.add("pip");
+					dropFolders.add("setuptools");
+					for (String comment : comments) {
+						if (comment.startsWith(PIP_DROP)) {
+							dropFolders.add(comment.substring(PIP_DROP.length()).trim());
+						}
+					}
+					for (var s : dropFolders) {
+						var folder = libFolder.resolve("site-packages").resolve(s);
+						if (Files.exists(folder)) {
+							try (var f = Files.walk(folder)) {
+								f.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+							}
+						}
+					}
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
 
-    private static Collection<Path> resolveProjectDependencies(List<Map.Entry<String, Path>> dependencies) {
-        return dependencies.stream().map(e -> e.getValue()).collect(Collectors.toList());
-    }
+	private static Collection<Path> resolveProjectDependencies(List<Map.Entry<String, Path>> dependencies) {
+		return dependencies.stream().map(e -> e.getValue()).collect(Collectors.toList());
+	}
 
-    private static void getGraalPyArtifact(List<Map.Entry<String, Path>> dependencies, String aid) {
-        var projectArtifacts = resolveProjectDependencies(dependencies);
-        Path parent;
-        Path fileName;
-        for (var a : projectArtifacts) {
-            parent = a.getParent();
-            if (parent != null) {
-                fileName = a.getFileName();
-                if (fileName != null && parent.toString().contains(GRAALPY_GROUP) && fileName.toString().contains(aid)) {
-                    return;
-                }
-            }
-        }
-        throw new RuntimeException(String.format("Missing GraalPy dependency %s:%s. Please add it to your pom", GRAALPY_GROUP, aid));
-    }
+	private static void getGraalPyArtifact(List<Map.Entry<String, Path>> dependencies, String aid) {
+		var projectArtifacts = resolveProjectDependencies(dependencies);
+		Path parent;
+		Path fileName;
+		for (var a : projectArtifacts) {
+			parent = a.getParent();
+			if (parent != null) {
+				fileName = a.getFileName();
+				if (fileName != null && parent.toString().contains(GRAALPY_GROUP)
+						&& fileName.toString().contains(aid)) {
+					return;
+				}
+			}
+		}
+		throw new RuntimeException(
+				String.format("Missing GraalPy dependency %s:%s. Please add it to your pom", GRAALPY_GROUP, aid));
+	}
 
-    private static HashSet<String> calculateClasspath(List<Map.Entry<String, Path>> dependencies) {
-        var classpath = new HashSet<String>();
-        getGraalPyArtifact(dependencies, PYTHON_LANGUAGE);
-        getGraalPyArtifact(dependencies, PYTHON_LAUNCHER);
-        getGraalPyArtifact(dependencies, PYTHON_RESOURCES);
-        for (var r : resolveProjectDependencies(dependencies)) {
-            classpath.add(r.toAbsolutePath().toString());
-        }
-        return classpath;
-    }
+	private static HashSet<String> calculateClasspath(List<Map.Entry<String, Path>> dependencies) {
+		var classpath = new HashSet<String>();
+		getGraalPyArtifact(dependencies, PYTHON_LANGUAGE);
+		getGraalPyArtifact(dependencies, PYTHON_LAUNCHER);
+		getGraalPyArtifact(dependencies, PYTHON_RESOURCES);
+		for (var r : resolveProjectDependencies(dependencies)) {
+			classpath.add(r.toAbsolutePath().toString());
+		}
+		return classpath;
+	}
 
-    private static void log(String txt) {
-        if (BUILD_TOOL_LOG.isInfoEnabled()) {
-            BUILD_TOOL_LOG.info("[graalpy jbang integration] " + txt);
-        }
-    }
+	private static void log(String txt) {
+		if (BUILD_TOOL_LOG.isInfoEnabled()) {
+			BUILD_TOOL_LOG.info("[graalpy jbang integration] " + txt);
+		}
+	}
 }
