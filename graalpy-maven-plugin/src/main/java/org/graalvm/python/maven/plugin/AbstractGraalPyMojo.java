@@ -105,8 +105,11 @@ public abstract class AbstractGraalPyMojo extends AbstractMojo {
 	@Parameter
 	List<String> packages;
 
+	@SuppressFBWarnings("UUF_UNUSED_FIELD")
 	public static class PythonHome {
+		@SuppressWarnings("unused")
 		private List<String> includes;
+		@SuppressWarnings("unused")
 		private List<String> excludes;
 	}
 
@@ -187,9 +190,9 @@ public abstract class AbstractGraalPyMojo extends AbstractMojo {
 
 		if (enableWarnings && pythonHome != null) {
 			getLog().warn(
-					"The GraalPy plugin <pythonHome> configuration setting was deprecated and has no effect anymore.\n"
-							+ "For execution in jvm mode, the python language home is always available.\n"
-							+ "When building a native executable using GraalVM Native Image, then the full python language home is by default embedded into the native executable.\n"
+					"The GraalPy plugin <pythonHome> configuration setting was deprecated and has no effect anymore.%n"
+							+ "For execution in jvm mode, the python language home is always available.%n"
+							+ "When building a native executable using GraalVM Native Image, then the full python language home is by default embedded into the native executable.%n"
 							+ "For more details, please refer to the documentation of GraalVM Native Image options IncludeLanguageResources and CopyLanguageResources.");
 		}
 	}
@@ -206,8 +209,8 @@ public abstract class AbstractGraalPyMojo extends AbstractMojo {
 				// and there is only the outdated "vfs/proj"
 				// => looks like a project created < 24.1.0
 				throw new MojoExecutionException(String.format(
-						"Wrong virtual filesystem root!\n"
-								+ "Since 24.1.0 the virtual filesystem root has to be '%s'.\n"
+						"Wrong virtual filesystem root!%n"
+								+ "Since 24.1.0 the virtual filesystem root has to be '%s'.%n"
 								+ "Please rename the resource directory '%s' to '%s'",
 						resourceDirectory, Path.of(r.getDirectory(), "vfs"),
 						Path.of(r.getDirectory(), resourceDirectory)));
@@ -256,16 +259,6 @@ public abstract class AbstractGraalPyMojo extends AbstractMojo {
 			return rfp;
 		} else {
 			return project.getBasedir().toPath().resolve(graalPyLockFile);
-		}
-	}
-
-	private void delete(Path dir) throws MojoExecutionException {
-		try {
-			try (var s = Files.walk(dir)) {
-				s.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-			}
-		} catch (IOException e) {
-			new MojoExecutionException(String.format("failed to delete %s", dir), e);
 		}
 	}
 

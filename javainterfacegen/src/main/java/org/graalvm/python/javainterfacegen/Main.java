@@ -337,7 +337,7 @@ public class Main {
 				}
 			}
 			Object included = config.getGlobalProperties().get(Configuration.P_EXPORT_INCLUDED);
-			Set<String> includedPackages = null;
+			Set<String> includedPackages = Set.of();
 			if (included instanceof List list) {
 				includedPackages = Set.copyOf(list);
 			} else if (included instanceof String pkg) {

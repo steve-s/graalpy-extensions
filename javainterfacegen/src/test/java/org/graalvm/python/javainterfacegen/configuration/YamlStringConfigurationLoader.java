@@ -24,7 +24,7 @@ public class YamlStringConfigurationLoader implements ConfigurationLoader {
 			Yaml yaml = new Yaml();
 			yamlConfig = yaml.load(inputStream);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
 		return Configuration.merge(defaultConfig, yamlConfig);
 	}

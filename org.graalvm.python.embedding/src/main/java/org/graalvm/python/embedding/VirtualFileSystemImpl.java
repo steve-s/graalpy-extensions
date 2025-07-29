@@ -58,6 +58,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
@@ -114,9 +115,9 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
 					PrintWriter pw = new PrintWriter(sw);
 					lr.getThrown().printStackTrace(pw);
 					pw.close();
-					return String.format("%s: %s\n%s", lr.getLevel().getName(), lr.getMessage(), sw.toString());
+					return String.format("%s: %s%n%s", lr.getLevel().getName(), lr.getMessage(), sw.toString());
 				}
-				return String.format("%s: %s\n", lr.getLevel().getName(), lr.getMessage());
+				return String.format("%s: %s%n", lr.getLevel().getName(), lr.getMessage());
 			}
 		});
 		LOGGER.addHandler(consoleHandler);
@@ -467,73 +468,74 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
 					warn("VFS.initEntries: could not read resource %s", filelistPath);
 					return;
 				}
-				BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-				String resourcePath;
-				finest("VFS entries:");
-				while ((resourcePath = br.readLine()) != null) {
-					if (resourcePath.isBlank()) {
-						// allow empty lines, some tools insert empty lines when concatenating files
-						continue;
-					}
-
-					String projPath = absoluteResourcePath(vfsRoot, PROJ_DIR);
-					if (!projWarning && resourcePath.startsWith(projPath)) {
-						projWarning = true;
-						extendedWarn(
-								String.format("%s source root was deprecated, use %s instead.", projPath, srcPath));
-					}
-					if (!hasNativeFiles && resourcePath.startsWith(venvPath) && (resourcePath.endsWith(".so")
-							|| resourcePath.endsWith(".dylib") || resourcePath.endsWith(".dll"))) {
-						hasNativeFiles = true;
-					}
-
-					String platformPath = resourcePathToPlatformPath(resourcePath);
-					int i = mountPoint.toString().length();
-					DirEntry parent = null;
-					do {
-						String dir = platformPath.substring(0, i);
-						String dirKey = toCaseComparable(dir);
-						BaseEntry genericEntry = vfsEntries.get(dirKey);
-						DirEntry dirEntry;
-						if (genericEntry instanceof DirEntry de) {
-							dirEntry = de;
-						} else if (genericEntry == null) {
-							dirEntry = new DirEntry(dir);
-							vfsEntries.put(dirKey, dirEntry);
-							finest("  %s", dirEntry.getResourcePath());
-							if (parent != null) {
-								parent.entries.add(dirEntry);
-							}
-						} else {
-							throw fileDirDuplicateMismatchError(dirKey);
+				try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+					String resourcePath;
+					finest("VFS entries:");
+					while ((resourcePath = br.readLine()) != null) {
+						if (resourcePath.isBlank()) {
+							// allow empty lines, some tools insert empty lines when concatenating files
+							continue;
 						}
-						parent = dirEntry;
-						i++;
-					} while ((i = platformPath.indexOf(PLATFORM_SEPARATOR, i)) != -1);
 
-					assert parent != null;
-					if (!platformPath.endsWith(PLATFORM_SEPARATOR)) {
-						FileEntry fileEntry = new FileEntry(platformPath);
-						if (extractFilter != null && extractFilter.test(Paths.get(platformPath))) {
-							fileEntry.toExtract = List.of(fileEntry);
+						String projPath = absoluteResourcePath(vfsRoot, PROJ_DIR);
+						if (!projWarning && resourcePath.startsWith(projPath)) {
+							projWarning = true;
+							extendedWarn(
+									String.format("%s source root was deprecated, use %s instead.", projPath, srcPath));
 						}
-						BaseEntry previous = vfsEntries.put(toCaseComparable(platformPath), fileEntry);
-						if (previous != null) {
-							if (previous instanceof DirEntry) {
-								throw fileDirDuplicateMismatchError(platformPath);
-							}
-							if (filelistUrls.size() > 1 && !resourcePath.startsWith(venvPath)
-									&& !resourcePath.equals(absFilelistPath)) {
-								reportFailedMultiVFSCheck(multipleLocationsErrorMessage(
-										"There are duplicate entries originating from different virtual "
-												+ "filesystem instances. The duplicate entries path: %s.",
-										resourcePath));
-							}
-							fine(multipleLocationsErrorMessage(
-									"Duplicate entries virtual filesystem entries: " + resourcePath));
+						if (!hasNativeFiles && resourcePath.startsWith(venvPath) && (resourcePath.endsWith(".so")
+								|| resourcePath.endsWith(".dylib") || resourcePath.endsWith(".dll"))) {
+							hasNativeFiles = true;
 						}
-						finest("  %s", fileEntry.getResourcePath());
-						parent.entries.add(fileEntry);
+
+						String platformPath = resourcePathToPlatformPath(resourcePath);
+						int i = mountPoint.toString().length();
+						DirEntry parent = null;
+						do {
+							String dir = platformPath.substring(0, i);
+							String dirKey = toCaseComparable(dir);
+							BaseEntry genericEntry = vfsEntries.get(dirKey);
+							DirEntry dirEntry;
+							if (genericEntry instanceof DirEntry de) {
+								dirEntry = de;
+							} else if (genericEntry == null) {
+								dirEntry = new DirEntry(dir);
+								vfsEntries.put(dirKey, dirEntry);
+								finest("  %s", dirEntry.getResourcePath());
+								if (parent != null) {
+									parent.entries.add(dirEntry);
+								}
+							} else {
+								throw fileDirDuplicateMismatchError(dirKey);
+							}
+							parent = dirEntry;
+							i++;
+						} while ((i = platformPath.indexOf(PLATFORM_SEPARATOR, i)) != -1);
+
+						assert parent != null;
+						if (!platformPath.endsWith(PLATFORM_SEPARATOR)) {
+							FileEntry fileEntry = new FileEntry(platformPath);
+							if (extractFilter != null && extractFilter.test(Paths.get(platformPath))) {
+								fileEntry.toExtract = List.of(fileEntry);
+							}
+							BaseEntry previous = vfsEntries.put(toCaseComparable(platformPath), fileEntry);
+							if (previous != null) {
+								if (previous instanceof DirEntry) {
+									throw fileDirDuplicateMismatchError(platformPath);
+								}
+								if (filelistUrls.size() > 1 && !resourcePath.startsWith(venvPath)
+										&& !resourcePath.equals(absFilelistPath)) {
+									reportFailedMultiVFSCheck(multipleLocationsErrorMessage(
+											"There are duplicate entries originating from different virtual "
+													+ "filesystem instances. The duplicate entries path: %s.",
+											resourcePath));
+								}
+								fine(multipleLocationsErrorMessage(
+										"Duplicate entries virtual filesystem entries: " + resourcePath));
+							}
+							finest("  %s", fileEntry.getResourcePath());
+							parent.entries.add(fileEntry);
+						}
 					}
 				}
 			} catch (IOException ex) {
@@ -564,8 +566,8 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
 					}
 				}
 				if (baseDir != null) {
-					try (BufferedReader is = new BufferedReader(
-							new InputStreamReader(getResourceUrl(entry.getResourcePath()).openStream()))) {
+					try (BufferedReader is = new BufferedReader(new InputStreamReader(
+							getResourceUrl(entry.getResourcePath()).openStream(), StandardCharsets.UTF_8))) {
 						String line;
 						List<FileEntry> extractedTogether = new ArrayList<>();
 						while ((line = is.readLine()) != null) {
@@ -618,7 +620,7 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
 			assert contentsEntry instanceof FileEntry;
 			String contents;
 			try {
-				contents = new String(((FileEntry) contentsEntry).getData());
+				contents = new String(((FileEntry) contentsEntry).getData(), StandardCharsets.UTF_8);
 			} catch (IOException ex) {
 				throw new IllegalStateException(
 						String.format("IO error while reading venv contents file'%s'.", contentsPath), ex);
@@ -703,20 +705,20 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
 				} else {
 					throw new IllegalStateException(String.format(
 							"Could not find virtual filesystem with root '%s' as requested by System property '%s'. "
-									+ "Found the following virtual filesystem locations:\n" + "%s",
+									+ "Found the following virtual filesystem locations:%n" + "%s",
 							vfsRootURL, MULTI_VFS_SINGLE_ROOT_URL_PROP, locations));
 				}
 			} else {
 				String message = String.format(
-						"Found multiple embedded virtual filesystem instances in the following locations:\n" + "%s",
+						"Found multiple embedded virtual filesystem instances in the following locations:%n" + "%s",
 						locations);
 				if (!allowMultipleLocations) {
-					throw new IllegalStateException(String.format("%s\n\n"
+					throw new IllegalStateException(String.format("%s%n%n"
 							+ "It is recommended to use virtual filesystem isolation. See the documentation of "
 							+ "VirtualFilesystem$Builder#resourceDirectory(resourcePath) to learn about "
-							+ "isolating multiple virtual filesystems in one application.\n\n"
+							+ "isolating multiple virtual filesystems in one application.%n%n"
 							+ "Use experimental and unstable system property -D%s=URL to select only one virtual filesystem."
-							+ "The URL must point to the root of the desired virtual filesystem instance.\n\n"
+							+ "The URL must point to the root of the desired virtual filesystem instance.%n%n"
 							+ "Use experimental and unstable system property -D%s=true to merge the filesystems into one. "
 							+ "In case of duplicate entries in multiple filesystems, one is chosen at random.", message,
 							MULTI_VFS_SINGLE_ROOT_URL_PROP, MULTI_VFS_ALLOW_PROP));
@@ -760,7 +762,7 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
 				if (stream == null) {
 					throw new IOException("openStream() returned null");
 				}
-				String[] packages = new String(stream.readAllBytes()).split("(\\n|\\r\\n)");
+				String[] packages = new String(stream.readAllBytes(), StandardCharsets.UTF_8).split("(\\n|\\r\\n)");
 				for (String pkgAndVer : packages) {
 					if (pkgAndVer.isBlank() || pkgAndVer.trim().startsWith("#")) {
 						continue;
@@ -806,20 +808,21 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
 				if (stream == null) {
 					throw new IOException("openStream() returned null");
 				}
-				var reader = new BufferedReader(new InputStreamReader(stream));
-				String ver = reader.readLine();
-				if (ver == null) {
-					continue;
-				}
-				ver = ver.trim();
-				if (graalPyVersion == null) {
-					graalPyVersion = ver;
-					graalPyVersionUrl = installedUrl;
-				} else if (!graalPyVersion.equals(ver)) {
-					reportFailedMultiVFSCheck(
-							"Following virtual environments appear to have been created by different GraalPy versions:\n"
-									+ graalPyVersionUrl + '\n' + installedUrl);
-					break;
+				try (var reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+					String ver = reader.readLine();
+					if (ver == null) {
+						continue;
+					}
+					ver = ver.trim();
+					if (graalPyVersion == null) {
+						graalPyVersion = ver;
+						graalPyVersionUrl = installedUrl;
+					} else if (!graalPyVersion.equals(ver)) {
+						reportFailedMultiVFSCheck(
+								"Following virtual environments appear to have been created by different GraalPy versions:\n"
+										+ graalPyVersionUrl + '\n' + installedUrl);
+						break;
+					}
 				}
 			} catch (IOException e) {
 				warn("Cannot read GraalPy version from '%s'. Error: %s", installedUrl, e.getMessage());
@@ -1104,10 +1107,11 @@ final class VirtualFileSystemImpl implements FileSystem, AutoCloseable {
 			// appropriate python error
 			throw new FileSystemException(path.toString(), null, "Is a directory");
 		}
+		byte[] data = fileEntry.getData(); // throw the IOException before allocating SeekableByteChannel
 		return new SeekableByteChannel() {
 			long position = 0;
 
-			final byte[] bytes = fileEntry.getData();
+			final byte[] bytes = data;
 
 			@Override
 			public int read(ByteBuffer dst) throws IOException {

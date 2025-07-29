@@ -284,12 +284,13 @@ public class GeneratorTestBase {
 	}
 
 	public static String readFile(File f) throws IOException {
-		FileReader r = new FileReader(f);
-		int fileLen = (int) f.length();
-		CharBuffer cb = CharBuffer.allocate(fileLen);
-		r.read(cb);
-		cb.rewind();
-		return cb.toString();
+		try (FileReader r = new FileReader(f)) {
+			int fileLen = (int) f.length();
+			CharBuffer cb = CharBuffer.allocate(fileLen);
+			r.read(cb);
+			cb.rewind();
+			return cb.toString();
+		}
 	}
 
 	public File getTestFilesDir() {

@@ -102,10 +102,14 @@ public class InstallPackagesMojo extends AbstractGraalPyMojo {
 					? "None"
 					: String.join(", ", pce.getLockFilePackages());
 			throw new MojoExecutionException(
-					String.format(PACKAGES_CHANGED_ERROR, lockFile, pluginPkgsString, lockFilePkgsString));
+					formatMultiline(PACKAGES_CHANGED_ERROR, lockFile, pluginPkgsString, lockFilePkgsString));
 		} catch (IOException e) {
 			throw new MojoExecutionException(String.format("failed to create venv %s", venvDirectory), e);
 		}
 	}
 
+	private static String formatMultiline(String str, Object... args) {
+		// effectively suppresses VA_FORMAT_STRING_USES_NEWLINE
+		return str.formatted(args);
+	}
 }

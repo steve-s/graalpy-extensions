@@ -48,6 +48,7 @@ import java.io.InputStreamReader;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -161,12 +162,10 @@ public class GraalPyRunner {
 	}
 
 	private static void runProcess(ProcessBuilder pb, BuildToolLog log) throws IOException, InterruptedException {
-		pb.redirectError();
-		pb.redirectOutput();
 		Process process = pb.start();
 		Thread outputReader = new Thread(() -> {
 			try (InputStream is = process.getInputStream();
-					BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+					BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
 					subProcessOut(log, line);
@@ -180,9 +179,8 @@ public class GraalPyRunner {
 		outputReader.start();
 
 		Thread errorReader = new Thread(() -> {
-			try {
-				BufferedReader errorBufferedReader = new BufferedReader(
-						new InputStreamReader(process.getErrorStream()));
+			try (BufferedReader errorBufferedReader = new BufferedReader(
+					new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
 				String line;
 				while ((line = errorBufferedReader.readLine()) != null) {
 					subProcessErr(log, line);
@@ -206,12 +204,14 @@ public class GraalPyRunner {
 		}
 	}
 
+	@SuppressFBWarnings("UC_USELESS_VOID_METHOD")
 	private static void warn(BuildToolLog log, String txt, Throwable t) {
 		if (log.isWarningEnabled()) {
 			log.warning(txt, t);
 		}
 	}
 
+	@SuppressFBWarnings("UC_USELESS_VOID_METHOD")
 	private static void infoCmd(BuildToolLog log, String msg, List<String> cmd) {
 		if (log.isInfoEnabled()) {
 			log.info(String.format("%s %s", msg, String.join(" ", cmd)));
@@ -224,6 +224,7 @@ public class GraalPyRunner {
 		}
 	}
 
+	@SuppressFBWarnings("UC_USELESS_VOID_METHOD")
 	private static void subProcessErr(BuildToolLog log, String txt) {
 		if (log.isErrorEnabled()) {
 			log.subProcessErr(txt);

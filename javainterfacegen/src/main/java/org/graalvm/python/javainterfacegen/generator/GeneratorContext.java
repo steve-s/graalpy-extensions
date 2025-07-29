@@ -399,10 +399,7 @@ public class GeneratorContext {
 		if (overrides != null && overrides.containsKey(memberName)) {
 			Object override = overrides.get(memberName);
 			if (override != null && override instanceof Map map) {
-				Object rt = (String) map.get(Configuration.P_RETURN_TYPE);
-				if (rt instanceof String) {
-					returnType = (String) rt;
-				}
+				returnType = (String) map.get(Configuration.P_RETURN_TYPE);
 			}
 		}
 		return returnType;

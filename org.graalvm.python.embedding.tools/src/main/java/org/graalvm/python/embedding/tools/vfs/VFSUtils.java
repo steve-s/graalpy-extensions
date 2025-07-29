@@ -226,7 +226,7 @@ public final class VFSUtils {
 	public static void generateVFSFilesList(Path resourcesRoot, Path vfs, Set<String> ret,
 			Consumer<String> duplicateHandler) throws IOException {
 		if (!Files.isDirectory(vfs)) {
-			throw new IOException(String.format("'%s' has to exist and be a directory.\n", vfs));
+			throw new IOException(String.format("'%s' has to exist and be a directory.%n", vfs));
 		}
 		String rootPath = makeDirPath(vfs.toAbsolutePath());
 		int rootEndIdx;
@@ -482,7 +482,7 @@ public final class VFSUtils {
 				log.debug("");
 			}
 			return new IOException(String.format(
-					"Cannot read the lock file from '%s'\n(turn on debug log level to see the contents)", file));
+					"Cannot read the lock file from '%s'%n(turn on debug log level to see the contents)", file));
 		}
 
 		private static void write(Path venvDirectory, Path lockFile, String lockFileHeader, List<String> inputPackages,
@@ -860,6 +860,11 @@ public final class VFSUtils {
 		return false;
 	}
 
+	private static String formatMultiline(String str, Object... args) {
+		// effectively suppresses VA_FORMAT_STRING_USES_NEWLINE
+		return str.formatted(args);
+	}
+
 	private static void generateLaunchers(Launcher launcherArgs, BuildToolLog log) throws IOException {
 		debug(log, "Generating GraalPy launchers");
 		createParentDirectories(launcherArgs.launcherPath);
@@ -870,7 +875,7 @@ public final class VFSUtils {
 			// we do not bother checking if it exists and has correct java home, since it is
 			// simple
 			// to regenerate the launcher
-			var script = String.format("""
+			var script = formatMultiline("""
 					#!/usr/bin/env bash
 					%s --enable-native-access=ALL-UNNAMED %s -classpath %s %s --python.Executable="$0" "$@"
 					""", java, extraJavaOptions, String.join(File.pathSeparator, classpath), GRAALPY_MAIN_CLASS);
@@ -886,7 +891,7 @@ public final class VFSUtils {
 		} else if (!Files.exists(launcherArgs.launcherPath)
 				|| !checkWinLauncherJavaPath(launcherArgs.launcherPath.getParent().resolve("pyenv.cfg"), java)) {
 			// on windows, generate a venv launcher that executes the java command
-			var script = String.format("""
+			var script = formatMultiline("""
 					import os, shutil, struct, venv
 					from pathlib import Path
 					vl = os.path.join(venv.__path__[0], 'scripts', 'nt', 'graalpy.exe')
@@ -906,7 +911,7 @@ public final class VFSUtils {
 				throw new IOException("failed to create tmp launcher", e);
 			}
 			tmp.deleteOnExit();
-			try (var wr = new FileWriter(tmp)) {
+			try (var wr = new FileWriter(tmp, StandardCharsets.UTF_8)) {
 				wr.write(script);
 			} catch (IOException e) {
 				throw new IOException(String.format("failed to write tmp launcher %s", tmp), e);
@@ -988,6 +993,7 @@ public final class VFSUtils {
 		log.warning(txt);
 	}
 
+	@SuppressFBWarnings("UC_USELESS_VOID_METHOD")
 	private static void info(BuildToolLog log, String txt, Object... args) {
 		if (log.isInfoEnabled()) {
 			log.info(String.format(txt, args));

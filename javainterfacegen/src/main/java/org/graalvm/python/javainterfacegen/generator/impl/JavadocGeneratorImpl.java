@@ -40,6 +40,9 @@
  */
 package org.graalvm.python.javainterfacegen.generator.impl;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+
 import org.graalvm.python.javainterfacegen.generator.GeneratorContext;
 import org.graalvm.python.javainterfacegen.generator.GeneratorFactory;
 import org.graalvm.python.javainterfacegen.generator.JavadocGenerator;
@@ -50,9 +53,6 @@ import org.graalvm.python.javainterfacegen.mypy.nodes.FuncDef;
 import org.graalvm.python.javainterfacegen.mypy.nodes.MypyFile;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Node;
 import org.graalvm.python.javainterfacegen.mypy.nodes.Var;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 public class JavadocGeneratorImpl implements JavadocGenerator {
 
@@ -91,11 +91,9 @@ public class JavadocGeneratorImpl implements JavadocGenerator {
 
 		String managerClass = context.getConfig().getJavadocStorageManager(context);
 		JavadocStorageManager manager = GeneratorFactory.getJavadocStorageManager(managerClass);
-		FileInputStream input;
-		try {
-			input = new FileInputStream(manager.getStoragePath(context).toFile());
+		try (FileInputStream input = new FileInputStream(manager.getStoragePath(context).toFile())) {
 			return format(manager.load(input).get(fqn));
-		} catch (FileNotFoundException ex) {
+		} catch (IOException ex) {
 			// no javadoc for the file?
 		}
 

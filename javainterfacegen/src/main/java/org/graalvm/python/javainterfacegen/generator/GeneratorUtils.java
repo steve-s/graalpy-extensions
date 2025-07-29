@@ -267,16 +267,12 @@ public class GeneratorUtils {
 
 				Path licensePath = context.getConfig().getReferenceFolder().resolve((String) licenseFilePath);
 				File file = licensePath.toFile();
-				FileReader r;
-				try {
-					r = new FileReader(file);
+				try (FileReader r = new FileReader(file)) {
 					int fileLen = (int) file.length();
 					CharBuffer cb = CharBuffer.allocate(fileLen);
 					r.read(cb);
 					cb.rewind();
 					licenseCache.put((String) licenseFilePath, GeneratorUtils.createLicenseText(cb.toString()));
-				} catch (FileNotFoundException ex) {
-					Logger.getLogger(GeneratorUtils.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (IOException ex) {
 					Logger.getLogger(GeneratorUtils.class.getName()).log(Level.SEVERE, null, ex);
 				}
