@@ -190,6 +190,27 @@
           </dependency>
         </dependencies>
       </plugin>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>2.46.1</version>
+        <configuration>
+          <java>
+            <eclipse/>
+            <trimTrailingWhitespace/>
+            <removeWildcardImports/>
+            <!-- We cannot use the licenseHeader, because the spotless Maven plugin does not expose the yearSeparator property -->
+          </java>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>4.9.3.0</version>
+        <configuration>
+          <excludeFilterFile>../configs/SpotBugsFilters.xml</excludeFilterFile>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
