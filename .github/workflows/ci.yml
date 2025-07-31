@@ -10,7 +10,7 @@ env:
   graalvm_version: '26-ea'
 
 jobs:
-  # This is done as one separate step to work around rate limits for the API
+  # This is done as one single separate step to work around rate limits for the API
   maven_bundle_url:
     runs-on: ubuntu-latest
     outputs:
@@ -58,21 +58,12 @@ jobs:
           distribution: 'graalvm'
           java-version: ${{ env.graalvm_version }}
 
-      - name: Set Maven Flags on Windows
-        if: runner.os == 'Windows'
-        run: echo "EXCLUDE_IFACEGEN_ON_WIN=-pl !javainterfacegen" >> $GITHUB_ENV
-        shell: bash
-
-      - name: DEBUG
-        run: echo "${{ needs.maven_bundle_url.outputs.maven_bundle_url }}"
-        shell: bash
-
       - name: Setup Polyglot Maven bundle
         run: ./scripts/maven-bundle-setup.sh "${{ github.workspace }}/maven-resource-bundle" "${{ needs.maven_bundle_url.outputs.maven_bundle_url }}"
         shell: bash
 
       - name: Build project (skip tests)
-        run: mvn --batch-mode -DskipTests -s settings.xml $EXCLUDE_IFACEGEN_ON_WIN -Dgradle.java.home=$GRADLE_JAVA_HOME package verify
+        run: mvn --batch-mode -DskipTests -s settings.xml -Dgradle.java.home=$GRADLE_JAVA_HOME package verify
         shell: bash
 
       - name: Upload build artifacts
@@ -88,7 +79,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         test_name: [ test_jbang_integration.py, test_maven_plugin.py, test_gradle_plugin.py ]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -119,11 +109,6 @@ jobs:
         run: echo "GRADLE_JAVA_HOME=${{ steps.java21.outputs.path }}" >> $GITHUB_ENV
         shell: bash
 
-      - name: Set Maven Flags on Windows
-        if: runner.os == 'Windows'
-        run: echo "EXCLUDE_IFACEGEN_ON_WIN=-pl !javainterfacegen" >> $GITHUB_ENV
-        shell: bash
-
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
@@ -135,7 +120,7 @@ jobs:
         shell: bash
 
       - name: Run Maven install
-        run: mvn --batch-mode -s settings.xml $EXCLUDE_IFACEGEN_ON_WIN -Dgradle.java.home=$GRADLE_JAVA_HOME -DskipTests install
+        run: mvn --batch-mode -s settings.xml -Dgradle.java.home=$GRADLE_JAVA_HOME -DskipTests install
         shell: bash
 
       - name: Install JBang (Linux/macOS)
@@ -177,8 +162,6 @@ jobs:
 #            maven_args: >-
 #              -pl org.graalvm.python.embedding -Pisolate -Dpolyglot.engine.AllowExperimentalOptions=true -Dpolyglot.engine.SpawnIsolate=true -Dpolyglot.engine.IsolateMode=external -Dtest=org.graalvm.python.embedding.test.integration.** -am test
 #            display: "Isolated Embedding Integration Unit Tests"
-
-    name: ${{ matrix.display }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -206,19 +189,14 @@ jobs:
         run: echo "GRADLE_JAVA_HOME=${{ steps.java21.outputs.path }}" >> $GITHUB_ENV
         shell: bash
 
-      - name: Set Maven Flags on Windows
-        if: runner.os == 'Windows'
-        run: echo "EXCLUDE_IFACEGEN_ON_WIN=-pl !javainterfacegen" >> $GITHUB_ENV
-        shell: bash
-
       - name: Setup Polyglot Maven bundle
         run: ./scripts/maven-bundle-setup.sh "${{ github.workspace }}/maven-resource-bundle" "${{ needs.maven_bundle_url.outputs.maven_bundle_url }}"
         shell: bash
 
       - name: Run Maven install
-        run: mvn --batch-mode -s settings.xml $EXCLUDE_IFACEGEN_ON_WIN -Dgradle.java.home=$GRADLE_JAVA_HOME -DskipTests install
+        run: mvn --batch-mode -s settings.xml -Dgradle.java.home=$GRADLE_JAVA_HOME -DskipTests install
         shell: bash
 
       - name: Run Maven tests
-        run: mvn --batch-mode -s settings.xml $EXCLUDE_IFACEGEN_ON_WIN -Dgradle.java.home=$GRADLE_JAVA_HOME ${{ matrix.maven_args }}
+        run: mvn --batch-mode -s settings.xml -Dgradle.java.home=$GRADLE_JAVA_HOME ${{ matrix.maven_args }}
         shell: bash
