@@ -60,7 +60,7 @@ jobs:
 
       - name: Set Maven Flags on Windows
         if: runner.os == 'Windows'
-        run: echo "EXTRA_MAVEN_ARGS=-pl !javainterfacegen" >> $GITHUB_ENV
+        run: echo "EXCLUDE_IFACEGEN_ON_WIN=-pl !javainterfacegen" >> $GITHUB_ENV
         shell: bash
 
       - name: DEBUG
@@ -72,7 +72,7 @@ jobs:
         shell: bash
 
       - name: Build project (skip tests)
-        run: mvn --batch-mode -DskipTests -s settings.xml $EXTRA_MAVEN_ARGS -Dgradle.java.home=$GRADLE_JAVA_HOME package verify
+        run: mvn --batch-mode -DskipTests -s settings.xml $EXCLUDE_IFACEGEN_ON_WIN -Dgradle.java.home=$GRADLE_JAVA_HOME package verify
         shell: bash
 
       - name: Upload build artifacts
@@ -121,7 +121,7 @@ jobs:
 
       - name: Set Maven Flags on Windows
         if: runner.os == 'Windows'
-        run: echo "EXTRA_MAVEN_ARGS=-pl !javainterfacegen" >> $GITHUB_ENV
+        run: echo "EXCLUDE_IFACEGEN_ON_WIN=-pl !javainterfacegen" >> $GITHUB_ENV
         shell: bash
 
       - name: Set up GraalVM
@@ -135,7 +135,7 @@ jobs:
         shell: bash
 
       - name: Run Maven install
-        run: mvn --batch-mode -s settings.xml $EXTRA_MAVEN_ARGS -Dgradle.java.home=$GRADLE_JAVA_HOME -DskipTests install
+        run: mvn --batch-mode -s settings.xml $EXCLUDE_IFACEGEN_ON_WIN -Dgradle.java.home=$GRADLE_JAVA_HOME -DskipTests install
         shell: bash
 
       - name: Install JBang (Linux/macOS)
@@ -154,7 +154,7 @@ jobs:
 
       - name: Run integration tests
         run: |
-          mvn --batch-mode -s settings.xml $EXTRA_MAVEN_ARGS -Dgradle.java.home=$GRADLE_JAVA_HOME exec:java@integration-tests -Dintegration.tests.args="${{ matrix.test_name }} $TEST_FLAGS"
+          mvn --batch-mode -s settings.xml -Dgradle.java.home=$GRADLE_JAVA_HOME exec:java@integration-tests -Dintegration.tests.args="${{ matrix.test_name }} $TEST_FLAGS"
         shell: bash
 
   unit-tests:
@@ -166,15 +166,12 @@ jobs:
         include:
           - job_name: "unit"
             maven_args: "test"
-            display: "All Unit Tests"
           - job_name: "unit-modulepath"
             maven_args: >-
               -pl org.graalvm.python.embedding -Ptest.modules -am test
-            display: "Embedding Unit Tests Using Modulepath"
           - job_name: "integration-modulepath"
             maven_args: >-
               -pl org.graalvm.python.embedding -Ptest.modules.integration -Dtest=org.graalvm.python.embedding.test.integration.** -am test
-            display: "Embedding Integration Unit Tests Using Modulepath"
 # DO NOT MERGE: temporarily disabled
 #          - job_name: "isolate-integration"
 #            maven_args: >-
@@ -211,7 +208,7 @@ jobs:
 
       - name: Set Maven Flags on Windows
         if: runner.os == 'Windows'
-        run: echo "EXTRA_MAVEN_ARGS=-pl !javainterfacegen" >> $GITHUB_ENV
+        run: echo "EXCLUDE_IFACEGEN_ON_WIN=-pl !javainterfacegen" >> $GITHUB_ENV
         shell: bash
 
       - name: Setup Polyglot Maven bundle
@@ -219,9 +216,9 @@ jobs:
         shell: bash
 
       - name: Run Maven install
-        run: mvn --batch-mode -s settings.xml $EXTRA_MAVEN_ARGS -Dgradle.java.home=$GRADLE_JAVA_HOME -DskipTests install
+        run: mvn --batch-mode -s settings.xml $EXCLUDE_IFACEGEN_ON_WIN -Dgradle.java.home=$GRADLE_JAVA_HOME -DskipTests install
         shell: bash
 
       - name: Run Maven tests
-        run: mvn --batch-mode -s settings.xml $EXTRA_MAVEN_ARGS -Dgradle.java.home=$GRADLE_JAVA_HOME ${{ matrix.maven_args }}
+        run: mvn --batch-mode -s settings.xml $EXCLUDE_IFACEGEN_ON_WIN -Dgradle.java.home=$GRADLE_JAVA_HOME ${{ matrix.maven_args }}
         shell: bash
