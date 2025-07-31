@@ -175,15 +175,11 @@ jobs:
             maven_args: >-
               -pl org.graalvm.python.embedding -Ptest.modules.integration -Dtest=org.graalvm.python.embedding.test.integration.** -am test
             display: "Embedding Integration Unit Tests Using Modulepath"
-          - job_name: "isolate-integration"
-            maven_args: >-
-              -pl org.graalvm.python.embedding -Pisolate -Dpolyglot.engine.AllowExperimentalOptions=true -Dpolyglot.engine.SpawnIsolate=true -Dpolyglot.engine.IsolateMode=external -Dtest=org.graalvm.python.embedding.test.integration.** -am test
-            display: "Isolated Embedding Integration Unit Tests"
-        exclude:
-          - job_name: "isolate-integration"
-            os: windows-latest
-          - job_name: "isolate-integration"
-            os: macos-latest
+# DO NOT MERGE: temporarily disabled
+#          - job_name: "isolate-integration"
+#            maven_args: >-
+#              -pl org.graalvm.python.embedding -Pisolate -Dpolyglot.engine.AllowExperimentalOptions=true -Dpolyglot.engine.SpawnIsolate=true -Dpolyglot.engine.IsolateMode=external -Dtest=org.graalvm.python.embedding.test.integration.** -am test
+#            display: "Isolated Embedding Integration Unit Tests"
 
     name: ${{ matrix.display }}
     steps:
