@@ -181,7 +181,7 @@ SOFTWARE.
       <id>linux</id>
       <activation>
         <os>
-          <family>unix</family>
+          <family>Unix</family>
           <name>Linux</name>
         </os>
       </activation>
