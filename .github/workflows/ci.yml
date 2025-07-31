@@ -132,9 +132,7 @@ jobs:
 
       - name: Install JBang (Windows)
         if: runner.os == 'Windows' && matrix.test_name == 'test_jbang_integration.py'
-        run: |
-          irm https://ps.jbang.dev | iex
-          echo "$HOME\.jbang\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+        run: choco install jbang
         shell: pwsh
 
       - name: Run integration tests
@@ -162,6 +160,7 @@ jobs:
 #            maven_args: >-
 #              -pl org.graalvm.python.embedding -Pisolate -Dpolyglot.engine.AllowExperimentalOptions=true -Dpolyglot.engine.SpawnIsolate=true -Dpolyglot.engine.IsolateMode=external -Dtest=org.graalvm.python.embedding.test.integration.** -am test
 #            display: "Isolated Embedding Integration Unit Tests"
+    name: "${{ matrix.job_name }} (${{ matrix.os }})"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
