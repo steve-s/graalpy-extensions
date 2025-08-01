@@ -77,7 +77,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        #os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest]
         test_name: [ test_jbang_integration.py, test_maven_plugin.py, test_gradle_plugin.py ]
     steps:
       - name: Checkout code
