@@ -187,19 +187,31 @@
             <goals>
               <goal>java</goal>
             </goals>
+            <configuration>
+              <mainClass>com.oracle.graal.python.shell.GraalPythonMain</mainClass>
+              <commandlineArgs>
+                ${project.basedir}/integration-tests/run.py -v --gradle-java-home ${gradle.java.home} --graalpy-version ${project.polyglot.version} ${integration.tests.args}
+              </commandlineArgs>
+              <!-- Maven should pull all the dependencies, e.g., GraalPy itself, into local cache before running the integration tests,
+                  so that the integration tests can just use local repo even if this Maven script uses some additional repositories
+                  (e.g., via settings.xml) -->
+              <includeProjectDependencies>true</includeProjectDependencies>
+              <includePluginDependencies>true</includePluginDependencies>
+            </configuration>
+          </execution>
+          <execution>
+            <id>graalpy-shell</id>
+            <phase>none</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>com.oracle.graal.python.shell.GraalPythonMain</mainClass>
+              <includeProjectDependencies>true</includeProjectDependencies>
+              <includePluginDependencies>true</includePluginDependencies>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <mainClass>com.oracle.graal.python.shell.GraalPythonMain</mainClass>
-          <commandlineArgs>
-            ${project.basedir}/integration-tests/run.py -v --gradle-java-home ${gradle.java.home} --graalpy-version ${project.polyglot.version} ${integration.tests.args}
-          </commandlineArgs>
-          <!-- Maven should pull all the dependencies, e.g., GraalPy itself, into local cache before running the integration tests,
-              so that the integration tests can just use local repo even if this Maven script uses some additional repositories
-              (e.g., via settings.xml) -->
-          <includeProjectDependencies>true</includeProjectDependencies>
-          <includePluginDependencies>true</includePluginDependencies>
-        </configuration>
         <dependencies>
           <dependency>
             <groupId>org.graalvm.python</groupId>
