@@ -72,7 +72,7 @@ jobs:
           name: build-artifacts-${{ runner.os }}
           path: ./**/target/**
 
-  integration-tests:
+  integration:
     needs: [build, maven_bundle_url]
     runs-on: ${{ matrix.os }}
     strategy:
@@ -148,12 +148,12 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
-          - job_name: "unit"
+          - job_name: "unit-cp"
             maven_args: "test"
-          - job_name: "unit-modulepath"
+          - job_name: "unit-mp"
             maven_args: >-
               -pl org.graalvm.python.embedding -Ptest.modules -am test
-          - job_name: "integration-modulepath"
+          - job_name: "unit-it-mp"
             maven_args: >-
               -pl org.graalvm.python.embedding -Ptest.modules.integration -Dtest=org.graalvm.python.embedding.test.integration.** -am test
 # DO NOT MERGE: temporarily disabled
