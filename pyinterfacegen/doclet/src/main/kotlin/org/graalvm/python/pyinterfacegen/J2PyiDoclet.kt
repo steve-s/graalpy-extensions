@@ -77,7 +77,7 @@ class J2PyiDoclet : Doclet {
         val typeIRs = environment.includedElements
             .asSequence()
             .filterIsInstance<TypeElement>()
-            .filter { it.kind == ElementKind.CLASS || it.kind == ElementKind.INTERFACE || it.kind == ElementKind.ENUM }
+            .filter { it.kind == ElementKind.CLASS || it.kind == ElementKind.INTERFACE || it.kind == ElementKind.RECORD || it.kind == ElementKind.ENUM }
             .filter { shouldIncludeType(it) }
             .mapNotNull { maybeBuildTypeIR(it) }
             .sortedBy { it.qualifiedName }

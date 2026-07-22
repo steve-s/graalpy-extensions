@@ -13,6 +13,8 @@ import java.util.spi.ToolProvider
  */
 object DocletTestUtil {
     private fun extractTypeName(src: String): String {
+        val recordMatch = Regex("""\brecord\s+([A-Za-z0-9_]+)""").find(src)?.groupValues?.get(1)
+        if (recordMatch != null) return recordMatch
         val classMatch = Regex("""\bclass\s+([A-Za-z0-9_]+)""").find(src)?.groupValues?.get(1)
         if (classMatch != null) return classMatch
         val ifaceMatch = Regex("""\binterface\s+([A-Za-z0-9_]+)""").find(src)?.groupValues?.get(1)
@@ -128,7 +130,7 @@ object DocletTestUtil {
             basePkgs += pkg
             val pkgDir = File(tmpSrc, pkg.replace('.', '/'))
             pkgDir.mkdirs()
-            val className = Regex("""class\s+([A-Za-z0-9_]+)""").find(src)?.groupValues?.get(1) ?: "TestClass"
+            val className = extractTypeName(src)
             File(pkgDir, "$className.java").writeText(
                 """
                 package $pkg;

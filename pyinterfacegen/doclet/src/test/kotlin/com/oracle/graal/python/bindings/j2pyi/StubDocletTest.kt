@@ -26,6 +26,26 @@ class StubDocletTest {
     }
 
     @Test
+    fun record_isEmittedAsClassWithComponentAccessors() {
+        val java = """
+            public record Person(String name, int age) {}
+        """.trimIndent()
+        val expected = """
+            from typing import Any
+
+            class Person:
+                def __init__(self, name: str, age: int) -> None: ...
+                def age(self) -> int: ...
+                def equals(self, o: Any) -> bool: ...
+                def hashCode(self) -> int: ...
+                def name(self) -> str: ...
+                def toString(self) -> str: ...
+        """.trimIndent().trimEnd()
+        val actual = DocletTestUtil.runDoclet(java)
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun javadoc_pre_block_preserved_multiline() {
         val java = """
             /**
