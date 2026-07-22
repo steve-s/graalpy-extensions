@@ -1069,16 +1069,10 @@ class J2PyiDoclet : Doclet {
         if (isStatic) sb.appendLine("${indent}@staticmethod")
         val params = renderParams(m.params, includeSelf = !isStatic)
 
-        // Avoid shadowing built-in type names in class scope (e.g., a method named 'object' interfering with the 'object' type).
-        fun avoidBuiltinTypeShadow(name: String): String {
-            return when (name) {
-                // Common built-in type names used in annotations
-                "object", "str", "int", "float", "bool", "list", "dict", "set", "tuple" -> "${name}_"
-                else -> name
-            }
-        }
-
-        val defName = avoidBuiltinTypeShadow(safeIdentifier(m.name, allowSelf = true))
+        // Java methods are exposed as attributes by GraalPy, and Python permits an
+        // attribute to have the same name as a builtin (for example, `box.set()`).
+        // Keep that name in the stub so its API matches the runtime binding.
+        val defName = safeIdentifier(m.name, allowSelf = true)
         // Adjust return type: normally replace return-only TypeVars with Any; but keep them for Protocols.
         val adjustedRet: PyType = if (keepUnboundReturnTypeVars) m.returnType else adjustReturnTypeTypeVars(m)
         if (!m.doc.isNullOrBlank()) {
