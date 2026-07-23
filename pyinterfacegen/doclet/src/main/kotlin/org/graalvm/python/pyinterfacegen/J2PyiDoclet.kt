@@ -18,6 +18,7 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.ElementFilter
+import javax.lang.model.util.Types
 
 class J2PyiDoclet : Doclet {
     // Packages for which we are actually generating stubs in this run.
@@ -61,6 +62,8 @@ class J2PyiDoclet : Doclet {
     private var reporter: Reporter? = null
     private var outputDir: String? = null
     private var docTrees: DocTrees? = null
+    private var typeUtils: Types? = null
+    private val generatedMemberNamesCache = mutableMapOf<String, Set<String>>()
 
     override fun init(locale: Locale, reporter: Reporter) {
         this.reporter = reporter
@@ -70,15 +73,23 @@ class J2PyiDoclet : Doclet {
 
     override fun run(environment: DocletEnvironment): Boolean {
         this.docTrees = environment.docTrees
+        this.typeUtils = environment.typeUtils
+        generatedMemberNamesCache.clear()
 
         compileAssumedTypedPkgMatchers()
 
         // Build an intermediate representation for all included types (classes, interfaces, enums) honoring include/exclude and visibility.
-        val typeIRs = environment.includedElements
+        val includedTypes = environment.includedElements
             .asSequence()
             .filterIsInstance<TypeElement>()
             .filter { it.kind == ElementKind.CLASS || it.kind == ElementKind.INTERFACE || it.kind == ElementKind.RECORD || it.kind == ElementKind.ENUM }
             .filter { shouldIncludeType(it) }
+            .toList()
+        // Make this available while building each IR: it determines whether an inherited declared type will
+        // survive external-reference scrubbing and can therefore provide a Python member contract.
+        allowedPkgs = includedTypes.map { packageOf(it) }.toSet()
+        val typeIRs = includedTypes
+            .asSequence()
             .mapNotNull { maybeBuildTypeIR(it) }
             .sortedBy { it.qualifiedName }
             .toList()
@@ -90,9 +101,6 @@ class J2PyiDoclet : Doclet {
         if (typeIRs.isEmpty()) {
             return true
         }
-
-        // Record the set of packages for which we will emit stubs; used to avoid importing external refs.
-        allowedPkgs = typeIRs.map { it.packageName }.toSet()
 
         // Emit one .pyi module per top-level type and collect
         // package contents for __init__ re-exports and runtime symbols.
@@ -431,15 +439,25 @@ class J2PyiDoclet : Doclet {
         fun mapSuperType(tm: TypeMirror?): PyType? {
             if (tm == null || tm.kind == TypeKind.NONE) return null
             return when (val mapped = mapType(tm)) {
-                PyType.AnyT, PyType.ObjectT, PyType.NoneT -> null
-                else -> mapped
+                // Only generated Java declarations can safely be represented as Python bases. Built-in
+                // collection/ABC mappings remain useful in member annotations, but using them as bases
+                // would impose Python runtime contracts that Java binding objects do not implement.
+                is PyType.Ref -> mapped
+                else -> null
             }
         }
+        val mappedSuperclass = if (kind == Kind.CLASS) mapSuperType(te.superclass) else null
         val superTypes = buildList {
-            if (kind == Kind.CLASS) {
-                mapSuperType(te.superclass)?.let(::add)
+            mappedSuperclass?.let(::add)
+            for (interfaceType in te.interfaces) {
+                // A redundantly declared interface is already present through an emitted superclass.
+                // Keep every other direct interface so the Python hierarchy matches the Java hierarchy.
+                val inheritedThroughSuperclass = mappedSuperclass != null &&
+                    typeUtils?.isSubtype(te.superclass, interfaceType) == true
+                if (!inheritedThroughSuperclass) {
+                    mapSuperType(interfaceType)?.let(::add)
+                }
             }
-            te.interfaces.mapNotNullTo(this, ::mapSuperType)
         }
         val fields = if (kind == Kind.INTERFACE) {
             emptyList()
@@ -464,16 +482,19 @@ class J2PyiDoclet : Doclet {
         // Collect methods
         val allMethods = ElementFilter.methodsIn(te.enclosedElements).filter { isIncludedByVisibility(it) }
             .sortedWith(compareBy({ it.simpleName.toString() }, { it.parameters.size }))
-        val mappedMethods = allMethods.map { m ->
-            val variadic = m.isVarArgs
-            MethodIR(
-                name = m.simpleName.toString(),
-                params = paramsToIR(m, variadic),
-                returnType = mapReturnTypeWithNullability(m),
-                isStatic = m.modifiers.contains(Modifier.STATIC),
-                doc = docTrees?.javadocFull(m)
-            )
-        }
+        val suppressedOverrideMethods = allMethods.filter { method -> conflictsWithEmittedPythonBase(method, te) }.toSet()
+        val mappedMethods = allMethods
+            .filterNot { it in suppressedOverrideMethods }
+            .map { m ->
+                val variadic = m.isVarArgs
+                MethodIR(
+                    name = m.simpleName.toString(),
+                    params = paramsToIR(m, variadic),
+                    returnType = mapReturnTypeWithNullability(m),
+                    isStatic = m.modifiers.contains(Modifier.STATIC),
+                    doc = docTrees?.javadocFull(m)
+                )
+            }
 
         // Synthesize properties per JavaBeans rules and filter out matched getters/setters (classes only).
         val (properties, remainingMethods) = if (kind == Kind.CLASS && config.propertySynthesis) synthesizeProperties(
@@ -499,6 +520,7 @@ class J2PyiDoclet : Doclet {
             isAbstract = te.modifiers.contains(Modifier.ABSTRACT),
             typeParams = typeParams,
             superTypes = superTypes,
+            suppressedMemberNames = suppressedOverrideMethods.map { it.simpleName.toString() }.distinct().sorted(),
             doc = typeDoc,
             fields = fields,
             constructors = constructors,
@@ -507,6 +529,83 @@ class J2PyiDoclet : Doclet {
             enumConstants = enumConstants
         )
     }
+
+    /**
+     * A Java member must not replace an inherited Python member contract with an incompatible
+     * Java-shaped signature. Java can overload methods by parameter types and arity, whereas a
+     * Python subclass definition replaces the inherited attribute with the same name.
+     */
+    private fun conflictsWithEmittedPythonBase(method: ExecutableElement, owner: TypeElement): Boolean {
+        val types = typeUtils ?: return false
+        val visited = mutableSetOf<String>()
+        val pythonName = safeIdentifier(method.simpleName.toString(), allowSelf = true)
+
+        fun isEmittedBase(type: TypeMirror): Boolean {
+            val mapped = mapType(type)
+            return mapped is PyType.Ref && isAssumedTypedPackage(mapped.packageName)
+        }
+
+        fun visit(type: TypeMirror): Boolean {
+            for (base in types.directSupertypes(type)) {
+                if (!visited.add(base.toString())) continue
+                // If this base is scrubbed from the Python class header, none of its ancestors can
+                // supply an inherited Python contract either.
+                if (!isEmittedBase(base)) continue
+                val baseElement = (base as? DeclaredType)?.asElement() as? TypeElement
+                if (baseElement != null && pythonName in generatedPythonMemberNames(baseElement)) {
+                    return true
+                }
+                if (visit(base)) return true
+            }
+            return false
+        }
+
+        return visit(owner.asType())
+    }
+
+    /** Names that are actually emitted in a type's Python class body after visibility and property synthesis. */
+    private fun generatedPythonMemberNames(type: TypeElement): Set<String> =
+        generatedMemberNamesCache.getOrPut(type.qualifiedName.toString()) {
+            val kind = when (type.kind) {
+                ElementKind.INTERFACE -> Kind.INTERFACE
+                ElementKind.ENUM -> Kind.ENUM
+                else -> Kind.CLASS
+            }
+            val fields = if (kind == Kind.INTERFACE) {
+                emptyList()
+            } else {
+                ElementFilter.fieldsIn(type.enclosedElements)
+                    .filter { isIncludedByVisibility(it) && it.kind != ElementKind.ENUM_CONSTANT }
+                    .map { FieldIR(it.simpleName.toString(), mapFieldTypeWithNullability(it)) }
+            }
+            val rawMethods = ElementFilter.methodsIn(type.enclosedElements)
+                .filter { isIncludedByVisibility(it) }
+                .sortedWith(compareBy({ it.simpleName.toString() }, { it.parameters.size }))
+            val mappedMethods = rawMethods.map { method ->
+                MethodIR(
+                    name = method.simpleName.toString(),
+                    params = paramsToIR(method, method.isVarArgs),
+                    returnType = mapReturnTypeWithNullability(method),
+                    isStatic = method.modifiers.contains(Modifier.STATIC),
+                    doc = null
+                )
+            }
+            val (properties, remainingMethods) =
+                if (kind == Kind.CLASS && config.propertySynthesis) synthesizeProperties(fields, rawMethods, mappedMethods)
+                else Pair(emptyList(), mappedMethods)
+
+            buildSet {
+                val propertyNames = properties.mapTo(mutableSetOf()) { it.name }
+                val methodNames = remainingMethods.mapTo(mutableSetOf()) {
+                    safeIdentifier(it.name, allowSelf = true)
+                }
+                addAll(propertyNames)
+                addAll(methodNames)
+                for (field in fields) {
+                    if (field.name !in propertyNames && field.name !in methodNames) add(field.name)
+                }
+            }
+        }
 
     private fun synthesizeProperties(
         fields: List<FieldIR>, rawMethods: List<ExecutableElement>, mappedMethods: List<MethodIR>
@@ -621,31 +720,6 @@ class J2PyiDoclet : Doclet {
 
     // Emit a single type as .pyi text (class, interface-as-Protocol, or enum)
     private fun emitTypeAsPyi(t: TypeIR): String {
-        // After platform-type scrubbing (e.g. mapping java.lang.reflect.Type -> builtins.object), some Java generic
-        // parameters may no longer appear anywhere in the exposed Python types. Keeping such "phantom" type
-        // parameters causes mypy variance errors for Protocols and adds noise for users, so drop them.
-        if (t.typeParams.isNotEmpty()) {
-            val used = mutableSetOf<String>()
-            fun walk(py: PyType) {
-                py.walk { node ->
-                    if (node is PyType.TypeVarRef) used += node.name
-                }
-            }
-            for (s in t.superTypes) walk(s)
-            for (f in t.fields) walk(f.type)
-            for (c in t.constructors) for (p in c.params) walk(p.type)
-            for (m in t.methods) {
-                walk(m.returnType)
-                for (p in m.params) walk(p.type)
-            }
-            for (p in t.properties) walk(p.type)
-
-            val filtered = t.typeParams.filter { it.name in used }
-            if (filtered.size != t.typeParams.size) {
-                return emitTypeAsPyi(t.copy(typeParams = filtered))
-            }
-        }
-
         val hasTypeParams = t.typeParams.isNotEmpty()
         val needsEnumImport = t.kind == Kind.ENUM
         val sb = StringBuilder()
@@ -687,7 +761,7 @@ class J2PyiDoclet : Doclet {
             sb.appendLine("from enum import Enum")
         }
         // collections.abc imports
-        val abcImports = t.collectionsAbcImports()
+        val abcImports = if (t.kind == Kind.ENUM) emptySet() else t.collectionsAbcImports()
         if (abcImports.isNotEmpty()) {
             sb.appendLine("from collections.abc import ${abcImports.sorted().joinToString(", ")}")
         }
@@ -765,11 +839,20 @@ class J2PyiDoclet : Doclet {
                         }
                     }
 
-                    else -> {} // Any/None/Ref: nothing to do
+                    is PyType.Ref -> {
+                        for (a in py.args) {
+                            collectVariance(a, retLike, invariantCtx)
+                        }
+                    }
+
+                    else -> {} // Any/None: nothing to do
                 }
             }
 
             // Fields (attributes) – treat as "return-like" usage for variance purposes.
+            // Superclass type arguments constrain a Protocol's variance just like method positions.
+            // Treat them as invariant: the referenced base is responsible for its own variance.
+            for (superType in t.superTypes) collectVariance(superType, retLike = false, invariantCtx = true)
             for (f: FieldIR in t.fields) collectVariance(f.type, retLike = true, invariantCtx = false)
             // Constructors – parameters only
             for (c: ConstructorIR in t.constructors) {
@@ -907,13 +990,22 @@ class J2PyiDoclet : Doclet {
             return sb.toString()
         }
 
+        fun appendSuppressedMemberComments() {
+            for (name in t.suppressedMemberNames) {
+                sb.appendLine("${indent}# Java member '$name' omitted to preserve the inherited Python signature.")
+            }
+        }
+
         // Is the type empty?
         if (t.constructors.isEmpty() && t.methods.isEmpty() && t.fields.isEmpty() && t.properties.isEmpty()) {
+            appendSuppressedMemberComments()
             if (t.doc.isNullOrBlank()) {
                 sb.appendLine("${indent}pass")
             }
             return sb.toString()
         }
+
+        appendSuppressedMemberComments()
 
         // Fields (as attributes) for classes only.
         // If a property with the same name will be emitted, skip the raw field to avoid duplicate names.

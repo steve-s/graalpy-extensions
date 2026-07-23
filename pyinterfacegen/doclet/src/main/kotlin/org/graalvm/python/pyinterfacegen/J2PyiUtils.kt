@@ -267,6 +267,12 @@ fun mapDeclaredType(dt: DeclaredType, extraPlatformPackages: List<String>): PyTy
         val args: List<TypeMirror> = dt.typeArguments
         return if (i >= 0 && i < args.size) mapType(args[i], extraPlatformPackages) else PyType.AnyT
     }
+    fun isThrowableTypeParameter(tp: TypeParameterElement): Boolean = tp.bounds.any { bound ->
+        val boundElement = (bound as? DeclaredType)?.asElement() as? TypeElement
+        boundElement?.qualifiedName?.toString() in setOf(
+            "java.lang.Throwable", "java.lang.Exception", "java.lang.RuntimeException"
+        )
+    }
     return when (qn) {
         // Core
         "java.lang.String" -> PyType.Str
@@ -299,7 +305,14 @@ fun mapDeclaredType(dt: DeclaredType, extraPlatformPackages: List<String>): PyTy
                 if (isTopLevel && isPublic) {
                     val pkg = packageOf(el)
                     val name = el.simpleName.toString()
-                    val args = dt.typeArguments.map { mapType(it, extraPlatformPackages) }
+                    // Keep this in sync with TypeIR's exception-type-parameter elision. A Python stub
+                    // cannot model Java checked-exception parameters, so neither the declaration nor
+                    // references to that declaration may retain the corresponding type argument.
+                    val args = dt.typeArguments.mapIndexedNotNull { index, arg ->
+                        val formal = el.typeParameters.getOrNull(index)
+                        if (formal != null && isThrowableTypeParameter(formal)) null
+                        else mapType(arg, extraPlatformPackages)
+                    }
                     PyType.Ref(pkg, name, args)
                 } else {
                     PyType.ObjectT

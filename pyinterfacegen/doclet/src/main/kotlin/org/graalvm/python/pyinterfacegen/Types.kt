@@ -112,6 +112,8 @@ data class TypeIR(
     val isAbstract: Boolean,
     val typeParams: List<TypeParamIR>,
     val superTypes: List<PyType>,
+    // Java members omitted because their inherited Python base provides the authoritative signature.
+    val suppressedMemberNames: List<String>,
     val doc: String?,   // First-sentence Javadoc summary for the type
     val fields: List<FieldIR>,
     val constructors: List<ConstructorIR>,

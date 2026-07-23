@@ -49,7 +49,11 @@ class SnapshotTest {
         val expectedLines = listOf(
             "from .Bounded import Bounded as Bounded",
             "from .Box import Box as Box",
+            "from .EnthusiasticHello import EnthusiasticHello as EnthusiasticHello",
             "from .Hello import Hello as Hello",
+            "from .Nameable import Nameable as Nameable",
+            "from .NamedHello import NamedHello as NamedHello",
+            "from .StringBox import StringBox as StringBox",
             "from .UseSite import UseSite as UseSite",
         )
         for (line in expectedLines) {
