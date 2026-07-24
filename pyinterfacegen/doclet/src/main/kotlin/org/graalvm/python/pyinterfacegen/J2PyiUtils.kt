@@ -99,6 +99,13 @@ fun packageOf(e: Element): String {
 fun packageDir(base: File, pkg: String): File =
     if (pkg.isBlank()) base else File(base, pkg.replace('.', File.separatorChar))
 
+fun isThrowableTypeParameter(tp: TypeParameterElement): Boolean = tp.bounds.any { bound ->
+    val boundElement = (bound as? DeclaredType)?.asElement() as? TypeElement
+    boundElement?.qualifiedName?.toString() in setOf(
+        "java.lang.Throwable", "java.lang.Exception", "java.lang.RuntimeException"
+    )
+}
+
 // Map a Java package name to a Python package name using the provided prefix map.
 // Chooses the longest matching Java prefix (boundary at '.' or end).
 fun mapPackage(javaPkg: String, mappings: List<Pair<String, String>>): String {
@@ -267,11 +274,16 @@ fun mapDeclaredType(dt: DeclaredType, extraPlatformPackages: List<String>): PyTy
         val args: List<TypeMirror> = dt.typeArguments
         return if (i >= 0 && i < args.size) mapType(args[i], extraPlatformPackages) else PyType.AnyT
     }
-    fun isThrowableTypeParameter(tp: TypeParameterElement): Boolean = tp.bounds.any { bound ->
+    fun hasNumberBound(tp: TypeParameterElement): Boolean = tp.bounds.any { bound ->
         val boundElement = (bound as? DeclaredType)?.asElement() as? TypeElement
-        boundElement?.qualifiedName?.toString() in setOf(
-            "java.lang.Throwable", "java.lang.Exception", "java.lang.RuntimeException"
-        )
+        boundElement?.qualifiedName?.toString() == "java.lang.Number"
+    }
+    fun isOwnerRecursiveBound(tp: TypeParameterElement): Boolean = tp.bounds.any { bound ->
+        val declared = bound as? DeclaredType ?: return@any false
+        declared.asElement() == tp.genericElement &&
+            declared.typeArguments.any { argument ->
+                (argument as? TypeVariable)?.asElement() == tp
+            }
     }
     return when (qn) {
         // Core
@@ -311,7 +323,20 @@ fun mapDeclaredType(dt: DeclaredType, extraPlatformPackages: List<String>): PyTy
                     val args = dt.typeArguments.mapIndexedNotNull { index, arg ->
                         val formal = el.typeParameters.getOrNull(index)
                         if (formal != null && isThrowableTypeParameter(formal)) null
-                        else mapType(arg, extraPlatformPackages)
+                        else {
+                            val mappedArg = mapType(arg, extraPlatformPackages)
+                            // mypy does not recognize built-in int/float as subtypes of
+                            // numbers.Number in a TypeVar bound. Use the bound itself for
+                            // Java specializations such as NumberRange<Integer>.
+                            if (formal != null && isOwnerRecursiveBound(formal) && arg.kind == TypeKind.TYPEVAR) {
+                                // A module-level Python TypeVar cannot prove that another TypeVar
+                                // satisfies the owner's recursive bound. Keep the useful bound on
+                                // the declaration, but erase this forwarded argument to Any.
+                                PyType.AnyT
+                            } else if (formal != null && hasNumberBound(formal) &&
+                                (mappedArg === PyType.IntT || mappedArg === PyType.FloatT)
+                            ) PyType.NumberT else mappedArg
+                        }
                     }
                     PyType.Ref(pkg, name, args)
                 } else {

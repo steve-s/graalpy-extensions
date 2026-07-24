@@ -112,6 +112,8 @@ data class TypeIR(
     val isAbstract: Boolean,
     val typeParams: List<TypeParamIR>,
     val superTypes: List<PyType>,
+    val superTypeVariances: List<List<Variance>>,
+    val omittedSuperTypeNames: List<String>,
     // Java members omitted because their inherited Python base provides the authoritative signature.
     val suppressedMemberNames: List<String>,
     val doc: String?,   // First-sentence Javadoc summary for the type
@@ -123,6 +125,8 @@ data class TypeIR(
 )
 
 enum class Kind { CLASS, INTERFACE, ENUM }
+
+enum class Variance { COVARIANT, CONTRAVARIANT, INVARIANT }
 
 data class TypeParamIR(
     val name: String,

@@ -765,4 +765,160 @@ class StubDocletTest {
         assertTrue(!text.contains("Java member 'toString' omitted"),
                    "Object should not be treated as an emitted base:\n$text")
     }
+
+    @Test
+    fun packageMapping_preservesNestedProtocolVariance() {
+        val dest = DocletTestUtil.runDocletMultiWithArgs(
+            arrayOf(
+                "com.example" to """
+                    public interface Producer<T> {
+                        T produce();
+                    }
+                """.trimIndent(),
+                "com.example" to """
+                    public interface ProducerFactory<T> {
+                        Producer<T> producer();
+                    }
+                """.trimIndent()
+            ),
+            extraArgs = listOf("-Xj2pyi-packageMap", "com.example=pyexample")
+        )
+        val producer = File(dest, "pyexample/Producer.pyi").readText()
+        val factory = File(dest, "pyexample/ProducerFactory.pyi").readText()
+
+        assertTrue(producer.contains("T = TypeVar(\"T\", covariant=True)"), "Producer must be covariant:\n$producer")
+        assertTrue(factory.contains("T = TypeVar(\"T\", covariant=True)"),
+                   "Mapped Producer reference must preserve covariance:\n$factory")
+    }
+
+    @Test
+    fun throwableTypeParameter_elisionKeepsVarianceSlotsAligned() {
+        val dest = DocletTestUtil.runDocletMulti(
+            "com.example" to """
+                public interface ErrorFirst<E extends Throwable, T> {
+                    void accept(T value);
+                }
+            """.trimIndent(),
+            "com.example" to """
+                public interface ErrorFirstChild<T> extends ErrorFirst<RuntimeException, T> {
+                }
+            """.trimIndent()
+        )
+        val child = File(dest, "com/example/ErrorFirstChild.pyi").readText()
+
+        assertTrue(child.contains("T = TypeVar(\"T\", contravariant=True)"),
+                   "The retained T slot must use T's variance, not the elided exception slot:\n$child")
+    }
+
+    @Test
+    fun suppressedOverload_doesNotAffectProtocolVariance() {
+        val dest = DocletTestUtil.runDocletMulti(
+            "com.example" to """
+                public interface ValueSource<T> {
+                    T value();
+                }
+            """.trimIndent(),
+            "com.example" to """
+                public interface SuppressedValueOverload<T> extends ValueSource<T> {
+                    void value(T replacement);
+                }
+            """.trimIndent(),
+            "com.example" to """
+                public interface ValueSourceChild<T> extends SuppressedValueOverload<T> {
+                }
+            """.trimIndent()
+        )
+        val overload = File(dest, "com/example/SuppressedValueOverload.pyi").readText()
+        val child = File(dest, "com/example/ValueSourceChild.pyi").readText()
+
+        assertTrue(overload.contains("# Java member 'value' omitted to preserve the inherited Python signature."),
+                   "Expected the Java overload to be suppressed:\n$overload")
+        assertTrue(overload.contains("T = TypeVar(\"T\", covariant=True)"),
+                   "Suppressed parameter usage must not make the protocol invariant:\n$overload")
+        assertTrue(child.contains("T = TypeVar(\"T\", covariant=True)"),
+                   "Forwarded child variance must remain covariant:\n$child")
+    }
+
+    @Test
+    fun scrubbedSuperclass_doesNotHideGeneratedInterface() {
+        val dependencyClasses = DocletTestUtil.compileToDir(
+            mapOf(
+                "dep.ExternalBase" to ("dep" to """
+                    public class ExternalBase {
+                        public void run() {}
+                    }
+                """.trimIndent())
+            )
+        )
+        val dest = DocletTestUtil.runDocletMultiWithArgs(
+            arrayOf(
+                "com.example" to """
+                    public interface RunnableContract {
+                        void run();
+                    }
+                """.trimIndent(),
+                "com.example" to """
+                    public class ExternalChild extends dep.ExternalBase implements RunnableContract {
+                        public void run() {}
+                    }
+                """.trimIndent()
+            ),
+            classpath = listOf(dependencyClasses)
+        )
+        val child = File(dest, "com/example/ExternalChild.pyi").readText()
+
+        assertTrue(child.contains("class ExternalChild(RunnableContract):"),
+                   "A scrubbed dependency must not displace the generated interface:\n$child")
+        assertTrue(!child.contains("Java base 'RunnableContract' omitted"), "Interface must not be omitted:\n$child")
+    }
+
+    @Test
+    fun compatibleInterfaceContracts_areAllRetained() {
+        val dest = DocletTestUtil.runDocletMulti(
+            "com.example" to """
+                public interface SizedA {
+                    int size();
+                }
+            """.trimIndent(),
+            "com.example" to """
+                public interface SizedB {
+                    int size();
+                }
+            """.trimIndent(),
+            "com.example" to """
+                public class BothSized implements SizedA, SizedB {
+                    public int size() { return 0; }
+                }
+            """.trimIndent(),
+            "com.example" to """
+                public interface InheritedSized extends SizedA {
+                }
+            """.trimIndent(),
+            "com.example" to """
+                public class DirectAndInheritedSized implements SizedB, InheritedSized {
+                    public int size() { return 0; }
+                }
+            """.trimIndent()
+        )
+        val child = File(dest, "com/example/BothSized.pyi").readText()
+        val inheritedChild = File(dest, "com/example/DirectAndInheritedSized.pyi").readText()
+
+        assertTrue(child.contains("class BothSized(SizedA, SizedB):"),
+                   "Compatible bases must both remain in the Python hierarchy:\n$child")
+        assertTrue(!child.contains("Java base 'SizedB' omitted"), "Compatible base must not be omitted:\n$child")
+        assertTrue(inheritedChild.contains("class DirectAndInheritedSized(SizedB, InheritedSized):"),
+                   "Direct and inherited compatible contracts must both remain:\n$inheritedChild")
+    }
+
+    @Test
+    fun fBound_retainsSanitizedOuterBound() {
+        val java = """
+            public class Node<T, B extends Node<T, B>> {
+            }
+        """.trimIndent()
+        val text = DocletTestUtil.runDoclet(java)
+
+        assertTrue(text.contains("B = TypeVar(\"B\", bound=Node[Any, Any])"),
+                   "F-bound should retain its outer Java constraint with recursive variables erased:\n$text")
+    }
 }
