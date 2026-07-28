@@ -122,6 +122,12 @@ JAVA_HOME=/path/to/graalvm python3 integration-tests/run.py -v --no-clean \
     -k test_gradle_generated_app test_gradle_plugin
 ```
 
+One may need to update URLs if executed behind corporate proxy:
+```
+./mvnw -N -Pmxurlrewrite exec:java@patch-gradle-props
+```
+Changes created by this command should not be committed.
+
 ## Changing version
 
 - Update the top-level `pom.xml` property `revision`.
