@@ -12,7 +12,6 @@ java {
         languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
-
 kotlin {
     jvmToolchain(25)
 }

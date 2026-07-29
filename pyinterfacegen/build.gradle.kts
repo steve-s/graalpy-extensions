@@ -8,7 +8,7 @@ import java.net.URI
 import java.util.*
 
 plugins {
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.10"
     java
     // Use the locally included plugin (see settings.gradle.kts pluginManagement). Version is supplied there.
     id("org.graalvm.python.pyinterfacegen")
@@ -92,6 +92,7 @@ java {
 }
 
 kotlin {
+    // Use JDK 25 present on this host; adjust as needed in other environments
     jvmToolchain(25)
 }
 

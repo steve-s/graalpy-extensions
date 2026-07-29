@@ -1,7 +1,7 @@
 import org.graalvm.python.pyinterfacegen.build.mavenBundleRepository
 
 plugins {
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.10"
     java
     `maven-publish`
     id("j2pyi.convention")
