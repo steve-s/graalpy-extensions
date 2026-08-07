@@ -10,6 +10,30 @@ under the "GraalPy Embedding" section.
 
 ## 25.1.0
 
+* BouncyCastle is no longer pulled in transitively by the GraalPy embedding
+libraries or build tools. Applications that need support for legacy RSA, DSA,
+and EC private key formats must explicitly add
+`org.graalvm.python:python-bouncycastle-support`.
+
+  Maven:
+
+  ```xml
+  <dependency>
+    <groupId>org.graalvm.python</groupId>
+    <artifactId>python-bouncycastle-support</artifactId>
+    <version>${graalpy.version}</version>
+    <scope>runtime</scope>
+  </dependency>
+  ```
+
+  Gradle:
+
+  ```groovy
+  dependencies {
+      runtimeOnly("org.graalvm.python:python-bouncycastle-support:${graalPyVersion}")
+  }
+  ```
+
 * `VirtualFileSystem` can now be configured with a custom `ClassLoader` for
 resource lookup. The existing `resourceLoadingClass(Class<?>)` builder method
 now delegates to the class loader of the supplied class.

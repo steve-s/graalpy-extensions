@@ -444,11 +444,6 @@
             <version>${project.polyglot.version}</version>
           </dependency>
           <dependency>
-            <groupId>org.graalvm.python</groupId>
-            <artifactId>python-bouncycastle-support</artifactId>
-            <version>${project.polyglot.version}</version>
-          </dependency>
-          <dependency>
             <groupId>org.graalvm.sdk</groupId>
             <artifactId>launcher-common</artifactId>
             <version>${project.polyglot.version}</version>
