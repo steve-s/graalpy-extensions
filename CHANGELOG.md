@@ -8,12 +8,13 @@ GraalPy itself; those changes are recorded in the
 [GraalPy changelog](https://github.com/oracle/graalpython/blob/master/CHANGELOG.md)
 under the "GraalPy Embedding" section.
 
-## 25.1.0
+## 25.3
 
 * BouncyCastle is no longer pulled in transitively by the GraalPy embedding
-libraries or build tools. Applications that need support for legacy RSA, DSA,
-and EC private key formats must explicitly add
-`org.graalvm.python:python-bouncycastle-support`.
+libraries or build tools on JDKs newer than 25. From JDK 25 onwards, the
+built-in security providers offer everything except legacy RSA, DSA, and EC
+private key formats. Applications that need to support these must explicitly
+add `org.graalvm.python:python-bouncycastle-support`.
 
   Maven:
 
@@ -33,6 +34,8 @@ and EC private key formats must explicitly add
       runtimeOnly("org.graalvm.python:python-bouncycastle-support:${graalPyVersion}")
   }
   ```
+
+## 25.2
 
 * `VirtualFileSystem` can now be configured with a custom `ClassLoader` for
 resource lookup. The existing `resourceLoadingClass(Class<?>)` builder method

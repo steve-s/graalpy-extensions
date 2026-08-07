@@ -43,7 +43,6 @@ package org.graalvm.python.tasks;
 import org.graalvm.python.GradleLogger;
 import org.graalvm.python.dsl.GraalPyExtension;
 import org.graalvm.python.embedding.tools.JavaToolchain;
-import org.graalvm.python.embedding.tools.vfs.VFSUtils;
 import org.graalvm.python.embedding.tools.vfs.VFSUtils.Launcher;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
@@ -61,6 +60,7 @@ import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.jvm.toolchain.JavaLauncher;
+import org.gradle.work.DisableCachingByDefault;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -85,6 +85,7 @@ import static org.graalvm.python.embedding.tools.vfs.VFSUtils.LAUNCHER_NAME;
  * </ol>
  *
  */
+@DisableCachingByDefault(because = "Python package installation may not be idempotent.")
 public abstract class AbstractPackagesTask extends DefaultTask {
 
 	@Input
