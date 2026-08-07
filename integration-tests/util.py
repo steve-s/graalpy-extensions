@@ -49,7 +49,7 @@ from typing import Optional
 MAVEN_VERSION = "3.9.8"
 GLOBAL_MVN_CMD = [shutil.which('mvn'), "--batch-mode"]
 
-GRADLE_VERSION = "8.13"
+GRADLE_VERSION = "9.7"
 
 DEFAULT_VFS_PREFIX = "org.graalvm.python.vfs"
 
