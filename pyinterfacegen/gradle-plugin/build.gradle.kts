@@ -27,8 +27,6 @@ dependencies {
 }
 
 kotlin {
-    // Use the host JDK (21) to avoid toolchain download in this environment
-    jvmToolchain(21)
 }
 
 java {

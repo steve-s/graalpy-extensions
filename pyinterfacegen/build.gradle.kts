@@ -86,8 +86,6 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    // Use JDK 21 present on this host; adjust as needed in other environments
-    jvmToolchain(21)
 }
 
 // ------- GraalPy Integration Test Support -------

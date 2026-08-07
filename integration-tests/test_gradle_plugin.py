@@ -56,8 +56,6 @@ def append(file, txt):
 
 
 class GradlePluginTestBase(util.BuildToolTestBase):
-    EXPECTED_GRADLE_JAVA_VERSION = "21"
-
     def __init__(self, build_file_name:str, settings_file_name:str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.build_file_name = build_file_name
@@ -67,7 +65,6 @@ class GradlePluginTestBase(util.BuildToolTestBase):
     def setUpClass(cls):
         super().setUpClass()
         cls.test_prj_path = os.path.join(os.path.dirname(__file__), "gradle", "gradle-test-project")
-        cls.check_gradle_java_home(util.gradle_java_home)
 
     @staticmethod
     def gradle_string(value):
@@ -94,14 +91,6 @@ class GradlePluginTestBase(util.BuildToolTestBase):
         if java_version.startswith("1."):
             return java_version.split(".", 2)[1]
         return java_version.split(".", 1)[0].split("-", 1)[0]
-
-    @classmethod
-    def check_gradle_java_home(cls, java_home):
-        java_version = cls.java_version(java_home)
-        assert java_version == cls.EXPECTED_GRADLE_JAVA_VERSION or java_version.startswith(cls.EXPECTED_GRADLE_JAVA_VERSION + "."), (
-            f"Gradle integration tests need Java {cls.EXPECTED_GRADLE_JAVA_VERSION} to run Gradle and its plugins, "
-            f"but '{java_home}' is Java {java_version} (parsed from {java_home}/release). Pass --gradle-java-home with a JDK 21 runtime."
-        )
 
     def copy_build_files(self, target_dir):
         build_file = os.path.join(target_dir, self.build_file_name)
