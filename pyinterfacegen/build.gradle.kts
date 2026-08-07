@@ -8,7 +8,7 @@ import java.net.URI
 import java.util.*
 
 plugins {
-    kotlin("jvm") version "2.2.10"
+    kotlin("jvm") version "2.3.21"
     java
     // Use the locally included plugin (see settings.gradle.kts pluginManagement). Version is supplied there.
     id("org.graalvm.python.pyinterfacegen")
@@ -85,7 +85,14 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
+}
+
 kotlin {
+    jvmToolchain(25)
 }
 
 // ------- GraalPy Integration Test Support -------

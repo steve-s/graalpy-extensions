@@ -1,7 +1,7 @@
 import org.graalvm.python.pyinterfacegen.build.mavenBundleRepository
 
 plugins {
-    kotlin("jvm") version "2.2.10"
+    kotlin("jvm") version "2.3.21"
     java
     `maven-publish`
     id("j2pyi.convention")
@@ -15,6 +15,9 @@ repositories {
 group = "org.graalvm.python"
 
 java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
     withSourcesJar()
     withJavadocJar()
 }
@@ -28,6 +31,7 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
+    jvmToolchain(25)
 }
 
 publishing {
