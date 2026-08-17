@@ -996,16 +996,22 @@ public final class VFSUtils {
 		}
 	}
 
-	private static boolean checkPyVenvCfgFile(Path pyVenvCfg, Path java) {
+	private static boolean checkPyVenvCfgFile(Path pyVenvCfg, Path java, Path launcher) {
+		boolean commandMatches = false;
+		boolean baseExecutableMatches = !IS_WINDOWS;
 		try {
+			String expectedBaseExecutable = launcher.toRealPath().toString();
 			for (String line : Files.readAllLines(pyVenvCfg)) {
-				if (line.trim().startsWith("venvlauncher_command = " + java)) {
-					return true;
+				String trimmedLine = line.trim();
+				if (trimmedLine.startsWith("venvlauncher_command = " + java)) {
+					commandMatches = true;
+				} else if (trimmedLine.equals("base-executable = " + expectedBaseExecutable)) {
+					baseExecutableMatches = true;
 				}
 			}
 		} catch (IOException ignore) {
 		}
-		return false;
+		return commandMatches && baseExecutableMatches;
 	}
 
 	private static String formatMultiline(String str, Object... args) {
@@ -1028,7 +1034,7 @@ public final class VFSUtils {
 				pyvenvCfg = launcherDirectory.resolve("pyvenv.cfg");
 			}
 			if (Files.exists(launcherArgs.launcherPath)
-					&& checkPyVenvCfgFile(pyvenvCfg, javaToolchain.javaExecutable())) {
+					&& checkPyVenvCfgFile(pyvenvCfg, javaToolchain.javaExecutable(), launcherArgs.launcherPath)) {
 				return;
 			}
 			var launcherFolder = IS_WINDOWS
@@ -1047,6 +1053,10 @@ public final class VFSUtils {
 					with open(pyvenvcfg, 'w', encoding='utf-8') as f:
 					    f.write('venvlauncher_command = ')
 					    f.write(cmd)
+					    # Keep the copyable launcher distinct from the Java command it invokes.
+					    if os.name == 'nt':
+					        f.write('\\nbase-executable = ')
+					        f.write(os.path.realpath(tl))
 					""", launcherFolder, launcherName, launcherArgs.launcherPath, javaToolchain.javaExecutable(),
 					extraJavaOptions, classpath,
 					GRAALPY_MAIN_CLASS);
