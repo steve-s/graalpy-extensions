@@ -777,9 +777,11 @@ public final class VFSUtils {
 			return;
 		}
 		Path launcherPath = ensureLauncher(launcher, log);
-		// We turn off the hash checking at runtime in GraalPy resources
-		Stream<String> args = Stream.of("-m", "compileall", "-fq", "-j", "1", "--invalidation-mode", "checked-hash",
-				path.toString());
+		// Bytecode compilation only needs filesystem access, so use the portable Java
+		// backend.
+		// We turn off the hash checking at runtime in GraalPy resources.
+		Stream<String> args = Stream.of("--python.PosixModuleBackend=java", "-m", "compileall", "-fq", "-j", "1",
+				"--invalidation-mode", "checked-hash", path.toString());
 		if (cachePrefix != null) {
 			args = Stream.concat(Stream.of("--python.PyCachePrefix=" + cachePrefix), args);
 		}
