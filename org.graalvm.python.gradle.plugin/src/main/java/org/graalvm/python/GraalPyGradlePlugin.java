@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, 2025, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2024, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * The Universal Permissive License (UPL), Version 1.0
@@ -85,7 +85,6 @@ public abstract class GraalPyGradlePlugin implements Plugin<Project> {
 
 	private static final String GRADLE_PLUGIN_EXTRA_PROPERTIES = "META-INF/gradle-plugins/org.graalvm.python-extra.properties";
 	private static final String PYTHON_LAUNCHER_ARTIFACT_ID = "python-launcher";
-	private static final String PYTHON_BOUNCYCASTLE_SUPPORT_ARTIFACT_ID = "python-bouncycastle-support";
 	private static final String PYTHON_EMBEDDING_ARTIFACT_ID = "python-embedding";
 	private static final String POLYGLOT_GROUP_ID = "org.graalvm.polyglot";
 	private static final String POLYGLOT_ARTIFACT_ID = "polyglot";
@@ -324,7 +323,6 @@ public abstract class GraalPyGradlePlugin implements Plugin<Project> {
 		var launcher = configurations.getByName(LAUNCHER_CONFIGURATION_NAME);
 		launcher.getDependencies().addAllLater(dependencyList(project, extension, (version, community) -> List.of(
 				dependency(GRAALPY_GROUP_ID, PYTHON_LAUNCHER_ARTIFACT_ID, version),
-				dependency(GRAALPY_GROUP_ID, PYTHON_BOUNCYCASTLE_SUPPORT_ARTIFACT_ID, version),
 				dependency(GRAALPY_GROUP_ID, community ? PYTHON_COMMUNITY_ARTIFACT_ID : PYTHON_ARTIFACT_ID, version))));
 		makeSureBothEditionsAreNotOnClasspathSimultaneously(configurations);
 	}

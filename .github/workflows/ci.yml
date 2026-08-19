@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  graalvm_version: '25e1-ea'
+  graalvm_version: '25i3-ea'
 
 jobs:
   # This is done as one single separate step to work around rate limits for the API
@@ -18,13 +18,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Setup Java 21
-        id: java21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
 
       - name: Set Maven Bundle URL
         id: set_url
@@ -39,13 +32,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Setup Java 21
-        id: java21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -71,17 +57,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup Java 21
-        id: java21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Set GRADLE_JAVA_HOME
-        run: echo "GRADLE_JAVA_HOME=${{ steps.java21.outputs.path }}" >> $GITHUB_ENV
-        shell: bash
-
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
@@ -93,7 +68,7 @@ jobs:
         shell: bash
 
       - name: Build project (skip tests)
-        run: mvn --batch-mode -DskipTests -Dgradle.java.home=$GRADLE_JAVA_HOME package verify
+        run: mvn --batch-mode -DskipTests package verify
         shell: bash
 
       - name: Upload build artifacts
@@ -142,17 +117,6 @@ jobs:
           name: build-artifacts-${{ runner.os }}
           path: .
 
-      - name: Setup Java 21
-        id: java21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Set GRADLE_JAVA_HOME
-        run: echo "GRADLE_JAVA_HOME=${{ steps.java21.outputs.path }}" >> $GITHUB_ENV
-        shell: bash
-
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
@@ -164,7 +128,7 @@ jobs:
         shell: bash
 
       - name: Run Maven install
-        run: ./mvnw --batch-mode -Dgradle.java.home=$GRADLE_JAVA_HOME -DskipTests install
+        run: ./mvnw --batch-mode -DskipTests install
         shell: bash
 
       - name: Install JBang (Linux/macOS)
@@ -192,7 +156,7 @@ jobs:
       - name: Run integration tests
         id: tests_run
         run: |
-          ./mvnw --batch-mode -N -Dgradle.java.home=$GRADLE_JAVA_HOME exec:java@integration-tests -Dintegration.tests.args="${{ matrix.test_name }} ${{ matrix.extra_test_args }} $TEST_FLAGS"
+          ./mvnw --batch-mode -N exec:java@integration-tests -Dintegration.tests.args="${{ matrix.test_name }} ${{ matrix.extra_test_args }} $TEST_FLAGS"
         shell: bash
 
       # /var/folders/sw/**/T/jbang*native-image
@@ -240,33 +204,22 @@ jobs:
           name: build-artifacts-${{ runner.os }}
           path: .
 
-      - name: Setup Java 21
-        id: java21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
           distribution: 'graalvm'
           java-version: ${{ matrix.tests == 'isolate-it' && 'latest-ea' || env.graalvm_version }}
 
-      - name: Set GRADLE_JAVA_HOME
-        run: echo "GRADLE_JAVA_HOME=${{ steps.java21.outputs.path }}" >> $GITHUB_ENV
-        shell: bash
-
       - name: Setup Polyglot Maven bundle
         run: ./scripts/maven-bundle-setup.sh "${{ needs.maven_bundle_url.outputs.maven_bundle_url }}"
         shell: bash
 
       - name: Run Maven install
-        run: mvn --batch-mode -Dgradle.java.home=$GRADLE_JAVA_HOME -DskipTests install
+        run: mvn --batch-mode -DskipTests install
         shell: bash
 
       - name: Run Maven tests
-        run: mvn --batch-mode -Dgradle.java.home=$GRADLE_JAVA_HOME ${{ matrix.maven_args }}
+        run: mvn --batch-mode ${{ matrix.maven_args }}
         shell: bash
 
   pyinterfacegen:
@@ -282,11 +235,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup Java 21
-        uses: actions/setup-java@v4
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
         with:
-          distribution: temurin
-          java-version: 21
+          distribution: 'graalvm'
+          java-version: ${{ env.graalvm_version }}
 
       - name: Run Gradle tests (Linux/macOS)
         if: runner.os != 'Windows'

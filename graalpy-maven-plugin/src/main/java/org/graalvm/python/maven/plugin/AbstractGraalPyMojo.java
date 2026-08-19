@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2025, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * The Universal Permissive License (UPL), Version 1.0
@@ -82,7 +82,6 @@ import static org.graalvm.python.embedding.tools.vfs.VFSUtils.VFS_VENV;
 public abstract class AbstractGraalPyMojo extends AbstractMojo {
 
 	private static final String PYTHON_LAUNCHER_ARTIFACT_ID = "python-launcher";
-	private static final String PYTHON_BOUNCYCASTLE_SUPPORT_ARTIFACT_ID = "python-bouncycastle-support";
 
 	private static final String POLYGLOT_GROUP_ID = "org.graalvm.polyglot";
 	private static final String PYTHON_COMMUNITY_ARTIFACT_ID = "python-community";
@@ -385,7 +384,6 @@ public abstract class AbstractGraalPyMojo extends AbstractMojo {
 			launcherClassPath.add(graalPyLauncherArtifact.getFile().getAbsolutePath());
 			// and transitively all its dependencies
 			launcherClassPath.addAll(resolveDependencies(graalPyLauncherArtifact));
-			addArtifactWithDependencies(version, PYTHON_BOUNCYCASTLE_SUPPORT_ARTIFACT_ID, launcherClassPath);
 
 			// 2.) graalpy dependencies
 			Artifact graalPyArtifact = getGraalPyArtifact(project);
@@ -393,20 +391,6 @@ public abstract class AbstractGraalPyMojo extends AbstractMojo {
 			launcherClassPath.addAll(resolveDependencies(graalPyArtifact));
 		}
 		return launcherClassPath;
-	}
-
-	private void addArtifactWithDependencies(String version, String artifactId, Set<String> classPath)
-			throws IOException {
-		DefaultArtifact artifact = new DefaultArtifact(GRAALPY_GROUP_ID, artifactId, version, "compile", "jar", null,
-				new DefaultArtifactHandler("jar"));
-		ProjectBuildingResult result = buildProjectFromArtifact(artifact);
-		Artifact resolvedArtifact = result.getProject().getArtifact();
-		if (resolvedArtifact != null && resolvedArtifact.getFile() != null) {
-			classPath.add(resolvedArtifact.getFile().getAbsolutePath());
-		}
-		for (Dependency dependency : result.getDependencyResolutionResult().getResolvedDependencies()) {
-			addDependency(dependency, classPath);
-		}
 	}
 
 	private Set<String> resolveDependencies(Artifact artifact) throws IOException {

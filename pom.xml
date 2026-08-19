@@ -9,7 +9,7 @@
   <properties>
     <!-- NOTE: revision is special and one can change it from cmd line: `mvn -Drevision=... package` -->
     <!-- See https://maven.apache.org/guides/mini/guide-maven-ci-friendly.html -->
-    <revision>25.1.0-SNAPSHOT</revision>
+    <revision>25.3.4.1-SNAPSHOT</revision>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.polyglot.version>${revision}</project.polyglot.version>
@@ -62,6 +62,7 @@
   </modules>
 
   <!-- javainterfacegen module is excluded on Windows -->
+  <!-- it also native access, which is only supported on JDK 25+ -->
   <profiles>
     <profile>
       <id>javainterfacegen-unix</id>
@@ -72,6 +73,9 @@
         <property>
           <name>!skipJavainterfacegen</name>
         </property>
+        <jdk>
+          [25,)
+        </jdk>
       </activation>
       <modules>
         <module>javainterfacegen</module>
@@ -441,11 +445,6 @@
           <dependency>
             <groupId>org.graalvm.python</groupId>
             <artifactId>python-launcher</artifactId>
-            <version>${project.polyglot.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.graalvm.python</groupId>
-            <artifactId>python-bouncycastle-support</artifactId>
             <version>${project.polyglot.version}</version>
           </dependency>
           <dependency>

@@ -47,9 +47,18 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 MAVEN_VERSION = "3.9.8"
-GLOBAL_MVN_CMD = [shutil.which('mvn'), "--batch-mode"]
 
-GRADLE_VERSION = "8.13"
+
+def _maven_command():
+    if sys.platform == "win32":
+        mvn = shutil.which("mvn.cmd")
+        return [os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c", mvn, "--batch-mode"]
+    return [shutil.which("mvn"), "--batch-mode"]
+
+
+GLOBAL_MVN_CMD = _maven_command()
+
+GRADLE_VERSION = "9.7"
 
 DEFAULT_VFS_PREFIX = "org.graalvm.python.vfs"
 

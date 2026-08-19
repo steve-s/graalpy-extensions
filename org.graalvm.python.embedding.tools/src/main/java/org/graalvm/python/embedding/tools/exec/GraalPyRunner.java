@@ -159,11 +159,13 @@ public final class GraalPyRunner {
 
 	private static void runProcess(ProcessBuilder pb, BuildToolLog log) throws IOException, InterruptedException {
 		Process process = pb.start();
+		List<String> processOutput = java.util.Collections.synchronizedList(new ArrayList<>());
 		Thread outputReader = new Thread(() -> {
 			try (InputStream is = process.getInputStream();
 					BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
+					processOutput.add("[stdout] " + line);
 					subProcessOut(log, line);
 				}
 			} catch (IOException e) {
@@ -179,6 +181,7 @@ public final class GraalPyRunner {
 					new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
 				String line;
 				while ((line = errorBufferedReader.readLine()) != null) {
+					processOutput.add("[stderr] " + line);
 					subProcessErr(log, line);
 				}
 			} catch (IOException e) {
@@ -194,9 +197,12 @@ public final class GraalPyRunner {
 		errorReader.join();
 
 		if (process.exitValue() != 0) {
-			throw new RuntimeException(
-					String.format("Running command: '%s' ended with code %d.See the error output above.",
-							String.join(" ", pb.command()), process.exitValue()));
+			String message = String.format("Running command: '%s' ended with code %d.",
+					String.join(" ", pb.command()), process.exitValue());
+			if (!processOutput.isEmpty()) {
+				message += "\nSubprocess output:\n" + String.join("\n", processOutput);
+			}
+			throw new RuntimeException(message);
 		}
 	}
 

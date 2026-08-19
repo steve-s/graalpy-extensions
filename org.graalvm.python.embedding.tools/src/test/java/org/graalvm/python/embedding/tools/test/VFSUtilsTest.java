@@ -132,6 +132,9 @@ public class VFSUtilsTest {
 		assertThat(log.getOutput(), containsString(MISSING_LOCK_FILE_WARNING));
 		checkInstalledPackages(venvDir.resolve("installed.txt"), "hello-world", "tiny-tiny");
 		checkVenvContentsFile(contents, "0.1", "hello-world", "tiny-tiny");
+		Path launcher = tmpDir.resolve(VFSUtils.LAUNCHER_NAME);
+		checkWindowsBaseExecutable(tmpDir.resolve("pyvenv.cfg"), launcher);
+		checkWindowsBaseExecutable(venvDir.resolve("pyvenv.cfg"), launcher);
 
 		// install packages again, assert that venv wasn't created again and packages
 		// weren't
@@ -631,6 +634,17 @@ public class VFSUtilsTest {
 	private static void checkInstalledPackages(Path instaledFile, String... packages) throws IOException {
 		assertTrue(Files.exists(instaledFile));
 		checkPackages(instaledFile, Files.readAllLines(instaledFile), packages);
+	}
+
+	private static void checkWindowsBaseExecutable(Path pyVenvCfg, Path launcher) throws IOException {
+		if (!System.getProperty("os.name").toLowerCase().contains("win")) {
+			return;
+		}
+		String prefix = "base-executable = ";
+		String baseExecutable = Files.readAllLines(pyVenvCfg).stream().map(String::trim)
+				.filter(line -> line.startsWith(prefix)).map(line -> line.substring(prefix.length())).findFirst()
+				.orElseThrow(() -> new AssertionError("missing base-executable in " + pyVenvCfg));
+		assertTrue(Files.isSameFile(launcher, Path.of(baseExecutable)));
 	}
 
 	private static void checkLockFile(Path lockFile, String[] inputPackages, String... installedPackages)
