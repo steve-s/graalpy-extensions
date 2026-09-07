@@ -11,10 +11,14 @@ plugins {
 }
 
 repositories {
-    // Resolve dependencies and the plugin/doclet locally if needed
+    // Prefer the public repository for released dependencies. Gradle sticks a
+    // module to the repository that supplied its POM, so putting mavenLocal()
+    // first can make a locally cached POM hide a source JAR that exists in
+    // Maven Central.
+    mavenCentral()
+    // Resolve local plugin/doclet and bundle artifacts when needed.
     mavenLocal()
     mavenBundleRepository(rootDir)
-    mavenCentral()
 }
 
 // A resolvable configuration of dependencies to generate stubs for

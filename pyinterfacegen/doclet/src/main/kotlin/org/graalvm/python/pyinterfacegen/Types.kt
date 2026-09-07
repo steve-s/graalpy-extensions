@@ -8,8 +8,16 @@ sealed interface PyType {
     }
 
     // Reference to another declared (top-level) type.
-    data class Ref(val packageName: String, val simpleName: String) : PyType {
-        override fun render(): String = simpleName
+    data class Ref(val packageName: String, val simpleName: String, val args: List<PyType> = emptyList()) : PyType {
+        override fun render(): String =
+            if (args.isEmpty()) simpleName else "$simpleName[${args.joinToString(", ") { it.render() }}]"
+
+        override fun walk(visit: (PyType) -> Unit) {
+            visit(this)
+            for (arg in args) {
+                arg.walk(visit)
+            }
+        }
     }
 
     // Reference to a type variable declared on the containing type.
@@ -103,6 +111,11 @@ data class TypeIR(
     val kind: Kind,
     val isAbstract: Boolean,
     val typeParams: List<TypeParamIR>,
+    val superTypes: List<PyType>,
+    val superTypeVariances: List<List<Variance>>,
+    val omittedSuperTypeNames: List<String>,
+    // Java members omitted because their inherited Python base provides the authoritative signature.
+    val suppressedMemberNames: List<String>,
     val doc: String?,   // First-sentence Javadoc summary for the type
     val fields: List<FieldIR>,
     val constructors: List<ConstructorIR>,
@@ -112,6 +125,8 @@ data class TypeIR(
 )
 
 enum class Kind { CLASS, INTERFACE, ENUM }
+
+enum class Variance { COVARIANT, CONTRAVARIANT, INVARIANT }
 
 data class TypeParamIR(
     val name: String,

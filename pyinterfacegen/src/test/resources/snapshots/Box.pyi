@@ -13,6 +13,6 @@ class Box(Generic[T]):
     def get(self) -> Any:
         """Get the contained value."""
         ...
-    def set_(self, v: T) -> None:
+    def set(self, v: T) -> None:
         """Set the contained value."""
         ...

@@ -116,7 +116,7 @@ You'll find a PEP 561 stub-only package at `build/pymodule` containing `.pyi` fi
 
 ## GraalPy integration check
 
-This build includes a convenience task that downloads a matching GraalPy distribution for your OS/arch, generates stubs and a Python package, then runs a short Python script under GraalPy to import and use the generated bindings:
+This build includes a convenience task that downloads a matching GraalPy distribution for your OS/arch, generates stubs and a Python package, then runs `src/test/python/graalpy_integration_test.py` under GraalPy. It imports every example binding and verifies constructors, method calls, and Java/Python value conversion:
 
 ```bash
 ./gradlew graalPyIntegrationTest

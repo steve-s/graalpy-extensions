@@ -8,8 +8,8 @@ import kotlin.test.assertTrue
 class DocsAndExamplesTest {
     @Test
     fun quickStartGeneratesExampleStubs() {
-        Generation.ensureMainGenerated()
-        val box = Generation.mainModuleBase().resolve("Box.pyi")
+        ensureMainGenerated()
+        val box = mainModuleBase().resolve("Box.pyi")
         assertTrue(Files.exists(box), "Box.pyi should be generated at: $box")
         val text = box.readText()
         assertTrue(

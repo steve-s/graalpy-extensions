@@ -13,11 +13,17 @@ import java.util.spi.ToolProvider
  */
 object DocletTestUtil {
     private fun extractTypeName(src: String): String {
-        val classMatch = Regex("""\bclass\s+([A-Za-z0-9_]+)""").find(src)?.groupValues?.get(1)
+        // Ignore comments: a Javadoc phrase such as "Greeter class summary" is not a declaration.
+        val source = src
+            .replace(Regex("""(?s)/\*.*?\*/"""), "")
+            .replace(Regex("""(?m)//.*$"""), "")
+        val recordMatch = Regex("""\brecord\s+([A-Za-z0-9_]+)""").find(source)?.groupValues?.get(1)
+        if (recordMatch != null) return recordMatch
+        val classMatch = Regex("""\bclass\s+([A-Za-z0-9_]+)""").find(source)?.groupValues?.get(1)
         if (classMatch != null) return classMatch
-        val ifaceMatch = Regex("""\binterface\s+([A-Za-z0-9_]+)""").find(src)?.groupValues?.get(1)
+        val ifaceMatch = Regex("""\binterface\s+([A-Za-z0-9_]+)""").find(source)?.groupValues?.get(1)
         if (ifaceMatch != null) return ifaceMatch
-        val enumMatch = Regex("""\benum\s+([A-Za-z0-9_]+)""").find(src)?.groupValues?.get(1)
+        val enumMatch = Regex("""\benum\s+([A-Za-z0-9_]+)""").find(source)?.groupValues?.get(1)
         if (enumMatch != null) return enumMatch
         return "TestClass"
     }
@@ -128,7 +134,7 @@ object DocletTestUtil {
             basePkgs += pkg
             val pkgDir = File(tmpSrc, pkg.replace('.', '/'))
             pkgDir.mkdirs()
-            val className = Regex("""class\s+([A-Za-z0-9_]+)""").find(src)?.groupValues?.get(1) ?: "TestClass"
+            val className = extractTypeName(src)
             File(pkgDir, "$className.java").writeText(
                 """
                 package $pkg;

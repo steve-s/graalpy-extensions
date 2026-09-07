@@ -15,9 +15,12 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.*
 import javax.lang.model.type.ArrayType
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.ExecutableType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.ElementFilter
+import javax.lang.model.util.Elements
+import javax.lang.model.util.Types
 
 class J2PyiDoclet : Doclet {
     // Packages for which we are actually generating stubs in this run.
@@ -61,6 +64,11 @@ class J2PyiDoclet : Doclet {
     private var reporter: Reporter? = null
     private var outputDir: String? = null
     private var docTrees: DocTrees? = null
+    private var typeUtils: Types? = null
+    private var elementUtils: Elements? = null
+    private val generatedMemberNamesCache = mutableMapOf<String, Set<String>>()
+    private val protocolVarianceCache = mutableMapOf<String, List<Variance>>()
+    private val generatedTypeElements = mutableMapOf<String, TypeElement>()
 
     override fun init(locale: Locale, reporter: Reporter) {
         this.reporter = reporter
@@ -70,15 +78,29 @@ class J2PyiDoclet : Doclet {
 
     override fun run(environment: DocletEnvironment): Boolean {
         this.docTrees = environment.docTrees
+        this.typeUtils = environment.typeUtils
+        this.elementUtils = environment.elementUtils
+        generatedMemberNamesCache.clear()
+        protocolVarianceCache.clear()
+        generatedTypeElements.clear()
 
         compileAssumedTypedPkgMatchers()
 
         // Build an intermediate representation for all included types (classes, interfaces, enums) honoring include/exclude and visibility.
-        val typeIRs = environment.includedElements
+        val includedTypes = environment.includedElements
             .asSequence()
             .filterIsInstance<TypeElement>()
-            .filter { it.kind == ElementKind.CLASS || it.kind == ElementKind.INTERFACE || it.kind == ElementKind.ENUM }
+            .filter { it.kind == ElementKind.CLASS || it.kind == ElementKind.INTERFACE || it.kind == ElementKind.RECORD || it.kind == ElementKind.ENUM }
             .filter { shouldIncludeType(it) }
+            .toList()
+        // Make this available while building each IR: it determines whether an inherited declared type will
+        // survive external-reference scrubbing and can therefore provide a Python member contract.
+        allowedPkgs = includedTypes.map { packageOf(it) }.toSet()
+        generatedTypeElements.putAll(
+            includedTypes.associateBy { it.qualifiedName.toString() }
+        )
+        val typeIRs = includedTypes
+            .asSequence()
             .mapNotNull { maybeBuildTypeIR(it) }
             .sortedBy { it.qualifiedName }
             .toList()
@@ -90,9 +112,6 @@ class J2PyiDoclet : Doclet {
         if (typeIRs.isEmpty()) {
             return true
         }
-
-        // Record the set of packages for which we will emit stubs; used to avoid importing external refs.
-        allowedPkgs = typeIRs.map { it.packageName }.toSet()
 
         // Emit one .pyi module per top-level type and collect
         // package contents for __init__ re-exports and runtime symbols.
@@ -396,12 +415,6 @@ class J2PyiDoclet : Doclet {
             ElementKind.ENUM -> Kind.ENUM
             else -> Kind.CLASS
         }
-        fun isThrowableBound(tm: TypeMirror?): Boolean {
-            if (tm == null) return false
-            val decl = (tm as? DeclaredType)?.asElement() as? TypeElement
-            val qn = decl?.qualifiedName?.toString() ?: return false
-            return qn == "java.lang.Throwable" || qn == "java.lang.Exception" || qn == "java.lang.RuntimeException"
-        }
         // Collect type parameters with simple upper bounds (first non-Object bound only).
         // Sanitize names to avoid stray whitespace that can lead to malformed TypeVar declarations.
         val typeParams: List<TypeParamIR> = te.typeParameters.map { tp ->
@@ -410,7 +423,7 @@ class J2PyiDoclet : Doclet {
             // the thrown exception type (e.g. <E extends Throwable>). Including such a parameter in a Protocol
             // causes mypy variance errors, and it doesn't add useful information for Python users.
             // So, drop type parameters that are bounded directly by Throwable/Exception.
-            if (tp.bounds.any { isThrowableBound(it) }) {
+            if (isThrowableTypeParameter(tp)) {
                 return@map null
             }
             // Prefer first bound that's not java.lang.Object; fall back to first or null
@@ -428,6 +441,55 @@ class J2PyiDoclet : Doclet {
             TypeParamIR(name, normalized)
         }.filterNotNull()
         val typeDoc: String? = docTrees?.javadocFull(te)
+        fun mapSuperType(tm: TypeMirror?): PyType? {
+            if (tm == null || tm.kind == TypeKind.NONE) return null
+            return when (val mapped = mapType(tm)) {
+                // Only generated Java declarations can safely be represented as Python bases. Built-in
+                // collection/ABC mappings remain useful in member annotations, but using them as bases
+                // would impose Python runtime contracts that Java binding objects do not implement.
+                is PyType.Ref -> mapped.takeIf { isAssumedTypedPackage(it.packageName) }
+                else -> null
+            }
+        }
+        val omittedSuperTypeNames = mutableListOf<String>()
+        val superTypeEntries = mutableListOf<Pair<PyType, List<Variance>>>()
+        val selectedSuperContracts = mutableMapOf<String, Set<String>>()
+        fun addSuperType(tm: TypeMirror, mapped: PyType, isJavaSuperclass: Boolean) {
+            val element = (tm as? DeclaredType)?.asElement() as? TypeElement
+            val contracts = generatedPythonMemberContracts(tm)
+            // Python cannot represent two unrelated bases that publish incompatible methods under
+            // the same name. Prefer the concrete Java superclass; otherwise retain the first
+            // interface and document the omitted relationship.
+            val hasIncompatibleContract = contracts.any { (name, signatures) ->
+                selectedSuperContracts[name]?.let { it != signatures } == true
+            }
+            if (!isJavaSuperclass && hasIncompatibleContract) {
+                omittedSuperTypeNames += mapped.render()
+                return
+            }
+            superTypeEntries += mapped to protocolTypeParameterVariances(element)
+            for ((name, signatures) in contracts) {
+                selectedSuperContracts.putIfAbsent(name, signatures)
+            }
+        }
+
+        val mappedSuperclass = if (kind == Kind.CLASS) mapSuperType(te.superclass) else null
+        if (mappedSuperclass != null)
+            addSuperType(te.superclass, mappedSuperclass, isJavaSuperclass = true)
+        for (interfaceType in te.interfaces) {
+            // A redundantly declared interface is already present through an emitted superclass.
+            // Keep every other direct interface unless its Python member contract conflicts with
+            // a base already selected above.
+            val inheritedThroughSuperclass = mappedSuperclass != null &&
+                typeUtils?.isSubtype(te.superclass, interfaceType) == true
+            if (!inheritedThroughSuperclass) {
+                val mapped = mapSuperType(interfaceType)
+                if (mapped != null)
+                    addSuperType(interfaceType, mapped, isJavaSuperclass = false)
+            }
+        }
+        val superTypes = superTypeEntries.map { it.first }
+        val superTypeVariances = superTypeEntries.map { it.second }
         val fields = if (kind == Kind.INTERFACE) {
             emptyList()
         } else {
@@ -451,22 +513,27 @@ class J2PyiDoclet : Doclet {
         // Collect methods
         val allMethods = ElementFilter.methodsIn(te.enclosedElements).filter { isIncludedByVisibility(it) }
             .sortedWith(compareBy({ it.simpleName.toString() }, { it.parameters.size }))
-        val mappedMethods = allMethods.map { m ->
-            val variadic = m.isVarArgs
-            MethodIR(
-                name = m.simpleName.toString(),
-                params = paramsToIR(m, variadic),
-                returnType = mapReturnTypeWithNullability(m),
-                isStatic = m.modifiers.contains(Modifier.STATIC),
-                doc = docTrees?.javadocFull(m)
-            )
-        }
+        val suppressedOverrideMethods = allMethods.filter { method -> conflictsWithEmittedPythonBase(method, te) }.toSet()
+        val emittedMethods = allMethods
+            .filterNot { it in suppressedOverrideMethods }
+        val mappedMethods = emittedMethods
+            .map { m ->
+                val variadic = m.isVarArgs
+                MethodIR(
+                    name = m.simpleName.toString(),
+                    params = paramsToIR(m, variadic),
+                    returnType = mapReturnTypeWithNullability(m),
+                    isStatic = m.modifiers.contains(Modifier.STATIC),
+                    doc = docTrees?.javadocFull(m)
+                )
+            }
 
         // Synthesize properties per JavaBeans rules and filter out matched getters/setters (classes only).
         val (properties, remainingMethods) = if (kind == Kind.CLASS && config.propertySynthesis) synthesizeProperties(
             fields,
-            allMethods,
-            mappedMethods
+            emittedMethods,
+            mappedMethods,
+            blockedPropertyNames = emittedPythonBaseMembers(te).keys
         )
         else Pair(emptyList(), mappedMethods)
 
@@ -485,6 +552,10 @@ class J2PyiDoclet : Doclet {
             kind = kind,
             isAbstract = te.modifiers.contains(Modifier.ABSTRACT),
             typeParams = typeParams,
+            superTypes = superTypes,
+            superTypeVariances = superTypeVariances,
+            omittedSuperTypeNames = omittedSuperTypeNames.distinct().sorted(),
+            suppressedMemberNames = suppressedOverrideMethods.map { it.simpleName.toString() }.distinct().sorted(),
             doc = typeDoc,
             fields = fields,
             constructors = constructors,
@@ -494,8 +565,266 @@ class J2PyiDoclet : Doclet {
         )
     }
 
+    private fun generatedTypeElement(ref: PyType.Ref): TypeElement? {
+        val qualifiedName = "${ref.packageName}.${ref.simpleName}"
+        return generatedTypeElements[qualifiedName] ?: elementUtils?.getTypeElement(qualifiedName)
+    }
+
+    /**
+     * Determine how a generated Protocol uses each type parameter. This is needed when a child
+     * Protocol forwards one of its variables through a generic base: the child's variance must
+     * agree with the base's variance or mypy rejects the class header.
+     */
+    private fun protocolTypeParameterVariances(
+        type: TypeElement?,
+        active: MutableSet<String> = mutableSetOf()
+    ): List<Variance> {
+        if (type == null || type.kind != ElementKind.INTERFACE || !config.interfaceAsProtocol) return emptyList()
+        val qualifiedName = type.qualifiedName.toString()
+        protocolVarianceCache[qualifiedName]?.let { return it }
+        if (!active.add(qualifiedName)) return emptyList()
+        // Keep these slots aligned with mapDeclaredType(), which removes Java exception-only
+        // parameters from every reference to the generated Protocol.
+        val parameters = type.typeParameters.filterNot(::isThrowableTypeParameter)
+        if (parameters.isEmpty()) {
+            active.remove(qualifiedName)
+            protocolVarianceCache[qualifiedName] = emptyList()
+            return emptyList()
+        }
+        val returned = mutableSetOf<String>()
+        val parameter = mutableSetOf<String>()
+        val invariant = mutableSetOf<String>()
+        val parameterNames = parameters.map { it.simpleName.toString() }.toSet()
+
+        fun collect(py: PyType, retLike: Boolean, invariantContext: Boolean) {
+            when (py) {
+                is PyType.TypeVarRef -> {
+                    val name = py.name
+                    if (name !in parameterNames) return
+                    if (retLike) returned += name else parameter += name
+                    if (invariantContext) invariant += name
+                }
+                is PyType.Generic -> {
+                    val nestedInvariant = invariantContext || py.name == "list" || py.name == "set" || py.name == "dict"
+                    for (arg in py.args) collect(arg, retLike, nestedInvariant)
+                }
+                is PyType.Abc -> {
+                    // The emitted ABCs used by the mapper (Collection, Sequence, Iterator,
+                    // Iterable and Mapping) are covariant in their element parameters.
+                    for (arg in py.args) collect(arg, retLike, invariantContext)
+                }
+                is PyType.Ref -> {
+                    val referenced = generatedTypeElement(py)
+                    val variances = protocolTypeParameterVariances(referenced, active)
+                    for ((index, arg) in py.args.withIndex()) {
+                        when (variances.getOrNull(index) ?: Variance.INVARIANT) {
+                            Variance.COVARIANT -> collect(arg, retLike, invariantContext)
+                            Variance.CONTRAVARIANT -> collect(arg, !retLike, invariantContext)
+                            Variance.INVARIANT -> collect(arg, retLike, true)
+                        }
+                    }
+                }
+                is PyType.Union -> py.items.forEach { collect(it, retLike, invariantContext) }
+                else -> Unit
+            }
+        }
+
+        // Scan all return types and method parameters recursively to establish variance.
+        ElementFilter.methodsIn(type.enclosedElements)
+            .filter { isIncludedByVisibility(it) }
+            .filterNot { conflictsWithEmittedPythonBase(it, type) }
+            .forEach { method ->
+                collect(mapReturnTypeWithNullability(method), retLike = true, invariantContext = false)
+                paramsToIR(method, method.isVarArgs).forEach { collect(it.type, retLike = false, invariantContext = false) }
+            }
+
+        // A Protocol also inherits variance constraints from its own generic bases. This is
+        // especially important for map-like interfaces combining read (covariant) and write
+        // (contravariant) views, which are therefore invariant overall.
+        typeUtils?.directSupertypes(type.asType()).orEmpty().forEach { superMirror ->
+            val mapped = mapType(superMirror)
+            if (mapped is PyType.Ref) {
+                val referenced = generatedTypeElement(mapped)
+                val variances = protocolTypeParameterVariances(referenced, active)
+                mapped.args.forEachIndexed { index, arg ->
+                    when (variances.getOrNull(index) ?: Variance.INVARIANT) {
+                        Variance.COVARIANT -> collect(arg, retLike = true, invariantContext = false)
+                        Variance.CONTRAVARIANT -> collect(arg, retLike = false, invariantContext = false)
+                        Variance.INVARIANT -> collect(arg, retLike = false, invariantContext = true)
+                    }
+                }
+            }
+        }
+
+        val result = parameters.map { parameterElement ->
+            when (val name = parameterElement.simpleName.toString()) {
+                in invariant -> Variance.INVARIANT
+                in returned if name !in parameter -> Variance.COVARIANT
+                in parameter if name !in returned -> Variance.CONTRAVARIANT
+                in returned if name in parameter -> Variance.INVARIANT
+                else -> Variance.COVARIANT
+            }
+        }
+        active.remove(qualifiedName)
+        protocolVarianceCache[qualifiedName] = result
+        return result
+    }
+
+    /**
+     * A Java member must not replace an inherited Python member contract with an incompatible
+     * Java-shaped signature. Java can overload methods by parameter types and arity, whereas a
+     * Python subclass definition replaces the inherited attribute with the same name.
+     */
+    private fun conflictsWithEmittedPythonBase(method: ExecutableElement, owner: TypeElement): Boolean {
+        val pythonName = safeIdentifier(method.simpleName.toString(), allowSelf = true)
+        val bases = emittedPythonBaseMembers(owner)[pythonName].orEmpty()
+        return bases.isNotEmpty()
+    }
+
+    private fun emittedPythonBaseMembers(owner: TypeElement): Map<String, Set<String>> {
+        val types = typeUtils ?: return emptyMap()
+        val visited = mutableSetOf<String>()
+        val members = mutableMapOf<String, MutableSet<String>>()
+
+        fun isEmittedBase(type: TypeMirror): Boolean {
+            val mapped = mapType(type)
+            return mapped is PyType.Ref && isAssumedTypedPackage(mapped.packageName)
+        }
+
+        fun visit(type: TypeMirror) {
+            for (base in types.directSupertypes(type)) {
+                if (!visited.add(base.toString())) continue
+                // If this base is scrubbed from the Python class header, none of its ancestors can
+                // supply an inherited Python contract either.
+                if (!isEmittedBase(base)) continue
+                val baseElement = (base as? DeclaredType)?.asElement() as? TypeElement
+                if (baseElement != null) {
+                    for (name in generatedPythonMemberNames(baseElement)) {
+                        members.getOrPut(name) { mutableSetOf() } += baseElement.qualifiedName.toString()
+                    }
+                }
+                visit(base)
+            }
+        }
+
+        visit(owner.asType())
+        return members
+    }
+
+    /**
+     * Python-visible contracts for comparing multiple bases. Generic members are viewed through
+     * the actual declared supertype so A<T>.get(T) and B<U>.get(U) compare equal in C<X>.
+     *
+     * For a concrete class, follow only its superclass chain: interfaces that could not safely be
+     * represented on that class must not leak back into a descendant's effective contract.
+     */
+    private fun generatedPythonMemberContracts(root: TypeMirror): Map<String, Set<String>> {
+        val types = typeUtils ?: return emptyMap()
+        val contracts = mutableMapOf<String, MutableSet<String>>()
+        val visited = mutableSetOf<String>()
+        val emittedNamesAcrossHierarchy = mutableSetOf<String>()
+        val methodNamesAcrossHierarchy = mutableSetOf<String>()
+
+        fun visit(type: TypeMirror) {
+            val declared = type as? DeclaredType ?: return
+            if (!visited.add(declared.toString())) return
+            val element = declared.asElement() as? TypeElement ?: return
+            val emittedNames = generatedPythonMemberNames(element)
+            emittedNamesAcrossHierarchy += emittedNames
+
+            ElementFilter.methodsIn(element.enclosedElements)
+                .filter { isIncludedByVisibility(it) }
+                .filterNot { conflictsWithEmittedPythonBase(it, element) }
+                .forEach { method ->
+                    val name = safeIdentifier(method.simpleName.toString(), allowSelf = true)
+                    if (name !in emittedNames) return@forEach
+                    val executable = runCatching { types.asMemberOf(declared, method) as ExecutableType }
+                        .getOrElse { method.asType() as ExecutableType }
+                    val params = executable.parameterTypes.mapIndexed { index, parameterType ->
+                        val prefix = if (method.isVarArgs && index == executable.parameterTypes.lastIndex) "*" else ""
+                        "$prefix${mapType(parameterType).render()}"
+                    }
+                    val staticPrefix = if (method.modifiers.contains(Modifier.STATIC)) "static" else "instance"
+                    val signature = "$staticPrefix(${params.joinToString(",")})->${mapType(executable.returnType).render()}"
+                    contracts.getOrPut(name) { mutableSetOf() } += signature
+                    methodNamesAcrossHierarchy += name
+                }
+
+            val directBases = types.directSupertypes(declared)
+            if (element.kind == ElementKind.INTERFACE) {
+                directBases.forEach(::visit)
+            } else {
+                directBases.firstOrNull {
+                    ((it as? DeclaredType)?.asElement() as? TypeElement)?.kind != ElementKind.INTERFACE
+                }?.let(::visit)
+            }
+        }
+
+        visit(root)
+        // Fields and synthesized properties also occupy a Python class attribute. Add the opaque
+        // contract only if no method anywhere in the effective hierarchy provides that name.
+        for (name in emittedNamesAcrossHierarchy - methodNamesAcrossHierarchy) {
+            contracts.getOrPut(name) { mutableSetOf() } += "attribute"
+        }
+        return contracts.mapValues { it.value.toSet() }
+    }
+
+    /** Names that are actually emitted in a type's Python class body after visibility and property synthesis. */
+    private fun generatedPythonMemberNames(type: TypeElement): Set<String> =
+        generatedMemberNamesCache.getOrPut(type.qualifiedName.toString()) {
+            val kind = when (type.kind) {
+                ElementKind.INTERFACE -> Kind.INTERFACE
+                ElementKind.ENUM -> Kind.ENUM
+                else -> Kind.CLASS
+            }
+            val fields = if (kind == Kind.INTERFACE) {
+                emptyList()
+            } else {
+                ElementFilter.fieldsIn(type.enclosedElements)
+                    .filter { isIncludedByVisibility(it) && it.kind != ElementKind.ENUM_CONSTANT }
+                    .map { FieldIR(it.simpleName.toString(), mapFieldTypeWithNullability(it)) }
+            }
+            val rawMethods = ElementFilter.methodsIn(type.enclosedElements)
+                .filter { isIncludedByVisibility(it) }
+                .sortedWith(compareBy({ it.simpleName.toString() }, { it.parameters.size }))
+            val emittedRawMethods = rawMethods.filterNot { conflictsWithEmittedPythonBase(it, type) }
+            val mappedMethods = emittedRawMethods.map { method ->
+                MethodIR(
+                    name = method.simpleName.toString(),
+                    params = paramsToIR(method, method.isVarArgs),
+                    returnType = mapReturnTypeWithNullability(method),
+                    isStatic = method.modifiers.contains(Modifier.STATIC),
+                    doc = null
+                )
+            }
+            val (properties, remainingMethods) =
+                if (kind == Kind.CLASS && config.propertySynthesis) synthesizeProperties(
+                    fields,
+                    emittedRawMethods,
+                    mappedMethods,
+                    blockedPropertyNames = emittedPythonBaseMembers(type).keys
+                )
+                else Pair(emptyList(), mappedMethods)
+
+            val ownNames = buildSet {
+                val propertyNames = properties.mapTo(mutableSetOf()) { it.name }
+                val methodNames = remainingMethods.mapTo(mutableSetOf()) {
+                    safeIdentifier(it.name, allowSelf = true)
+                }
+                addAll(propertyNames)
+                addAll(methodNames)
+                for (field in fields) {
+                    if (field.name !in propertyNames && field.name !in methodNames) add(field.name)
+                }
+            }
+            ownNames + emittedPythonBaseMembers(type).keys
+        }
+
     private fun synthesizeProperties(
-        fields: List<FieldIR>, rawMethods: List<ExecutableElement>, mappedMethods: List<MethodIR>
+        fields: List<FieldIR>,
+        rawMethods: List<ExecutableElement>,
+        mappedMethods: List<MethodIR>,
+        blockedPropertyNames: Set<String> = emptySet()
     ): Pair<List<PropertyIR>, List<MethodIR>> {
         // Index raw methods by name for bean detection; exclude static methods from consideration
         data class Getter(val el: ExecutableElement, val name: String, val kind: String) // kind: "get" or "is"
@@ -544,6 +873,9 @@ class J2PyiDoclet : Doclet {
         for ((propName, getters: List<Getter>) in gettersByProp) {
             // Exactly one compatible getter must exist
             if (getters.size != 1) continue
+            // An inherited method/property with this Python name is authoritative. Keep the Java
+            // getter/setter as ordinary methods instead of creating a conflicting property.
+            if (safeIdentifier(propName) in blockedPropertyNames || propName in blockedPropertyNames) continue
             val g: Getter = getters.single()
             val gType: PyType = mapReturnTypeWithNullability(g.el)
             val gDoc: String? = docTrees?.javadocSummary(g.el)
@@ -607,30 +939,6 @@ class J2PyiDoclet : Doclet {
 
     // Emit a single type as .pyi text (class, interface-as-Protocol, or enum)
     private fun emitTypeAsPyi(t: TypeIR): String {
-        // After platform-type scrubbing (e.g. mapping java.lang.reflect.Type -> builtins.object), some Java generic
-        // parameters may no longer appear anywhere in the exposed Python types. Keeping such "phantom" type
-        // parameters causes mypy variance errors for Protocols and adds noise for users, so drop them.
-        if (t.typeParams.isNotEmpty()) {
-            val used = mutableSetOf<String>()
-            fun walk(py: PyType) {
-                py.walk { node ->
-                    if (node is PyType.TypeVarRef) used += node.name
-                }
-            }
-            for (f in t.fields) walk(f.type)
-            for (c in t.constructors) for (p in c.params) walk(p.type)
-            for (m in t.methods) {
-                walk(m.returnType)
-                for (p in m.params) walk(p.type)
-            }
-            for (p in t.properties) walk(p.type)
-
-            val filtered = t.typeParams.filter { it.name in used }
-            if (filtered.size != t.typeParams.size) {
-                return emitTypeAsPyi(t.copy(typeParams = filtered))
-            }
-        }
-
         val hasTypeParams = t.typeParams.isNotEmpty()
         val needsEnumImport = t.kind == Kind.ENUM
         val sb = StringBuilder()
@@ -672,7 +980,7 @@ class J2PyiDoclet : Doclet {
             sb.appendLine("from enum import Enum")
         }
         // collections.abc imports
-        val abcImports = t.collectionsAbcImports()
+        val abcImports = if (t.kind == Kind.ENUM) emptySet() else t.collectionsAbcImports()
         if (abcImports.isNotEmpty()) {
             sb.appendLine("from collections.abc import ${abcImports.sorted().joinToString(", ")}")
         }
@@ -750,11 +1058,40 @@ class J2PyiDoclet : Doclet {
                         }
                     }
 
-                    else -> {} // Any/None/Ref: nothing to do
+                    is PyType.Ref -> {
+                        val referenced = generatedTypeElement(py)
+                        val variances = protocolTypeParameterVariances(referenced)
+                        for ((index, a) in py.args.withIndex()) {
+                            when (variances.getOrNull(index) ?: Variance.INVARIANT) {
+                                Variance.COVARIANT -> collectVariance(a, retLike, invariantCtx)
+                                Variance.CONTRAVARIANT -> collectVariance(a, !retLike, invariantCtx)
+                                Variance.INVARIANT -> collectVariance(a, retLike, invariantCtx = true)
+                            }
+                        }
+                    }
+
+                    else -> {} // Any/None: nothing to do
                 }
             }
 
             // Fields (attributes) – treat as "return-like" usage for variance purposes.
+            // Forwarded type arguments inherit the variance of the generic Protocol base. Treating
+            // every base argument as invariant makes otherwise valid iterator/predicate protocols
+            // fail mypy's variance checks.
+            for ((index, superType) in t.superTypes.withIndex()) {
+                val variances = t.superTypeVariances.getOrNull(index).orEmpty()
+                if (superType is PyType.Ref) {
+                    superType.args.forEachIndexed { argIndex, arg ->
+                        when (variances.getOrNull(argIndex) ?: Variance.INVARIANT) {
+                            Variance.COVARIANT -> collectVariance(arg, retLike = true, invariantCtx = false)
+                            Variance.CONTRAVARIANT -> collectVariance(arg, retLike = false, invariantCtx = false)
+                            Variance.INVARIANT -> collectVariance(arg, retLike = false, invariantCtx = true)
+                        }
+                    }
+                } else {
+                    collectVariance(superType, retLike = false, invariantCtx = true)
+                }
+            }
             for (f: FieldIR in t.fields) collectVariance(f.type, retLike = true, invariantCtx = false)
             // Constructors – parameters only
             for (c: ConstructorIR in t.constructors) {
@@ -784,13 +1121,14 @@ class J2PyiDoclet : Doclet {
                     // For Protocols (PEP 544), use position-only rules:
                     // - only in params  -> contravariant
                     // - only in returns -> covariant
-                    // - unused          -> invariant (no variance arg)
+                    // - unused          -> covariant (the least restrictive Protocol variance)
                     // - both            -> invariant (no variance arg)
                     val inRet = name in seenInReturn
                     val inPar = name in seenInParam
                     var result: String? = when {
                         inPar && !inRet -> "contravariant=True"
                         inRet && !inPar -> "covariant=True"
+                        !inRet /* && !inPar  [always true] */ -> "covariant=True"
                         else -> null
                     }
                     // Fallback: if Protocol variance is requested but inference yielded null (i.e., invariant or both),
@@ -802,6 +1140,7 @@ class J2PyiDoclet : Doclet {
                         result = when {
                             inPar && !inRet -> "contravariant=True"
                             inRet && !inPar -> "covariant=True"
+                            !inRet /* && !inPar  [always true] */ -> "covariant=True"
                             else -> null
                         }
                     }
@@ -811,7 +1150,11 @@ class J2PyiDoclet : Doclet {
                 sb.appendLine("from typing import TypeVar")
                 // Emit declared class type params first (preserve bounds), then remaining refs unbounded
                 for (tp: TypeParamIR in t.typeParams) {
-                    val bound = tp.bound?.render()
+                    // Python TypeVar bounds are module-level expressions. A Java bound such as
+                    // Comparable<T> or the F-bounded B extends AbstractSupplier<T, B> therefore
+                    // cannot refer back to the class's type variables; erase those references to
+                    // Any while retaining the useful outer bound.
+                    val bound: String? = tp.bound?.let { sanitizeTypeParameterBound(it).render() }
                     val name = tp.name
                     // Infer variance only for interfaces being emitted as Protocols (PEP 544 requires consistency).
                     val varianceArg: String? = if (t.kind == Kind.INTERFACE && config.interfaceAsProtocol)
@@ -853,6 +1196,9 @@ class J2PyiDoclet : Doclet {
         // Build class header with Protocol/Enum bases using PEP 484 generics.
         val header = run {
             val bases = mutableListOf<String>()
+            if (t.kind != Kind.ENUM) {
+                bases += t.superTypes.map { it.render() }
+            }
             when (t.kind) {
                 Kind.INTERFACE -> if (config.interfaceAsProtocol) bases += "Protocol"
                 Kind.ENUM -> bases += "Enum"
@@ -889,13 +1235,25 @@ class J2PyiDoclet : Doclet {
             return sb.toString()
         }
 
+        fun appendSuppressedMemberComments() {
+            for (base in t.omittedSuperTypeNames) {
+                sb.appendLine("${indent}# Java base '$base' omitted because its Python members conflict with another base.")
+            }
+            for (name in t.suppressedMemberNames) {
+                sb.appendLine("${indent}# Java member '$name' omitted to preserve the inherited Python signature.")
+            }
+        }
+
         // Is the type empty?
         if (t.constructors.isEmpty() && t.methods.isEmpty() && t.fields.isEmpty() && t.properties.isEmpty()) {
+            appendSuppressedMemberComments()
             if (t.doc.isNullOrBlank()) {
                 sb.appendLine("${indent}pass")
             }
             return sb.toString()
         }
+
+        appendSuppressedMemberComments()
 
         // Fields (as attributes) for classes only.
         // If a property with the same name will be emitted, skip the raw field to avoid duplicate names.
@@ -1069,16 +1427,10 @@ class J2PyiDoclet : Doclet {
         if (isStatic) sb.appendLine("${indent}@staticmethod")
         val params = renderParams(m.params, includeSelf = !isStatic)
 
-        // Avoid shadowing built-in type names in class scope (e.g., a method named 'object' interfering with the 'object' type).
-        fun avoidBuiltinTypeShadow(name: String): String {
-            return when (name) {
-                // Common built-in type names used in annotations
-                "object", "str", "int", "float", "bool", "list", "dict", "set", "tuple" -> "${name}_"
-                else -> name
-            }
-        }
-
-        val defName = avoidBuiltinTypeShadow(safeIdentifier(m.name, allowSelf = true))
+        // Java methods are exposed as attributes by GraalPy, and Python permits an
+        // attribute to have the same name as a builtin (for example, `box.set()`).
+        // Keep that name in the stub so its API matches the runtime binding.
+        val defName = safeIdentifier(m.name, allowSelf = true)
         // Adjust return type: normally replace return-only TypeVars with Any; but keep them for Protocols.
         val adjustedRet: PyType = if (keepUnboundReturnTypeVars) m.returnType else adjustReturnTypeTypeVars(m)
         if (!m.doc.isNullOrBlank()) {
@@ -1088,6 +1440,15 @@ class J2PyiDoclet : Doclet {
         } else {
             sb.appendLine("${indent}def ${defName}($params) -> ${adjustedRet.render()}: ...")
         }
+    }
+
+    private fun sanitizeTypeParameterBound(type: PyType): PyType = when (type) {
+        is PyType.TypeVarRef -> PyType.AnyT
+        is PyType.Generic -> type.copy(args = type.args.map(::sanitizeTypeParameterBound))
+        is PyType.Abc -> type.copy(args = type.args.map(::sanitizeTypeParameterBound))
+        is PyType.Ref -> type.copy(args = type.args.map(::sanitizeTypeParameterBound))
+        is PyType.Union -> type.copy(items = type.items.map(::sanitizeTypeParameterBound))
+        else -> type
     }
 
     // Replace in the return type any TypeVar that doesn't appear in parameters with Any,
@@ -1138,9 +1499,10 @@ class J2PyiDoclet : Doclet {
     private fun TypeIR.needsAnyImport(): Boolean {
         // Base scan for Any present anywhere in the type signatures.
         val base =
-            fields.any { anyInType(it.type) } || constructors.any { it.params.any { p -> anyInType(p.type) } } || methods.any {
+            superTypes.any { anyInType(it) } || fields.any { anyInType(it.type) } || constructors.any { it.params.any { p -> anyInType(p.type) } } || methods.any {
                 anyInType(it.returnType) || it.params.any { p -> anyInType(p.type) }
-            } || properties.any { anyInType(it.type) } || typeParams.any { it.bound?.let { b -> anyInType(b) } == true }
+            } || properties.any { anyInType(it.type) } ||
+            typeParams.any { it.bound?.let { b -> anyInType(sanitizeTypeParameterBound(b)) } == true }
         if (base) return true
         // Extra: our emission replaces return-only TypeVars with Any to satisfy mypy.
         // If a method's return type references a TypeVar that's not present in any parameter, we need Any imported.
@@ -1159,12 +1521,12 @@ class J2PyiDoclet : Doclet {
     }
 
     private fun TypeIR.needsNumberImport(): Boolean =
-        fields.any { numberInType(it.type) } || constructors.any { it.params.any { p -> numberInType(p.type) } } || methods.any {
+        superTypes.any { numberInType(it) } || fields.any { numberInType(it.type) } || constructors.any { it.params.any { p -> numberInType(p.type) } } || methods.any {
             numberInType(it.returnType) || it.params.any { p -> numberInType(p.type) }
         } || properties.any { numberInType(it.type) } || typeParams.any { it.bound?.let { b -> numberInType(b) } == true }
 
     private fun TypeIR.needsBuiltinsImport(): Boolean =
-        fields.any { objectInType(it.type) } || constructors.any { it.params.any { p -> objectInType(p.type) } } || methods.any {
+        superTypes.any { objectInType(it) } || fields.any { objectInType(it.type) } || constructors.any { it.params.any { p -> objectInType(p.type) } } || methods.any {
             objectInType(it.returnType) || it.params.any { p -> objectInType(p.type) }
         } || properties.any { objectInType(it.type) } || typeParams.any { it.bound?.let { b -> objectInType(b) } == true }
 
@@ -1199,7 +1561,7 @@ class J2PyiDoclet : Doclet {
                 if (it is PyType.Ref) {
                     // Only import types that are within the set of packages we are emitting.
                     if (!isFullyQualifiedNameAJDKType(it.packageName) && isAssumedTypedPackage(it.packageName)) {
-                        refs += it
+                        refs += it.copy(args = emptyList())
                     }
                 }
             }
@@ -1212,7 +1574,7 @@ class J2PyiDoclet : Doclet {
     private fun scrubExternalRefs(t: TypeIR): TypeIR {
         fun scrub(pt: PyType): PyType {
             return when (pt) {
-                is PyType.Ref -> if (isAssumedTypedPackage(pt.packageName)) pt else PyType.ObjectT
+                is PyType.Ref -> if (isAssumedTypedPackage(pt.packageName)) pt.copy(args = pt.args.map(::scrub)) else PyType.ObjectT
                 is PyType.Generic -> pt.copy(args = pt.args.map(::scrub))
                 is PyType.Abc -> pt.copy(args = pt.args.map(::scrub))
                 is PyType.Union -> pt.copy(items = pt.items.map(::scrub))
@@ -1222,12 +1584,14 @@ class J2PyiDoclet : Doclet {
 
         fun scrubParams(params: List<ParamIR>) = params.map { it.copy(type = scrub(it.type)) }
         // Scrub fields/constructors/methods/properties and type param bounds
+        val superTypes = t.superTypes.map(::scrub)
         val fields = t.fields.map { it.copy(type = scrub(it.type)) }
         val ctors = t.constructors.map { it.copy(params = scrubParams(it.params)) }
         val methods = t.methods.map { it.copy(params = scrubParams(it.params), returnType = scrub(it.returnType)) }
         val props = t.properties.map { it.copy(type = scrub(it.type)) }
         val tparams = t.typeParams.map { it.copy(bound = it.bound?.let(::scrub)) }
         return t.copy(
+            superTypes = superTypes,
             fields = fields,
             constructors = ctors,
             methods = methods,
@@ -1237,6 +1601,9 @@ class J2PyiDoclet : Doclet {
     }
 
     private fun collectAllMembers(t: TypeIR, function: (pt: PyType) -> Unit) {
+        for (superType in t.superTypes) {
+            function(superType)
+        }
         for (field in t.fields) {
             function(field.type)
         }
